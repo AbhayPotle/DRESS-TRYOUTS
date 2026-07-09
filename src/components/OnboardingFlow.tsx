@@ -49,6 +49,35 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }, [step, stream]);
 
+  // Load MediaPipe scripts on mount if not already loaded
+  useEffect(() => {
+    const loadMediaPipe = () => {
+      if ((window as any).Pose && (window as any).Camera) {
+        return; // Already loaded
+      }
+
+      // Check if scripts are already in the document
+      const existingPose = document.querySelector('script[src*="@mediapipe/pose"]');
+      const existingCamera = document.querySelector('script[src*="@mediapipe/camera_utils"]');
+
+      if (!existingPose) {
+        const poseScript = document.createElement('script');
+        poseScript.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js';
+        poseScript.async = true;
+        document.body.appendChild(poseScript);
+      }
+
+      if (!existingCamera) {
+        const cameraScript = document.createElement('script');
+        cameraScript.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js';
+        cameraScript.async = true;
+        document.body.appendChild(cameraScript);
+      }
+    };
+
+    loadMediaPipe();
+  }, []);
+
   // Clean up streams/loops on unmount
   useEffect(() => {
     return () => {
