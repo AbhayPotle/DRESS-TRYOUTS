@@ -26,7 +26,7 @@ const styles = `
 `;
 
 interface SmartMirrorProps {
-  gender: 'man' | 'woman' | 'boy' | 'girl';
+  gender: 'male' | 'female';
   initialMeasurements: ScanMeasurements;
   initialStream: MediaStream | null;
   onExit: () => void;
@@ -44,7 +44,11 @@ export default function SmartMirror({
 
   // Libraries & Data
   const [outfitLibrary] = useState<Outfit[]>(() => generateOutfitLibrary());
-  const genderOutfits = outfitLibrary.filter(o => o.gender === gender);
+  const genderOutfits = outfitLibrary.filter(o => 
+    gender === 'male' 
+      ? (o.gender === 'man' || o.gender === 'boy')
+      : (o.gender === 'woman' || o.gender === 'girl')
+  );
   
   // State
   const [activeOutfitIndex, setActiveOutfitIndex] = useState(0);
@@ -517,6 +521,28 @@ export default function SmartMirror({
                     {oc}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Guidelines Floating Card */}
+            <div className="absolute top-24 left-6 z-20 w-64 bg-black/60 border border-white/10 backdrop-blur-md rounded-2xl p-4 text-xs space-y-3">
+              <div className="flex items-center gap-1.5 text-yellow-500 font-bold uppercase tracking-wider text-[10px]">
+                <HelpCircle className="w-4 h-4" />
+                <span>Mirror Guidelines</span>
+              </div>
+              <p className="text-neutral-400 leading-normal">
+                Stand <strong>4-6 feet</strong> back. Keep your chest and waist inside the camera frame for a perfect size fit.
+              </p>
+              <div className="space-y-1.5 pt-1.5 border-t border-white/5">
+                <span className="text-[9px] uppercase tracking-widest text-neutral-500 font-bold">Gesture Shortcuts:</span>
+                <div className="grid grid-cols-1 gap-1 font-mono text-[10px]">
+                  <div className="flex justify-between"><span className="text-neutral-300">👌 Pinch</span> <span className="text-yellow-500 font-bold">Next Look</span></div>
+                  <div className="flex justify-between"><span className="text-neutral-300">👌👌 Dbl Pinch</span> <span className="text-yellow-500 font-bold">Prev Look</span></div>
+                  <div className="flex justify-between"><span className="text-neutral-300">👋 Wave Right</span> <span className="text-yellow-500 font-bold">Random Fit</span></div>
+                  <div className="flex justify-between"><span className="text-neutral-300">👍 Thumbs Up</span> <span className="text-yellow-500 font-bold">Fav Look</span></div>
+                  <div className="flex justify-between"><span className="text-neutral-300">✌️ Peace Sign</span> <span className="text-yellow-500 font-bold">Snap Photo</span></div>
+                  <div className="flex justify-between"><span className="text-neutral-300">🤝 Wrists Close</span> <span className="text-yellow-500 font-bold">Show Mode</span></div>
+                </div>
               </div>
             </div>
 
