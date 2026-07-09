@@ -8,12 +8,12 @@ import { ScanMeasurements } from '../utils/aiRecommender';
 
 export default function Home() {
   const [appState, setAppState] = useState<'landing' | 'onboarding' | 'mirror'>('landing');
-  const [gender, setGender] = useState<'man' | 'woman' | 'boy' | 'girl'>('man');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [measurements, setMeasurements] = useState<ScanMeasurements | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
   const handleOnboardingComplete = (data: {
-    gender: 'man' | 'woman' | 'boy' | 'girl';
+    gender: 'male' | 'female';
     measurements: ScanMeasurements;
     stream: MediaStream | null;
   }) => {

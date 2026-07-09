@@ -6,7 +6,7 @@ import { ScanMeasurements } from '../utils/aiRecommender';
 
 interface OnboardingFlowProps {
   onComplete: (data: {
-    gender: 'man' | 'woman' | 'boy' | 'girl';
+    gender: 'male' | 'female';
     measurements: ScanMeasurements;
     stream: MediaStream | null;
   }) => void;
@@ -14,7 +14,7 @@ interface OnboardingFlowProps {
 
 export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState<'gender' | 'camera' | 'scan' | 'result'>('gender');
-  const [gender, setGender] = useState<'man' | 'woman' | 'boy' | 'girl'>('man');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanStatus, setScanStatus] = useState('Positioning body in frame...');
@@ -32,7 +32,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     };
   }, [step, stream]);
 
-  const handleGenderSelect = (selectedGender: 'man' | 'woman' | 'boy' | 'girl') => {
+  const handleGenderSelect = (selectedGender: 'male' | 'female') => {
     setGender(selectedGender);
     setStep('camera');
   };
@@ -84,8 +84,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
         
         // Mock calculations based on average profiles
-        const mockMeasurements: Record<string, ScanMeasurements> = {
-          man: {
+        const mockMeasurements: Record<'male' | 'female', ScanMeasurements> = {
+          male: {
             heightCm: 178,
             chestCm: 102,
             waistCm: 84,
@@ -95,7 +95,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             legLengthCm: 81,
             bodyType: 'Athletic'
           },
-          woman: {
+          female: {
             heightCm: 165,
             chestCm: 90,
             waistCm: 68,
@@ -104,26 +104,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             armLengthCm: 56,
             legLengthCm: 74,
             bodyType: 'Curvy'
-          },
-          boy: {
-            heightCm: 140,
-            chestCm: 72,
-            waistCm: 62,
-            hipCm: 74,
-            shoulderWidthCm: 32,
-            armLengthCm: 46,
-            legLengthCm: 58,
-            bodyType: 'Average'
-          },
-          girl: {
-            heightCm: 138,
-            chestCm: 68,
-            waistCm: 59,
-            hipCm: 72,
-            shoulderWidthCm: 31,
-            armLengthCm: 44,
-            legLengthCm: 56,
-            bodyType: 'Slim'
           }
         };
 
@@ -157,23 +137,23 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               Welcome to the Smart Mirror
             </h1>
             <p className="text-neutral-400 text-lg max-w-xl mx-auto">
-              Step into a luxury virtual fitting experience. Choose a profile to begin.
+              Step into a luxury virtual fitting experience. Choose your profile to begin.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
-            {(['man', 'woman', 'boy', 'girl'] as const).map(p => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-2xl mx-auto w-full px-4">
+            {(['male', 'female'] as const).map(p => (
               <button
                 key={p}
                 onClick={() => handleGenderSelect(p)}
-                className="group relative flex flex-col items-center p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-yellow-500/50 hover:bg-white/10 transition-all duration-500 overflow-hidden cursor-pointer"
+                className="group relative flex flex-col items-center p-10 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-yellow-500/50 hover:bg-white/10 transition-all duration-500 overflow-hidden cursor-pointer w-full"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-16 h-16 rounded-full bg-neutral-800/80 group-hover:bg-yellow-500/20 flex items-center justify-center border border-white/10 group-hover:border-yellow-500/30 transition-all duration-500 mb-4">
-                  <User className="w-8 h-8 text-neutral-400 group-hover:text-yellow-500 transition-colors duration-500" />
+                <div className="w-20 h-20 rounded-full bg-neutral-800/80 group-hover:bg-yellow-500/20 flex items-center justify-center border border-white/10 group-hover:border-yellow-500/30 transition-all duration-500 mb-6">
+                  <User className="w-10 h-10 text-neutral-400 group-hover:text-yellow-500 transition-colors duration-500" />
                 </div>
-                <span className="text-lg font-bold capitalize tracking-wide">{p}</span>
-                <span className="text-xs text-neutral-500 mt-1">Select Profile</span>
+                <span className="text-xl font-bold capitalize tracking-wide">{p}</span>
+                <span className="text-xs text-neutral-500 mt-2">Select Profile</span>
               </button>
             ))}
           </div>

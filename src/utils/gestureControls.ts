@@ -93,7 +93,7 @@ export class GestureDetector {
 
     // 1. Hands Together (Wrists are close)
     const wristDist = this.distance(leftWrist, rightWrist);
-    if (wristDist < 0.08 && leftWrist.visibility! > 0.5 && rightWrist.visibility! > 0.5) {
+    if (wristDist < 0.12 && leftWrist.visibility! > 0.3 && rightWrist.visibility! > 0.3) {
       activeGesture = 'hands_together';
       activeConfidence = 0.9;
     }
@@ -102,8 +102,8 @@ export class GestureDetector {
     // We check both left and right hands
     const leftPinchDist = this.distance(leftIndex, leftThumb);
     const rightPinchDist = this.distance(rightIndex, rightThumb);
-    const isPinching = (leftPinchDist < 0.035 && leftIndex.visibility! > 0.5) || 
-                       (rightPinchDist < 0.035 && rightIndex.visibility! > 0.5);
+    const isPinching = (leftPinchDist < 0.045 && leftIndex.visibility! > 0.2) || 
+                       (rightPinchDist < 0.045 && rightIndex.visibility! > 0.2);
 
     if (isPinching && activeGesture === 'none') {
       activeGesture = 'pinch';
@@ -130,8 +130,8 @@ export class GestureDetector {
 
     // 5. Thumbs Up (Thumb is higher than index/wrist, others closed)
     if (activeGesture === 'none') {
-      const isThumbsUpRight = rightThumb.y < rightIndex.y - 0.04 && rightThumb.visibility! > 0.5;
-      const isThumbsUpLeft = leftThumb.y < leftIndex.y - 0.04 && leftThumb.visibility! > 0.5;
+      const isThumbsUpRight = rightThumb.y < rightIndex.y - 0.035 && rightThumb.visibility! > 0.2;
+      const isThumbsUpLeft = leftThumb.y < leftIndex.y - 0.035 && leftThumb.visibility! > 0.2;
       if (isThumbsUpRight || isThumbsUpLeft) {
         activeGesture = 'thumbs_up';
         activeConfidence = 0.8;
@@ -141,8 +141,8 @@ export class GestureDetector {
     // 6. Peace Sign (Index and middle fingers are high above wrist, pinky low)
     if (activeGesture === 'none') {
       // In Pose model, we approximate peace sign if index is high above pinky
-      const isPeaceRight = rightIndex.y < landmarks[18].y - 0.06 && rightIndex.visibility! > 0.5;
-      const isPeaceLeft = leftIndex.y < landmarks[17].y - 0.06 && leftIndex.visibility! > 0.5;
+      const isPeaceRight = rightIndex.y < landmarks[18].y - 0.045 && rightIndex.visibility! > 0.2;
+      const isPeaceLeft = leftIndex.y < landmarks[17].y - 0.045 && leftIndex.visibility! > 0.2;
       if (isPeaceRight || isPeaceLeft) {
         activeGesture = 'peace';
         activeConfidence = 0.8;
@@ -154,8 +154,8 @@ export class GestureDetector {
       // Open palm can be approximated when index and pinky are extended wide
       const leftPalmSize = this.distance(leftIndex, landmarks[17]);
       const rightPalmSize = this.distance(rightIndex, landmarks[18]);
-      if ((leftPalmSize > 0.08 && leftIndex.visibility! > 0.5) || 
-          (rightPalmSize > 0.08 && rightIndex.visibility! > 0.5)) {
+      if ((leftPalmSize > 0.075 && leftIndex.visibility! > 0.2) || 
+          (rightPalmSize > 0.075 && rightIndex.visibility! > 0.2)) {
         activeGesture = 'open_palm';
         activeConfidence = 0.75;
       }
@@ -208,7 +208,8 @@ export class GestureDetector {
 
   private distance(p1: Point3D, p2: Point3D): number {
     if (!p1 || !p2) return 999;
-    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2) + Math.pow(p1.z - p2.z, 2));
+    // Calculate strictly in 2D to eliminate noise from estimated Z (depth) coordinate
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
   }
 
   private setCooldown(gesture: GestureType, ms: number) {
