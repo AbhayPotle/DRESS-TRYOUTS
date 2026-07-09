@@ -213,21 +213,39 @@ function eraseHandsForOcclusion(ctx: CanvasRenderingContext2D, points: any[]) {
   ctx.save();
   ctx.globalCompositeOperation = 'destination-out';
 
-  if (leftWrist.vis > 0.5) {
+  // Draw tight mask matching exact hand shape
+  if (leftWrist && leftIndex && leftThumb && leftPinky && leftWrist.vis > 0.3) {
     ctx.beginPath();
-    const cx = (leftWrist.x + leftIndex.x + leftThumb.x + leftPinky.x) / 4;
-    const cy = (leftWrist.y + leftIndex.y + leftThumb.y + leftPinky.y) / 4;
-    const r = Math.max(30, distance(leftWrist, leftIndex) * 1.5);
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.moveTo(leftWrist.x, leftWrist.y);
+    ctx.lineTo(leftThumb.x, leftThumb.y);
+    ctx.lineTo(leftIndex.x, leftIndex.y);
+    ctx.lineTo(leftPinky.x, leftPinky.y);
+    ctx.closePath();
+    
+    // Draw with thick stroke to cover finger thickness cleanly
+    ctx.lineWidth = 30;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.fillStyle = '#000';
     ctx.fill();
   }
 
-  if (rightWrist.vis > 0.5) {
+  if (rightWrist && rightIndex && rightThumb && rightPinky && rightWrist.vis > 0.3) {
     ctx.beginPath();
-    const cx = (rightWrist.x + rightIndex.x + rightThumb.x + rightPinky.x) / 4;
-    const cy = (rightWrist.y + rightIndex.y + rightThumb.y + rightPinky.y) / 4;
-    const r = Math.max(30, distance(rightWrist, rightIndex) * 1.5);
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.moveTo(rightWrist.x, rightWrist.y);
+    ctx.lineTo(rightThumb.x, rightThumb.y);
+    ctx.lineTo(rightIndex.x, rightIndex.y);
+    ctx.lineTo(rightPinky.x, rightPinky.y);
+    ctx.closePath();
+    
+    ctx.lineWidth = 30;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.fillStyle = '#000';
     ctx.fill();
   }
 
@@ -290,14 +308,14 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.moveTo(scaledRS.x, scaledRS.y);
   ctx.quadraticCurveTo(shoulderMidX, shoulderMidY + 16, scaledLS.x, scaledLS.y);
   ctx.lineTo(leftSleeveEnd.x, leftSleeveEnd.y);
-  const leftUnderarm = { x: scaledLS.x - (scaledLS.x - scaledLH.x) * 0.22, y: scaledLS.y + (scaledLH.y - scaledLS.y) * 0.25 };
-  ctx.lineTo(leftUnderarm.x - 12, leftUnderarm.y + 12);
+  const leftUnderarm = { x: scaledLS.x + (scaledLH.x - scaledLS.x) * 0.22, y: scaledLS.y + (scaledLH.y - scaledLS.y) * 0.25 };
+  ctx.lineTo(leftUnderarm.x + 12, leftUnderarm.y + 12);
   ctx.lineTo(leftUnderarm.x, leftUnderarm.y);
-  ctx.quadraticCurveTo(scaledLH.x - 12, interpolate(scaledLS, scaledLH, 0.6).y, scaledLH.x - 6, scaledLH.y + 6);
-  ctx.quadraticCurveTo(hipMidX, hipMidY + 12, scaledRH.x + 6, scaledRH.y + 6);
+  ctx.quadraticCurveTo(scaledLH.x + 10, interpolate(scaledLS, scaledLH, 0.6).y, scaledLH.x + 16, scaledLH.y + 6);
+  ctx.quadraticCurveTo(hipMidX, hipMidY + 12, scaledRH.x - 16, scaledRH.y + 6);
   const rUnder = rightUnderarm(scaledRH, scaledRS);
-  ctx.quadraticCurveTo(scaledRH.x + 12, interpolate(scaledRS, scaledRH, 0.6).y, rUnder.x, rUnder.y);
-  ctx.lineTo(rightSleeveEnd.x + 12, rightSleeveEnd.y + 12);
+  ctx.quadraticCurveTo(scaledRH.x - 10, interpolate(scaledRS, scaledRH, 0.6).y, rUnder.x, rUnder.y);
+  ctx.lineTo(rightSleeveEnd.x - 12, rightSleeveEnd.y + 12);
   ctx.lineTo(rightSleeveEnd.x, rightSleeveEnd.y);
   ctx.closePath();
 
@@ -652,29 +670,34 @@ function drawAccessory(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
     ctx.fillStyle = config.secondaryColor || 'rgba(0,40,0,0.6)';
 
     const lensRadius = distance(lE, rE) * 0.45;
+    
+    // Calculate vertical glasses placement blending eye level and nose bridge level
+    const midEyeY = (lE.y + rE.y) / 2;
+    const glassY = nose && nose.vis > 0.3 ? (nose.y * 0.38 + midEyeY * 0.62) : (midEyeY + 12);
 
     ctx.beginPath();
-    ctx.arc(lE.x, lE.y + 2, lensRadius, 0, Math.PI * 2);
+    ctx.arc(lE.x, glassY, lensRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(rE.x, rE.y + 2, lensRadius, 0, Math.PI * 2);
+    ctx.arc(rE.x, glassY, lensRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(lE.x + lensRadius, lE.y + 2);
-    ctx.lineTo(rE.x - lensRadius, rE.y + 2);
+    ctx.moveTo(lE.x + lensRadius, glassY);
+    ctx.lineTo(rE.x - lensRadius, glassY);
     ctx.stroke();
 
+    // Specular shine highlights on lenses
     ctx.strokeStyle = 'rgba(255,255,255,0.4)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(lE.x - lensRadius + 5, lE.y + 5);
-    ctx.lineTo(lE.x + 5, lE.y - lensRadius + 5);
-    ctx.moveTo(rE.x - lensRadius + 5, rE.y + 5);
-    ctx.lineTo(rE.x + 5, rE.y - lensRadius + 5);
+    ctx.moveTo(lE.x - lensRadius + 5, glassY + 3);
+    ctx.lineTo(lE.x + 5, glassY - lensRadius + 5);
+    ctx.moveTo(rE.x - lensRadius + 5, glassY + 3);
+    ctx.lineTo(rE.x + 5, glassY - lensRadius + 5);
     ctx.stroke();
     
     ctx.restore();

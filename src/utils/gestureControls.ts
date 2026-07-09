@@ -106,8 +106,24 @@ export class GestureDetector {
     // We check both left and right hands
     const leftPinchDist = this.distance(leftIndex, leftThumb);
     const rightPinchDist = this.distance(rightIndex, rightThumb);
-    const isPinching = (leftPinchDist < 0.045 && leftIndex.visibility! > 0.2) || 
-                       (rightPinchDist < 0.045 && rightIndex.visibility! > 0.2);
+    
+    // Scale-invariant hand scale metric (wrist to index tip distance)
+    const leftHandScale = this.distance(leftWrist, leftIndex);
+    const rightHandScale = this.distance(rightWrist, rightIndex);
+
+    // Reference Y level (shoulder level or default mid-screen)
+    const lSh = landmarks[11];
+    const rSh = landmarks[12];
+    const shY = (lSh && rSh) ? (lSh.y + rSh.y)/2 : 0.45;
+
+    // To prevent false pinch triggers when hands are down, we require the wrist to be raised near/above shoulder level
+    const leftWristRaised = leftWrist.y < shY + 0.12;
+    const rightWristRaised = rightWrist.y < shY + 0.12;
+
+    const isLeftPinching = leftWristRaised && leftPinchDist < leftHandScale * 0.33 && leftIndex.visibility! > 0.2;
+    const isRightPinching = rightWristRaised && rightPinchDist < rightHandScale * 0.33 && rightIndex.visibility! > 0.2;
+
+    const isPinching = isLeftPinching || isRightPinching;
 
     if (isPinching && activeGesture === 'none') {
       activeGesture = 'pinch';
