@@ -150,13 +150,16 @@ export function drawGarments(
   ctx.translate(width, 0);
   ctx.scale(-1, 1);
 
-  // Convert normalized landmarks to canvas pixel coordinates
-  const points = landmarks.map(lm => ({
-    x: lm.x * width,
-    y: lm.y * height,
-    z: lm.z,
-    vis: lm.visibility ?? 0
-  }));
+  // Convert normalized landmarks to canvas pixel coordinates safely
+  const points = landmarks.map(lm => {
+    if (!lm) return { x: 0, y: 0, z: 0, vis: 0 };
+    return {
+      x: lm.x * width,
+      y: lm.y * height,
+      z: lm.z,
+      vis: lm.visibility ?? 0
+    };
+  });
 
   // Hand landmarks for occlusion:
   // 15/16: wrists, 17/18: pinkies, 19/20: indexes, 21/22: thumbs
@@ -237,7 +240,7 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const lE = p[13];
   const rE = p[14];
 
-  if (lS.vis < 0.4 || rS.vis < 0.4) return;
+  if (!lS || !rS || lS.vis < 0.15 || rS.vis < 0.15) return;
 
   const config = item.renderConfig;
   
@@ -363,7 +366,7 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
   let lH = p[23];
   let rH = p[24];
 
-  if (lH.vis < 0.4 || rH.vis < 0.4) return;
+  if (!lH || !rH || lH.vis < 0.15 || rH.vis < 0.15) return;
 
   const config = item.renderConfig;
   const isShorts = item.subcategory.includes('Skirts') || item.subcategory.includes('Mini');
@@ -438,7 +441,7 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const lS = p[11];
   const rS = p[12];
 
-  if (lS.vis < 0.4 || rS.vis < 0.4) return;
+  if (!lS || !rS || lS.vis < 0.15 || rS.vis < 0.15) return;
 
   const config = item.renderConfig;
   const isSaree = item.subcategory.includes('Sarees');
@@ -584,7 +587,7 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   const lW = p[15];
   const rW = p[16];
 
-  if (lS.vis < 0.4 || rS.vis < 0.4) return;
+  if (!lS || !rS || lS.vis < 0.15 || rS.vis < 0.15) return;
 
   const config = item.renderConfig;
   const isLeather = config.texture === 'leather';
@@ -641,7 +644,7 @@ function drawAccessory(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
     const nose = p[0];
     const lE = p[2];
     const rE = p[5];
-    if (lE.vis < 0.4 || rE.vis < 0.4) return;
+    if (!lE || !rE || lE.vis < 0.15 || rE.vis < 0.15) return;
 
     ctx.save();
     ctx.strokeStyle = config.baseColor;
@@ -703,7 +706,7 @@ function drawAccessory(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
 function drawShoes(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: ScanMeasurements) {
   const lA = p[27];
   const rA = p[28];
-  if (lA.vis < 0.5 && rA.vis < 0.5) return;
+  if (!lA || !rA || (lA.vis < 0.15 && rA.vis < 0.15)) return;
 
   const config = item.renderConfig;
 

@@ -67,6 +67,10 @@ export class GestureDetector {
     const leftThumb = landmarks[21];
     const rightThumb = landmarks[22];
 
+    if (!leftWrist || !rightWrist || !leftIndex || !rightIndex || !leftThumb || !rightThumb) {
+      return { gesture: 'none', confidence: 0 };
+    }
+
     // Push to history
     this.history.push({
       leftHand: [leftIndex, leftThumb],
