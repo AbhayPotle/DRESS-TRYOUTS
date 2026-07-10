@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Layers, Sliders, Heart, Info, RefreshCw, 
   HelpCircle, CheckCircle, Smartphone, Camera, Grid, 
@@ -33,6 +33,12 @@ export default function MirrorSidebar({
   const [tab, setTab] = useState<'catalog' | 'ai' | 'gestures'>('catalog');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [visibleCount, setVisibleCount] = useState(30);
+
+  // Reset lazy-loading count whenever filters change
+  useEffect(() => {
+    setVisibleCount(30);
+  }, [selectedCategory, searchTerm]);
 
   // Filter outfits
   const filteredOutfits = outfits.filter(o => {
@@ -118,7 +124,7 @@ export default function MirrorSidebar({
                 Available Outfits ({filteredOutfits.length})
               </span>
               <div className="grid grid-cols-1 gap-3">
-                {filteredOutfits.slice(0, 50).map(outfit => {
+                {filteredOutfits.slice(0, visibleCount).map(outfit => {
                   const isActive = activeOutfit?.id === outfit.id;
                   const isFav = favorites.includes(outfit.id);
                   return (
@@ -165,6 +171,16 @@ export default function MirrorSidebar({
                   );
                 })}
               </div>
+
+              {visibleCount < filteredOutfits.length && (
+                <button
+                  onClick={() => setVisibleCount(prev => prev + 30)}
+                  className="w-full py-3.5 mt-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-yellow-500/30 text-neutral-300 hover:text-white font-semibold text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4 animate-spin-hover" />
+                  <span>Load More Outfits ({filteredOutfits.length - visibleCount} remaining)</span>
+                </button>
+              )}
             </div>
           </div>
         )}
