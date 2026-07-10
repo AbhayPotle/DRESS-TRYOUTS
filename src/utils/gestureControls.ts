@@ -113,11 +113,11 @@ export class GestureDetector {
     
     // Scale-invariant body scale factor using shoulder width (distance between shoulders)
     const bodyScale = (lSh && rSh) ? this.distance(lSh, rSh) : 0.22;
-    const pinchThreshold = bodyScale * 0.18; // approx 18% of shoulder width
+    const pinchThreshold = bodyScale * 0.22; // approx 22% of shoulder width for reliable detection
 
     // To prevent false pinch triggers when hands are down, we require the wrist to be raised near/above shoulder level
-    const leftWristRaised = leftWrist.y < shY + 0.12;
-    const rightWristRaised = rightWrist.y < shY + 0.12;
+    const leftWristRaised = leftWrist.y < shY + 0.18;
+    const rightWristRaised = rightWrist.y < shY + 0.18;
 
     const isLeftPinching = leftWristRaised && leftPinchDist < pinchThreshold;
     const isRightPinching = rightWristRaised && rightPinchDist < pinchThreshold;
