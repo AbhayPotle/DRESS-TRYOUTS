@@ -185,6 +185,55 @@ export default function SmartMirror({
           canvas.height
         );
 
+        // Draw Hand Tracking indicator overlay for better user feedback
+        const lWrist = results.poseLandmarks[15];
+        const rWrist = results.poseLandmarks[16];
+        const lIndex = results.poseLandmarks[19];
+        const rIndex = results.poseLandmarks[20];
+        
+        ctx.save();
+        // Flip the drawing since the canvas is mirrored inside drawGarments
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        
+        ctx.fillStyle = '#10B981'; // Emerald Green
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1.5;
+
+        // Reference Y level (shoulder level or default mid-screen)
+        const lSh = results.poseLandmarks[11];
+        const rSh = results.poseLandmarks[12];
+        const shY = (lSh && rSh) ? (lSh.y + rSh.y)/2 : 0.45;
+
+        [ { wrist: lWrist, index: lIndex }, { wrist: rWrist, index: rIndex } ].forEach(hand => {
+          if (hand.wrist) {
+            const isRaised = hand.wrist.y < shY + 0.18; // Match the 0.18 height gate
+            
+            // Draw a faint glowing ring around the hand when raised in the active zone
+            if (isRaised) {
+              const wx = hand.wrist.x * canvas.width;
+              const wy = hand.wrist.y * canvas.height;
+              const ix = hand.index ? hand.index.x * canvas.width : wx;
+              const iy = hand.index ? hand.index.y * canvas.height : wy;
+
+              ctx.shadowColor = '#10B981';
+              ctx.shadowBlur = 10;
+              ctx.fillStyle = 'rgba(16, 185, 129, 0.6)';
+              ctx.beginPath();
+              ctx.arc(wx, wy, 8, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+
+              ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
+              ctx.beginPath();
+              ctx.arc(ix, iy, 5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+            }
+          }
+        });
+        ctx.restore();
+
         // Process Gestures
         const detected = gestureDetectorRef.current.update(results.poseLandmarks, Date.now());
         if (detected.gesture !== 'none') {
