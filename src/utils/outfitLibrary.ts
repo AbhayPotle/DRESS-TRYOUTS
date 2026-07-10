@@ -648,16 +648,16 @@ export function generateOutfitLibrary(): Outfit[] {
     }
   }
 
-  // Ensure we have at least 1000 items (if combination yields less, we expand it by color variations)
+  // Ensure we have at least 10000 items (to prevent duplicates and provide supreme variety)
   let variationIdx = 0;
-  while (library.length < 1050) {
+  while (library.length < 10050) {
     const baseOutfit = library[variationIdx % library.length];
     if (!baseOutfit) break;
     
     variationIdx++;
     // Create color variation
     const newItems = baseOutfit.items.map((item, idx) => {
-      if (item.colors.length > 1) {
+      if (item.colors && item.colors.length > 1) {
         const newColor = item.colors[variationIdx % item.colors.length];
         return {
           ...item,
@@ -672,7 +672,7 @@ export function generateOutfitLibrary(): Outfit[] {
       return item;
     });
 
-    const words = ['Aura', 'Select', 'Edition', 'Studio', 'Premium', 'Concept', 'Luxe', 'Essence'];
+    const words = ['Aura', 'Select', 'Edition', 'Studio', 'Premium', 'Concept', 'Luxe', 'Essence', 'Vogue', 'Urban', 'Metro', 'Signature', 'Elite', 'Reserve', 'Classic', 'Prime'];
     const varWord = words[variationIdx % words.length];
 
     library.push({
