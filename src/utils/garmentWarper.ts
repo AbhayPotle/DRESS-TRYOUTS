@@ -23,7 +23,7 @@ function adjustColorBrightness(hex: string, percent: number): string {
   return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
 }
 
-// Generates live programmatic fabric texture patterns or gradients
+// Generates live programmatic high-resolution fabric texture patterns (16px tile for finer weave)
 function getFabricFill(
   ctx: CanvasRenderingContext2D,
   color: string,
@@ -44,56 +44,56 @@ function getFabricFill(
     return grad;
   }
 
-  // Create an offscreen canvas to weave the fabric texture pattern
+  // Create an offscreen canvas to weave the fabric texture pattern (16px instead of 24px for a finer thread count)
   const patternCanvas = document.createElement('canvas');
-  patternCanvas.width = 24;
-  patternCanvas.height = 24;
+  patternCanvas.width = 16;
+  patternCanvas.height = 16;
   const pCtx = patternCanvas.getContext('2d');
   if (!pCtx) return color;
 
   // Base fabric color
   pCtx.fillStyle = color;
-  pCtx.fillRect(0, 0, 24, 24);
+  pCtx.fillRect(0, 0, 16, 16);
 
   if (textureType === 'denim') {
-    // Diagonal twill weave pattern
-    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-    pCtx.lineWidth = 1;
+    // Finer selvedge twill denim weave
+    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+    pCtx.lineWidth = 0.75;
     pCtx.beginPath();
-    pCtx.moveTo(0, 0); pCtx.lineTo(24, 24);
-    pCtx.moveTo(-12, 0); pCtx.lineTo(12, 24);
-    pCtx.moveTo(12, 0); pCtx.lineTo(36, 24);
+    pCtx.moveTo(0, 0); pCtx.lineTo(16, 16);
+    pCtx.moveTo(-8, 0); pCtx.lineTo(8, 16);
+    pCtx.moveTo(8, 0); pCtx.lineTo(24, 16);
     pCtx.stroke();
     
-    pCtx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+    pCtx.strokeStyle = 'rgba(0, 0, 0, 0.13)';
     pCtx.beginPath();
-    pCtx.moveTo(0, 2); pCtx.lineTo(22, 24);
-    pCtx.moveTo(-12, 2); pCtx.lineTo(10, 24);
+    pCtx.moveTo(0, 1.5); pCtx.lineTo(14.5, 16);
+    pCtx.moveTo(-8, 1.5); pCtx.lineTo(6.5, 16);
     pCtx.stroke();
   } else if (textureType === 'knitted') {
-    // Cable knit vertical stitch weave
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.06)';
-    pCtx.fillRect(0, 0, 3, 24);
-    pCtx.fillRect(12, 0, 3, 24);
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-    pCtx.fillRect(6, 0, 3, 24);
-    pCtx.fillRect(18, 0, 3, 24);
+    // Ribbed knit stitch lines (16px tile)
+    pCtx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+    pCtx.fillRect(0, 0, 2, 16);
+    pCtx.fillRect(8, 0, 2, 16);
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+    pCtx.fillRect(4, 0, 2, 16);
+    pCtx.fillRect(12, 0, 2, 16);
   } else if (textureType === 'leather') {
     // Pebbled leather grain
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-    pCtx.fillRect(3, 3, 4, 4);
-    pCtx.fillRect(15, 15, 4, 4);
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    pCtx.fillRect(4, 4, 2, 2);
-    pCtx.fillRect(16, 16, 2, 2);
+    pCtx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    pCtx.fillRect(2, 2, 2.5, 2.5);
+    pCtx.fillRect(10, 10, 2.5, 2.5);
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    pCtx.fillRect(3, 3, 1, 1);
+    pCtx.fillRect(11, 11, 1, 1);
   } else {
     // Standard Plain Cotton Weave (micro threads)
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-    pCtx.fillRect(0, 0, 24, 1);
-    pCtx.fillRect(0, 0, 1, 24);
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.03)';
-    pCtx.fillRect(0, 12, 24, 1);
-    pCtx.fillRect(12, 0, 1, 24);
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    pCtx.fillRect(0, 0, 16, 0.75);
+    pCtx.fillRect(0, 0, 0.75, 16);
+    pCtx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+    pCtx.fillRect(0, 8, 16, 0.75);
+    pCtx.fillRect(8, 0, 0.75, 16);
   }
 
   const pattern = ctx.createPattern(patternCanvas, 'repeat');
@@ -160,11 +160,6 @@ export function drawGarments(
       vis: lm.visibility ?? 0
     };
   });
-
-  // Hand landmarks for occlusion:
-  // 15/16: wrists, 17/18: pinkies, 19/20: indexes, 21/22: thumbs
-  const leftHandPoints = [points[15], points[17], points[19], points[21]];
-  const rightHandPoints = [points[16], points[18], points[20], points[22]];
 
   // Sort garments order
   const sortedItems = [...items].sort((a, b) => {
@@ -262,15 +257,22 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   const config = item.renderConfig;
   
-  let fitMultiplier = 1.0;
-  if (m.bodyType === 'Plus Size') fitMultiplier = 1.28;
-  else if (m.bodyType === 'Curvy') fitMultiplier = 1.18;
-  else if (m.bodyType === 'Muscular') fitMultiplier = 1.14;
-  else if (m.bodyType === 'Slim') fitMultiplier = 0.90;
+  // Calculate dynamic point-by-point fitting ratios based on scanned measurements
+  const isFemale = item.gender === 'woman' || item.gender === 'girl' || item.subcategory.includes('Crop Tops');
+  const baseShoulder = isFemale ? 38 : 44;
+  const baseChest = isFemale ? 88 : 96;
+  const baseWaist = isFemale ? 68 : 82;
+
+  const shoulderScale = m.shoulderWidthCm ? (m.shoulderWidthCm / baseShoulder) : 1.0;
+  const waistScale = m.waistCm ? (m.waistCm / baseWaist) : 1.0;
+
+  // Restrict bounds to prevent camera glitches from blowing up coordinates
+  const shScale = Math.max(0.78, Math.min(1.35, shoulderScale));
+  const wScale = Math.max(0.78, Math.min(1.35, waistScale));
 
   let lH = p[23];
   let rH = p[24];
-  if (lH.vis < 0.5 || rH.vis < 0.5) {
+  if (!lH || !rH || lH.vis < 0.5 || rH.vis < 0.5) {
     const shWidth = distance(lS, rS);
     lH = {
       x: lS.x - shWidth * 0.08,
@@ -292,10 +294,10 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const shCenter = (lS.x + rS.x) / 2;
   const hpCenter = (lH.x + rH.x) / 2;
 
-  const scaledLS = { x: shCenter + (lS.x - shCenter) * fitMultiplier, y: lS.y };
-  const scaledRS = { x: shCenter + (rS.x - shCenter) * fitMultiplier, y: rS.y };
-  const scaledLH = { x: hpCenter + (lH.x - hpCenter) * fitMultiplier, y: lH.y };
-  const scaledRH = { x: hpCenter + (rH.x - hpCenter) * fitMultiplier, y: rH.y };
+  const scaledLS = { x: shCenter + (lS.x - shCenter) * shScale, y: lS.y };
+  const scaledRS = { x: shCenter + (rS.x - shCenter) * shScale, y: rS.y };
+  const scaledLH = { x: hpCenter + (lH.x - hpCenter) * wScale, y: lH.y };
+  const scaledRH = { x: hpCenter + (rH.x - hpCenter) * wScale, y: rH.y };
 
   const leftSleeveEnd = item.styleTags.includes('Oversized') 
     ? interpolate(scaledLS, lE, 0.65) 
@@ -349,33 +351,51 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any, rH: any) {
   ctx.save();
   
-  // 1. Soft integration shadow under chin/neck area
   const shMidX = (lS.x + rS.x) / 2;
   const shMidY = (lS.y + rS.y) / 2;
-  const gradNeck = ctx.createRadialGradient(shMidX, shMidY, 5, shMidX, shMidY, 40);
-  gradNeck.addColorStop(0, 'rgba(0, 0, 0, 0.28)');
+  const bodyW = distance(lS, rS);
+
+  // 1. Soft integration shadow under chin/neck area
+  const gradNeck = ctx.createRadialGradient(shMidX, shMidY, 5, shMidX, shMidY, bodyW * 0.22);
+  gradNeck.addColorStop(0, 'rgba(0, 0, 0, 0.32)');
   gradNeck.addColorStop(1, 'rgba(0, 0, 0, 0)');
   ctx.fillStyle = gradNeck;
   ctx.beginPath();
   ctx.moveTo(rS.x, rS.y);
-  ctx.quadraticCurveTo(shMidX, shMidY + 25, lS.x, lS.y);
-  ctx.lineTo(lS.x, lS.y + 40);
-  ctx.lineTo(rS.x, rS.y + 40);
+  ctx.quadraticCurveTo(shMidX, shMidY + 20, lS.x, lS.y);
+  ctx.lineTo(lS.x, lS.y + bodyW * 0.25);
+  ctx.lineTo(rS.x, rS.y + bodyW * 0.25);
   ctx.closePath();
   ctx.fill();
 
-  // 2. Ambient occlusion shading along the sides (makes it look 3D and rounded)
+  // 2. Specular lighting reflections on shoulders (simulating overhead store lighting)
+  const leftShoulderGrad = ctx.createRadialGradient(lS.x, lS.y + 10, 5, lS.x, lS.y + 10, bodyW * 0.3);
+  leftShoulderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+  leftShoulderGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = leftShoulderGrad;
+  ctx.beginPath();
+  ctx.arc(lS.x, lS.y + 10, bodyW * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  const rightShoulderGrad = ctx.createRadialGradient(rS.x, rS.y + 10, 5, rS.x, rS.y + 10, bodyW * 0.3);
+  rightShoulderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+  rightShoulderGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = rightShoulderGrad;
+  ctx.beginPath();
+  ctx.arc(rS.x, rS.y + 10, bodyW * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 3. Ambient occlusion shading along the sides (makes it look 3D and rounded)
   const gradSides = ctx.createLinearGradient(lS.x, lS.y, rS.x, rS.y);
-  gradSides.addColorStop(0, 'rgba(0,0,0,0.18)');
-  gradSides.addColorStop(0.15, 'rgba(0,0,0,0)');
-  gradSides.addColorStop(0.5, 'rgba(255,255,255,0.08)'); // Center highlight
-  gradSides.addColorStop(0.85, 'rgba(0,0,0,0)');
-  gradSides.addColorStop(1, 'rgba(0,0,0,0.18)');
+  gradSides.addColorStop(0, 'rgba(0,0,0,0.2)');
+  gradSides.addColorStop(0.18, 'rgba(0,0,0,0)');
+  gradSides.addColorStop(0.5, 'rgba(255,255,255,0.12)'); // Chest specular bulge highlight
+  gradSides.addColorStop(0.82, 'rgba(0,0,0,0)');
+  gradSides.addColorStop(1, 'rgba(0,0,0,0.2)');
   ctx.fillStyle = gradSides;
   
-  // Re-draw torso area clip
   ctx.globalCompositeOperation = 'source-atop';
-  ctx.fillRect(lS.x - 50, lS.y - 10, rS.x - lS.x + 100, (lH.y - lS.y) + 100);
+  ctx.fillRect(lS.x - 100, lS.y - 10, rS.x - lS.x + 200, (lH.y - lS.y) + 150);
   
   ctx.restore();
 }
@@ -387,12 +407,13 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
   if (!lH || !rH || lH.vis < 0.15 || rH.vis < 0.15) return;
 
   const config = item.renderConfig;
-  const isShorts = item.subcategory.includes('Skirts') || item.subcategory.includes('Mini');
+  const isShorts = item.subcategory.includes('Skirts') || item.subcategory.includes('Mini') || item.subcategory.includes('Shorts');
 
-  let fitMultiplier = 1.0;
-  if (m.bodyType === 'Plus Size') fitMultiplier = 1.25;
-  else if (m.bodyType === 'Curvy') fitMultiplier = 1.18;
-  else if (m.bodyType === 'Slim') fitMultiplier = 0.92;
+  // Calculate dynamic fit hips scale
+  const isFemale = item.gender === 'woman' || item.gender === 'girl' || item.subcategory.includes('Skirts');
+  const baseHip = isFemale ? 94 : 96;
+  const hipScale = m.hipCm ? (m.hipCm / baseHip) : 1.0;
+  const hScale = Math.max(0.78, Math.min(1.35, hipScale));
 
   const hipWidth = distance(lH, rH);
   
@@ -401,22 +422,22 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
   let lA = p[27];
   let rA = p[28];
 
-  if (lK.vis < 0.5) lK = { x: lH.x, y: lH.y + hipWidth * 1.35, vis: 0.9 };
-  if (rK.vis < 0.5) rK = { x: rH.x, y: rH.y + hipWidth * 1.35, vis: 0.9 };
-  if (lA.vis < 0.5) lA = { x: lK.x, y: lK.y + hipWidth * 1.45, vis: 0.9 };
-  if (rA.vis < 0.5) rA = { x: rK.x, y: rK.y + hipWidth * 1.45, vis: 0.9 };
+  if (!lK || lK.vis < 0.5) lK = { x: lH.x, y: lH.y + hipWidth * 1.35, vis: 0.9 };
+  if (!rK || rK.vis < 0.5) rK = { x: rH.x, y: rH.y + hipWidth * 1.35, vis: 0.9 };
+  if (!lA || lA.vis < 0.5) lA = { x: lK.x, y: lK.y + hipWidth * 1.45, vis: 0.9 };
+  if (!rA || rA.vis < 0.5) rA = { x: rK.x, y: rK.y + hipWidth * 1.45, vis: 0.9 };
 
   const hpCenter = (lH.x + rH.x) / 2;
-  const scaledLH = { x: hpCenter + (lH.x - hpCenter) * fitMultiplier, y: lH.y };
-  const scaledRH = { x: hpCenter + (rH.x - hpCenter) * fitMultiplier, y: rH.y };
+  const scaledLH = { x: hpCenter + (lH.x - hpCenter) * hScale, y: lH.y };
+  const scaledRH = { x: hpCenter + (rH.x - hpCenter) * hScale, y: rH.y };
   
   const kneeCenter = (lK.x + rK.x) / 2;
-  const scaledLK = { x: kneeCenter + (lK.x - kneeCenter) * fitMultiplier, y: lK.y };
-  const scaledRK = { x: kneeCenter + (rK.x - kneeCenter) * fitMultiplier, y: rK.y };
+  const scaledLK = { x: kneeCenter + (lK.x - kneeCenter) * hScale * 0.95, y: lK.y };
+  const scaledRK = { x: kneeCenter + (rK.x - kneeCenter) * hScale * 0.95, y: rK.y };
 
   const ankleCenter = (lA.x + rA.x) / 2;
-  const scaledLA = { x: ankleCenter + (lA.x - ankleCenter) * fitMultiplier, y: lA.y };
-  const scaledRA = { x: ankleCenter + (rA.x - ankleCenter) * fitMultiplier, y: rA.y };
+  const scaledLA = { x: ankleCenter + (lA.x - ankleCenter) * hScale * 0.9, y: lA.y };
+  const scaledRA = { x: ankleCenter + (rA.x - ankleCenter) * hScale * 0.9, y: rA.y };
 
   ctx.beginPath();
   ctx.moveTo(scaledRH.x + 6, scaledRH.y - 15);
@@ -470,10 +491,16 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     return;
   }
 
-  let fitMultiplier = 1.0;
-  if (m.bodyType === 'Plus Size') fitMultiplier = 1.25;
-  else if (m.bodyType === 'Curvy') fitMultiplier = 1.2;
-  else if (m.bodyType === 'Slim') fitMultiplier = 0.9;
+  // Calculate dynamic point-by-point fitting ratios based on scanned measurements
+  const isFemale = item.gender === 'woman' || item.gender === 'girl' || isLehenga;
+  const baseShoulder = isFemale ? 38 : 44;
+  const baseHip = isFemale ? 94 : 96;
+
+  const shoulderScale = m.shoulderWidthCm ? (m.shoulderWidthCm / baseShoulder) : 1.0;
+  const hipScale = m.hipCm ? (m.hipCm / baseHip) : 1.0;
+
+  const shScale = Math.max(0.78, Math.min(1.35, shoulderScale));
+  const hScale = Math.max(0.78, Math.min(1.35, hipScale));
 
   const shWidth = distance(lS, rS);
 
@@ -484,22 +511,22 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   let lA = p[27];
   let rA = p[28];
 
-  if (lH.vis < 0.5 || rH.vis < 0.5) {
+  if (!lH || !rH || lH.vis < 0.5 || rH.vis < 0.5) {
     lH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.5, vis: 0.9 };
     rH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.5, vis: 0.9 };
   }
-  if (lK.vis < 0.5) lK = { x: lH.x, y: lH.y + shWidth * 1.2, vis: 0.9 };
-  if (rK.vis < 0.5) rK = { x: rH.x, y: rH.y + shWidth * 1.2, vis: 0.9 };
-  if (lA.vis < 0.5) lA = { x: lK.x, y: lK.y + shWidth * 1.3, vis: 0.9 };
-  if (rA.vis < 0.5) rA = { x: rK.x, y: rK.y + shWidth * 1.3, vis: 0.9 };
+  if (!lK || lK.vis < 0.5) lK = { x: lH.x, y: lH.y + shWidth * 1.2, vis: 0.9 };
+  if (!rK || rK.vis < 0.5) rK = { x: rH.x, y: rH.y + shWidth * 1.2, vis: 0.9 };
+  if (!lA || lA.vis < 0.5) lA = { x: lK.x, y: lK.y + shWidth * 1.3, vis: 0.9 };
+  if (!rA || rA.vis < 0.5) rA = { x: rK.x, y: rK.y + shWidth * 1.3, vis: 0.9 };
 
   const shCenter = (lS.x + rS.x) / 2;
   const hpCenter = (lH.x + rH.x) / 2;
   
-  const scaledLS = { x: shCenter + (lS.x - shCenter) * fitMultiplier, y: lS.y };
-  const scaledRS = { x: shCenter + (rS.x - shCenter) * fitMultiplier, y: rS.y };
-  const scaledLH = { x: hpCenter + (lH.x - hpCenter) * fitMultiplier, y: lH.y };
-  const scaledRH = { x: hpCenter + (rH.x - hpCenter) * fitMultiplier, y: rH.y };
+  const scaledLS = { x: shCenter + (lS.x - shCenter) * shScale, y: lS.y };
+  const scaledRS = { x: shCenter + (rS.x - shCenter) * shScale, y: rS.y };
+  const scaledLH = { x: hpCenter + (lH.x - hpCenter) * hScale, y: lH.y };
+  const scaledRH = { x: hpCenter + (rH.x - hpCenter) * hScale, y: rH.y };
 
   ctx.beginPath();
   const shoulderMidX = (scaledLS.x + scaledRS.x) / 2;
@@ -705,7 +732,7 @@ function drawAccessory(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
 
   if (item.subcategory === 'Watches') {
     const lW = p[15];
-    if (lW.vis < 0.5) return;
+    if (!lW || lW.vis < 0.5) return;
 
     ctx.save();
     ctx.fillStyle = config.baseColor;
@@ -737,12 +764,12 @@ function drawShoes(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Sc
   ctx.fillStyle = config.baseColor;
   ctx.strokeStyle = 'rgba(0,0,0,0.15)';
   
-  if (lA.vis > 0.5) {
+  if (lA.vis > 0.15) {
     ctx.beginPath();
     ctx.ellipse(lA.x, lA.y + 12, 14, 8, Math.PI / 12, 0, Math.PI * 2);
     ctx.fill();
   }
-  if (rA.vis > 0.5) {
+  if (rA.vis > 0.15) {
     ctx.beginPath();
     ctx.ellipse(rA.x, rA.y + 12, 14, 8, -Math.PI / 12, 0, Math.PI * 2);
     ctx.fill();
@@ -814,15 +841,23 @@ function rightUnderarm(rH: any, rS: any) {
 }
 
 function drawTopCreases(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any, rH: any, leftUnderarm: any, rUnder: any) {
-  // Draw 3D wrinkles radiating from armpits to chest
-  draw3DCrease(ctx, leftUnderarm.x + 10, leftUnderarm.y + 10, (lS.x + rH.x)/2, (leftUnderarm.y + rH.y)/2, (lS.x + rS.x)/2 - 10, (lH.y + lS.y)/2);
-  draw3DCrease(ctx, rUnder.x - 10, rUnder.y + 10, (rS.x + lH.x)/2, (rUnder.y + lH.y)/2, (lS.x + rS.x)/2 + 10, (rH.y + rS.y)/2);
+  const shMidY = (lS.y + rS.y) / 2;
+  const hpMidY = (lH.y + rH.y) / 2;
+  const midY = (shMidY + hpMidY) / 2;
+
+  // Wrinkles radiating from left/right armpits
+  draw3DCrease(ctx, leftUnderarm.x + 8, leftUnderarm.y + 8, (lS.x + rH.x)/2 - 10, midY - 20, (lS.x + rS.x)/2 - 20, midY, 1.2);
+  draw3DCrease(ctx, leftUnderarm.x + 12, leftUnderarm.y + 35, (lS.x + rH.x)/2 - 20, midY + 10, (lS.x + rS.x)/2 - 30, midY + 30, 0.85);
+  
+  draw3DCrease(ctx, rUnder.x - 8, rUnder.y + 8, (rS.x + lH.x)/2 + 10, midY - 20, (lS.x + rS.x)/2 + 20, midY, 1.2);
+  draw3DCrease(ctx, rUnder.x - 12, rUnder.y + 35, (rS.x + lH.x)/2 + 20, midY + 10, (lS.x + rS.x)/2 + 30, midY + 30, 0.85);
 
   // Soft folds across waist (helps show leaning/bending)
   const dy = Math.abs(lH.y - lS.y);
-  if (dy < 200) { // user is leaning forward, add extra fold wrinkles
-    draw3DCrease(ctx, lH.x + 20, lH.y - 40, (lH.x + rH.x)/2, lH.y - 30, rH.x - 20, lH.y - 40, 1.2);
-    draw3DCrease(ctx, lH.x + 30, lH.y - 70, (lH.x + rH.x)/2, lH.y - 60, rH.x - 30, lH.y - 70, 0.8);
+  if (dy < 250) {
+    draw3DCrease(ctx, lH.x + 30, lH.y - 45, (lH.x + rH.x)/2, lH.y - 35, rH.x - 30, lH.y - 45, 1.3);
+    draw3DCrease(ctx, lH.x + 40, lH.y - 75, (lH.x + rH.x)/2, lH.y - 65, rH.x - 40, lH.y - 75, 0.95);
+    draw3DCrease(ctx, lH.x + 25, lH.y - 110, (lH.x + rH.x)/2, lH.y - 100, rH.x - 25, lH.y - 110, 0.7);
   }
 }
 
@@ -838,11 +873,11 @@ function drawDenimDetails(ctx: CanvasRenderingContext2D, lH: any, rH: any, lK: a
 
   // 3D wrinkles around knees (whiskers)
   if (!isShorts && lK.vis > 0.5) {
-    draw3DCrease(ctx, lK.x - 12, lK.y - 12, lK.x, lK.y - 8, lK.x + 12, 1.3);
-    draw3DCrease(ctx, lK.x - 10, lK.y + 6, lK.x, lK.y + 9, lK.x + 10, 0.95);
+    draw3DCrease(ctx, lK.x - 12, lK.y - 12, lK.x, lK.y - 8, lK.x + 12, lK.y - 12, 1.3);
+    draw3DCrease(ctx, lK.x - 10, lK.y + 6, lK.x, lK.y + 9, lK.x + 10, lK.y + 6, 0.95);
     
-    draw3DCrease(ctx, rK.x - 12, rK.y - 12, rK.x, rK.y - 8, rK.x + 12, 1.3);
-    draw3DCrease(ctx, rK.x - 10, rK.y + 6, rK.x, rK.y + 9, rK.x + 10, 0.95);
+    draw3DCrease(ctx, rK.x - 12, rK.y - 12, rK.x, rK.y - 8, rK.x + 12, rK.y - 12, 1.3);
+    draw3DCrease(ctx, rK.x - 10, rK.y + 6, rK.x, rK.y + 9, rK.x + 10, rK.y + 6, 0.95);
   }
 
   // Shadow between legs (gives pants a 3D divided silhouette rather than flat color block)
