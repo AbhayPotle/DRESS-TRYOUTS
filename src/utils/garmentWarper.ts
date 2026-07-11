@@ -833,6 +833,25 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   const raisedRS = { x: rS.x, y: rS.y - neckYOffset };
   const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
 
+  const isLeftWristVisible = lW && lW.vis > 0.45;
+  const isRightWristVisible = rW && rW.vis > 0.45;
+
+  let leftWrist = { ...lW };
+  let rightWrist = { ...rW };
+
+  if (!isLeftWristVisible || !isRightWristVisible) {
+    // Sitting mode fallback: draw sleeves ending near the side of the body/mid forearm
+    const sleeveLen = shWidth * 0.8;
+    leftWrist = {
+      x: raisedLS.x - sleeveLen * 0.35,
+      y: raisedLS.y + sleeveLen
+    };
+    rightWrist = {
+      x: raisedRS.x + sleeveLen * 0.35,
+      y: raisedRS.y + sleeveLen
+    };
+  }
+
   // Left Jacket Half
   ctx.save();
   ctx.shadowColor = 'rgba(0, 0, 0, 0.28)';
@@ -840,11 +859,19 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   ctx.shadowOffsetX = -4;
   ctx.shadowOffsetY = 6;
   ctx.beginPath();
-  ctx.moveTo((raisedLS.x + raisedRS.x)/2 - 5, raisedMidY + shWidth * 0.05);
-  ctx.lineTo(raisedLS.x, raisedLS.y);
-  ctx.lineTo(lW.x - 5, lW.y);
-  ctx.lineTo(lH.x - 14, lH.y + 20);
-  ctx.lineTo((lH.x + rH.x)/2 - 5, lH.y + 15);
+  ctx.moveTo((raisedLS.x + raisedRS.x)/2 - 5, raisedMidY + shWidth * 0.05); // Collar center
+  ctx.lineTo(raisedLS.x, raisedLS.y); // Shoulder
+  ctx.lineTo(leftWrist.x - 5, leftWrist.y); // Outer wrist
+  ctx.lineTo(leftWrist.x + 8, leftWrist.y + 8); // Inner wrist
+  
+  // Draw back to underarm to form the sleeve outline
+  const leftUnderarm = { 
+    x: raisedLS.x + (lH.x - raisedLS.x) * 0.22, 
+    y: raisedLS.y + (lH.y - raisedLS.y) * 0.25 
+  };
+  ctx.lineTo(leftUnderarm.x + 6, leftUnderarm.y + 6); // Underarm
+  ctx.lineTo(lH.x - 14, lH.y + 20); // Hip
+  ctx.lineTo((lH.x + rH.x)/2 - 5, lH.y + 15); // Bottom center
   ctx.closePath();
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', (raisedLS.x + raisedRS.x)/2, raisedLS.y, shWidth);
   ctx.fill();
@@ -857,11 +884,15 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   ctx.shadowOffsetX = 4;
   ctx.shadowOffsetY = 6;
   ctx.beginPath();
-  ctx.moveTo((raisedLS.x + raisedRS.x)/2 + 5, raisedMidY + shWidth * 0.05);
-  ctx.lineTo(raisedRS.x, raisedRS.y);
-  ctx.lineTo(rW.x + 5, rW.y);
-  ctx.lineTo(rH.x + 14, rH.y + 20);
-  ctx.lineTo((lH.x + rH.x)/2 + 5, lH.y + 15);
+  ctx.moveTo((raisedLS.x + raisedRS.x)/2 + 5, raisedMidY + shWidth * 0.05); // Collar center
+  ctx.lineTo(raisedRS.x, raisedRS.y); // Shoulder
+  ctx.lineTo(rightWrist.x + 5, rightWrist.y); // Outer wrist
+  ctx.lineTo(rightWrist.x - 8, rightWrist.y + 8); // Inner wrist
+  
+  const rUnder = rightUnderarm(rH, raisedRS);
+  ctx.lineTo(rUnder.x - 6, rUnder.y + 6); // Underarm
+  ctx.lineTo(rH.x + 14, rH.y + 20); // Hip
+  ctx.lineTo((lH.x + rH.x)/2 + 5, lH.y + 15); // Bottom center
   ctx.closePath();
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', (raisedLS.x + raisedRS.x)/2, raisedLS.y, shWidth);
   ctx.fill();
@@ -872,8 +903,8 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   ctx.stroke();
 
   // Outerwear double-stitching
-  drawStitchingLine(ctx, raisedLS.x, raisedLS.y, lW.x - 5, lW.y);
-  drawStitchingLine(ctx, raisedRS.x, raisedRS.y, rW.x + 5, rW.y);
+  drawStitchingLine(ctx, raisedLS.x, raisedLS.y, leftWrist.x - 5, leftWrist.y);
+  drawStitchingLine(ctx, raisedRS.x, raisedRS.y, rightWrist.x + 5, rightWrist.y);
 
   // Specular reflection lines for leather
   if (isLeather) {
@@ -881,7 +912,7 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
     ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.moveTo(raisedLS.x, raisedLS.y + 3);
-    ctx.lineTo(interpolate(raisedLS, lW, 0.35).x, interpolate(raisedLS, lW, 0.35).y);
+    ctx.lineTo(interpolate(raisedLS, leftWrist, 0.35).x, interpolate(raisedLS, leftWrist, 0.35).y);
     ctx.stroke();
   }
 
