@@ -65,8 +65,8 @@ function getFabricFill(
   pCtx.fillRect(0, 0, 16, 16);
 
   if (textureType === 'denim') {
-    // Finer selvedge twill denim weave
-    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+    // High-contrast twill denim weave
+    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
     pCtx.lineWidth = 0.75;
     pCtx.beginPath();
     pCtx.moveTo(0, 0); pCtx.lineTo(16, 16);
@@ -74,33 +74,33 @@ function getFabricFill(
     pCtx.moveTo(8, 0); pCtx.lineTo(24, 16);
     pCtx.stroke();
     
-    pCtx.strokeStyle = 'rgba(0, 0, 0, 0.13)';
+    pCtx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
     pCtx.beginPath();
     pCtx.moveTo(0, 1.5); pCtx.lineTo(14.5, 16);
     pCtx.moveTo(-8, 1.5); pCtx.lineTo(6.5, 16);
     pCtx.stroke();
   } else if (textureType === 'knitted') {
-    // Ribbed knit stitch lines (16px tile)
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+    // Chunky ribbed knit stitch lines (16px tile)
+    pCtx.fillStyle = 'rgba(0, 0, 0, 0.16)';
     pCtx.fillRect(0, 0, 2, 16);
     pCtx.fillRect(8, 0, 2, 16);
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.14)';
     pCtx.fillRect(4, 0, 2, 16);
     pCtx.fillRect(12, 0, 2, 16);
   } else if (textureType === 'leather') {
-    // Pebbled leather grain
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    // Tactile pebbled leather grain
+    pCtx.fillStyle = 'rgba(0, 0, 0, 0.28)';
     pCtx.fillRect(2, 2, 2.5, 2.5);
     pCtx.fillRect(10, 10, 2.5, 2.5);
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
     pCtx.fillRect(3, 3, 1, 1);
     pCtx.fillRect(11, 11, 1, 1);
   } else {
-    // Standard Plain Cotton Weave (micro threads)
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    // Tactile Plain Cotton Weave (micro threads)
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
     pCtx.fillRect(0, 0, 16, 0.75);
     pCtx.fillRect(0, 0, 0.75, 16);
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+    pCtx.fillStyle = 'rgba(0, 0, 0, 0.10)';
     pCtx.fillRect(0, 8, 16, 0.75);
     pCtx.fillRect(8, 0, 0.75, 16);
   }
@@ -122,20 +122,23 @@ function draw3DCrease(
 ) {
   ctx.save();
   
-  // 1. Crease Shadow (dark) with soft blur filter for realism
-  ctx.strokeStyle = `rgba(0, 0, 0, ${0.15 * intensity})`;
-  ctx.lineWidth = 3.5;
-  ctx.filter = 'blur(2px)'; // apply soft-blur filter to shadow
+  // 1. Crease Shadow (dark) - draw a thick low-opacity shadow and a thinner medium-opacity shadow to emulate a soft blur naturally (GPU-accelerated)
+  ctx.strokeStyle = `rgba(0, 0, 0, ${0.06 * intensity})`;
+  ctx.lineWidth = 5.0;
   ctx.beginPath();
   ctx.moveTo(startX, startY);
   ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
   ctx.stroke();
 
-  // Reset filter for highlight
-  ctx.filter = 'none';
+  ctx.strokeStyle = `rgba(0, 0, 0, ${0.11 * intensity})`;
+  ctx.lineWidth = 2.0;
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+  ctx.stroke();
 
   // 2. Crease Highlight (light, offset slightly to catch highlights)
-  ctx.strokeStyle = `rgba(255, 255, 255, ${0.18 * intensity})`;
+  ctx.strokeStyle = `rgba(255, 255, 255, ${0.22 * intensity})`;
   ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.moveTo(startX + 1.2, startY - 0.8);
