@@ -583,10 +583,31 @@ export function generateOutfitLibrary(): Outfit[] {
           const top = tops[t];
           const bottom = bottoms[b];
           
-          // Select accessory, shoe and outerwear based on iterations to vary
+          // Select shoe and outerwear based on iterations to vary
           const shoe = shoes[ (t + b) % shoes.length ] || shoes[0];
-          const acc = accessories[ (t * b) % accessories.length ] || accessories[0];
           const outer = (t + b) % 3 === 0 ? (outerwear[ (t + b) % outerwear.length ] || null) : null;
+
+          // Select accessory based on occasion suitability
+          let acc: Garment | null = null;
+          const accessoryCandidate = accessories[ (t * b) % accessories.length ];
+          if (accessoryCandidate) {
+            if (accessoryCandidate.subcategory === 'Sunglasses') {
+              const isOutdoorOccasion = ['Casual', 'Streetwear', 'Vacation', 'Summer', 'Korean Fashion'].includes(cat);
+              if (isOutdoorOccasion && (t + b) % 3 === 0) {
+                acc = accessoryCandidate;
+              }
+            } else if (accessoryCandidate.subcategory === 'Watches') {
+              const isFormalOccasion = ['Business', 'Office', 'Luxury', 'Casual'].includes(cat);
+              if (isFormalOccasion && (t + b) % 2 === 0) {
+                acc = accessoryCandidate;
+              }
+            } else {
+              const isBagOccasion = ['Casual', 'Party', 'Traditional', 'Vacation', 'Luxury'].includes(cat);
+              if (isBagOccasion && (t + b) % 2 === 0) {
+                acc = accessoryCandidate;
+              }
+            }
+          }
 
           const items: Garment[] = [top, bottom];
           if (shoe) items.push(shoe);
@@ -619,8 +640,30 @@ export function generateOutfitLibrary(): Outfit[] {
       for (let f = 0; f < fulls.length; f++) {
         const full = fulls[f];
         const shoe = shoes[ f % shoes.length ] || shoes[0];
-        const acc = accessories[ (f + 1) % accessories.length ] || accessories[0];
         const outer = f % 2 === 0 ? (outerwear[ f % outerwear.length ] || null) : null;
+
+        // Select accessory based on occasion suitability for full body garments
+        let acc: Garment | null = null;
+        const accessoryCandidate = accessories[ (f + 1) % accessories.length ];
+        if (accessoryCandidate) {
+          if (accessoryCandidate.subcategory === 'Sunglasses') {
+            const isOutdoorOccasion = ['Casual', 'Streetwear', 'Vacation', 'Summer', 'Korean Fashion'].includes(cat);
+            // Dresses don't usually wear sunglasses unless it's a casual summer look
+            if (isOutdoorOccasion && f % 3 === 0 && full.subcategory.includes('Summer')) {
+              acc = accessoryCandidate;
+            }
+          } else if (accessoryCandidate.subcategory === 'Watches') {
+            const isFormalOccasion = ['Business', 'Office', 'Luxury', 'Casual'].includes(cat);
+            if (isFormalOccasion && f % 2 === 0) {
+              acc = accessoryCandidate;
+            }
+          } else {
+            const isBagOccasion = ['Casual', 'Party', 'Traditional', 'Vacation', 'Luxury'].includes(cat);
+            if (isBagOccasion && f % 2 === 0) {
+              acc = accessoryCandidate;
+            }
+          }
+        }
 
         const items: Garment[] = [full];
         if (shoe) items.push(shoe);
