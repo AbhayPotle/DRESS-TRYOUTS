@@ -91,6 +91,7 @@ export default function SmartMirror({
   const activeCameraRef = useRef<any>(null);
   const activePoseRef = useRef<any>(null);
   const activeHandsRef = useRef<any>(null);
+  const lastShoulderCenterRef = useRef<{ x: number; y: number } | null>(null);
 
   // State synchronization Refs to prevent MediaPipe stale closure bugs
   const activeOutfitRef = useRef<Outfit | null>(activeOutfit);
@@ -234,11 +235,37 @@ export default function SmartMirror({
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Draw the video frame to overlay matches
-      ctx.save();
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       if (results.poseLandmarks) {
+        const lS = results.poseLandmarks[11];
+        const rS = results.poseLandmarks[12];
+        
+        if (lS && rS) {
+          const currentX = (lS.x + rS.x) / 2;
+          const currentY = (lS.y + rS.y) / 2;
+          
+          if (lastShoulderCenterRef.current) {
+            const jumpDist = Math.sqrt(
+              Math.pow(currentX - lastShoulderCenterRef.current.x, 2) + 
+              Math.pow(currentY - lastShoulderCenterRef.current.y, 2)
+            );
+            
+            // Rejects background person tracking jumps
+            if (jumpDist > 0.20) {
+              return; 
+            }
+            
+            lastShoulderCenterRef.current = {
+              x: lastShoulderCenterRef.current.x * 0.7 + currentX * 0.3,
+              y: lastShoulderCenterRef.current.y * 0.7 + currentY * 0.3
+            };
+          } else {
+            lastShoulderCenterRef.current = { x: currentX, y: currentY };
+          }
+        }
+
+        // Proceed to render on canvas
+        ctx.save();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         // Draw the warped clothing textures using up-to-date activeOutfitRef
         drawGarments(
           ctx, 
