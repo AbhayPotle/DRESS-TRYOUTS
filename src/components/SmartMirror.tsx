@@ -44,11 +44,20 @@ export default function SmartMirror({
 
   // Libraries & Data
   const [outfitLibrary] = useState<Outfit[]>(() => generateOutfitLibrary());
-  const genderOutfits = outfitLibrary.filter(o => 
-    gender === 'male' 
-      ? (o.gender === 'man' || o.gender === 'boy')
-      : (o.gender === 'woman' || o.gender === 'girl')
-  );
+  const [genderOutfits] = useState<Outfit[]>(() => {
+    const filtered = outfitLibrary.filter(o => 
+      gender === 'male' 
+        ? (o.gender === 'man' || o.gender === 'boy')
+        : (o.gender === 'woman' || o.gender === 'girl')
+    );
+    // Shuffle using Fisher-Yates algorithm to prevent repeats and show random items
+    const arr = [...filtered];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  });
   
   // State
   const [activeOutfitIndex, setActiveOutfitIndex] = useState(0);
