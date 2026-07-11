@@ -176,16 +176,16 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         const lK = results.poseLandmarks[25]; // L knee
         const lA = results.poseLandmarks[27]; // L ankle
 
-        // Only require shoulders and face to be visible to initiate a scan (makes sitting scan possible!)
-        const isLSVisible = lS && lS.visibility > 0.55;
-        const isRSVisible = rS && rS.visibility > 0.55;
+        // Only require shoulders and face to be visible to initiate a scan (lowered threshold to 0.22 for backlit/window environments)
+        const isLSVisible = lS && lS.visibility > 0.22;
+        const isRSVisible = rS && rS.visibility > 0.22;
 
         if (isLSVisible && isRSVisible) {
           isCalibrationFrameValidRef.current = true;
           const buffer = measurementsBufferRef.current;
           
-          const isLHVisible = lH && lH.visibility > 0.55;
-          const isRHVisible = rH && rH.visibility > 0.55;
+          const isLHVisible = lH && lH.visibility > 0.22;
+          const isRHVisible = rH && rH.visibility > 0.22;
           const isHipsVisible = isLHVisible && isRHVisible;
 
           const shWidth = Math.abs(lS.x - rS.x);
@@ -293,7 +293,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
     jointsToDraw.forEach(idx => {
       const joint = landmarks[idx];
-      if (joint && joint.visibility > 0.4) {
+      if (joint && joint.visibility > 0.15) {
         const jx = joint.x * w;
         const jy = joint.y * h;
         
