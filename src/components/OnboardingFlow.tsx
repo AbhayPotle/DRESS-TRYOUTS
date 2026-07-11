@@ -34,12 +34,14 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     chestWidths: number[];
     waistWidths: number[];
     hipWidths: number[];
+    eyeDistances: number[];
   }>({
     shoulderWidths: [],
     torsoHeights: [],
     chestWidths: [],
     waistWidths: [],
-    hipWidths: []
+    hipWidths: [],
+    eyeDistances: []
   });
 
   const isCalibrationFrameValidRef = useRef<boolean>(false);
@@ -194,6 +196,14 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
           const shWidth = Math.abs(lS.x - rS.x);
           let torsoH, hipW, chestW, waistW;
+
+          // Capture eye-to-eye distance in pixels (average human eye distance is ~6.3 cm)
+          const lEye = results.poseLandmarks[2];
+          const rEye = results.poseLandmarks[5];
+          if (lEye && rEye) {
+            const eyeDistPx = Math.sqrt(Math.pow(lEye.x - rEye.x, 2) + Math.pow(lEye.y - rEye.y, 2));
+            buffer.eyeDistances.push(eyeDistPx);
+          }
 
           if (isHipsVisible) {
             // Full Body Scan Mode (Standing)
@@ -351,9 +361,41 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       return;
     }
 
-    // Average the buffered coordinate ratios
     const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
-    
+
+    if (currentScanModeRef.current === 'sitting') {
+      // Sitting Mode: Use Face/Eye Distance Calibration (eye distance is ~6.3 cm on average)
+      const avgEyePx = avg(buffer.eyeDistances) * 1280;
+      const finalShoulderPx = avg(buffer.shoulderWidths) * 1280;
+      
+      // Calculate calibration scale factor (cm per pixel)
+      const scaleFactor = avgEyePx > 0 ? (6.3 / avgEyePx) : 0.08;
+      
+      // Calculate realistic shoulders and chest sizing
+      const shoulderWidthCm = Math.round(finalShoulderPx * scaleFactor * 1.02);
+      const chestCm = Math.round(shoulderWidthCm * 2.18); // chest circumference is roughly 2.18x shoulder width
+
+      // Clip bounds to normal human limits just in case
+      const safeShoulder = Math.max(34, Math.min(54, shoulderWidthCm));
+      const safeChest = Math.max(76, Math.min(125, chestCm));
+
+      const scannedProfile: ScanMeasurements = {
+        heightCm: null, // Not visible
+        chestCm: safeChest,
+        waistCm: null, // Not visible
+        hipCm: null, // Not visible
+        shoulderWidthCm: safeShoulder,
+        armLengthCm: null,
+        legLengthCm: null,
+        bodyType: 'Portrait (Sitting)'
+      };
+
+      setComputedMeasurements(scannedProfile);
+      setStep('result');
+      return;
+    }
+
+    // Average the buffered coordinate ratios
     const finalShoulderPx = avg(buffer.shoulderWidths) * 1280;
     const finalTorsoPx = avg(buffer.torsoHeights) * 720;
     const finalHipPx = avg(buffer.hipWidths) * 1280;
@@ -552,24 +594,24 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </div>
             <div className="space-y-1">
               <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Calibrated Height</span>
-              <p className="text-xl font-bold text-white">{computedMeasurements.heightCm} cm</p>
+              <p className="text-xl font-bold text-white">{computedMeasurements.heightCm ? `${computedMeasurements.heightCm} cm` : '-'}</p>
             </div>
             <hr className="col-span-2 border-white/10" />
             <div className="space-y-1">
               <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Chest Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.chestCm} cm</p>
+              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.chestCm ? `${computedMeasurements.chestCm} cm` : '-'}</p>
             </div>
             <div className="space-y-1">
               <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Waist Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.waistCm} cm</p>
+              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.waistCm ? `${computedMeasurements.waistCm} cm` : '-'}</p>
             </div>
             <div className="space-y-1">
               <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Hips Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.hipCm} cm</p>
+              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.hipCm ? `${computedMeasurements.hipCm} cm` : '-'}</p>
             </div>
             <div className="space-y-1">
               <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Shoulders Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.shoulderWidthCm} cm</p>
+              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.shoulderWidthCm ? `${computedMeasurements.shoulderWidthCm} cm` : '-'}</p>
             </div>
           </div>
 
