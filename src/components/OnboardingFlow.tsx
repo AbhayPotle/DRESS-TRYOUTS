@@ -42,6 +42,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     hipWidths: []
   });
 
+  const isCalibrationFrameValidRef = useRef<boolean>(false);
+
   // Fix: Set video source object on re-render after the element mounts
   useEffect(() => {
     if (step === 'scan' && stream && videoRef.current) {
@@ -173,8 +175,14 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         const lK = results.poseLandmarks[25]; // L knee
         const lA = results.poseLandmarks[27]; // L ankle
 
-        // Only buffer if coordinates have acceptable visibility
-        if (lS.visibility > 0.5 && rS.visibility > 0.5) {
+        // Only buffer if shoulders, chest, and waist/hips are all detected with high visibility
+        const isLSVisible = lS && lS.visibility > 0.55;
+        const isRSVisible = rS && rS.visibility > 0.55;
+        const isLHVisible = lH && lH.visibility > 0.55;
+        const isRHVisible = rH && rH.visibility > 0.55;
+
+        if (isLSVisible && isRSVisible && isLHVisible && isRHVisible) {
+          isCalibrationFrameValidRef.current = true;
           const buffer = measurementsBufferRef.current;
           
           const shWidth = Math.abs(lS.x - rS.x);
@@ -190,6 +198,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           buffer.chestWidths.push(chestW);
           buffer.waistWidths.push(waistW);
           buffer.hipWidths.push(hipW);
+        } else {
+          isCalibrationFrameValidRef.current = false;
         }
       }
     });
@@ -221,6 +231,12 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     ];
 
     scanIntervalRef.current = setInterval(() => {
+      if (!isCalibrationFrameValidRef.current) {
+        // Paused because landmarks (especially waist/hips) are missing!
+        setScanStatus('⚠️ Stand back: Waist and hips must be visible to calibrate!');
+        return;
+      }
+
       progress += 2;
       setScanProgress(progress);
 
