@@ -87,6 +87,24 @@ export default function SmartMirror({
   const handLandmarksRef = useRef<any>(null);
   const lastPinchTimeRef = useRef<number>(0);
 
+  // State synchronization Refs to prevent MediaPipe stale closure bugs
+  const activeOutfitRef = useRef<Outfit | null>(activeOutfit);
+  const measurementsRef = useRef<ScanMeasurements>(measurements);
+  const favoritesRef = useRef<string[]>(favorites);
+  const compareLooksRef = useRef<any[]>(compareLooks);
+  const genderOutfitsRef = useRef<Outfit[]>(genderOutfits);
+  const isFashionShowActiveRef = useRef<boolean>(isFashionShowActive);
+
+  // Sync refs on every single render
+  useEffect(() => {
+    activeOutfitRef.current = activeOutfit;
+    measurementsRef.current = measurements;
+    favoritesRef.current = favorites;
+    compareLooksRef.current = compareLooks;
+    genderOutfitsRef.current = genderOutfits;
+    isFashionShowActiveRef.current = isFashionShowActive;
+  });
+
   // Setup stream and MediaPipe Pose
   useEffect(() => {
     if (initialStream && videoRef.current) {
@@ -202,12 +220,12 @@ export default function SmartMirror({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (results.poseLandmarks) {
-        // Draw the warped clothing textures
+        // Draw the warped clothing textures using up-to-date activeOutfitRef
         drawGarments(
           ctx, 
           results.poseLandmarks, 
-          activeOutfit ? activeOutfit.items : [], 
-          measurements, 
+          activeOutfitRef.current ? activeOutfitRef.current.items : [], 
+          measurementsRef.current, 
           canvas.width, 
           canvas.height
         );
@@ -521,15 +539,21 @@ export default function SmartMirror({
 
     setGestureFeedback(labels[gesture]);
 
-    // Perform specific action
+    // Perform specific action using up-to-date refs
     if (gesture === 'pinch') {
-      handleNextOutfit();
+      setActiveOutfitIndex(prev => (prev + 1) % genderOutfitsRef.current.length);
     } else if (gesture === 'double_pinch') {
-      handlePrevOutfit();
+      setActiveOutfitIndex(prev => (prev - 1 + genderOutfitsRef.current.length) % genderOutfitsRef.current.length);
     } else if (gesture === 'wave_right') {
-      handleRandomOutfit();
+      const rand = Math.floor(Math.random() * genderOutfitsRef.current.length);
+      setActiveOutfitIndex(rand);
     } else if (gesture === 'thumbs_up') {
-      if (activeOutfit) handleToggleFavorite(activeOutfit.id);
+      const active = activeOutfitRef.current;
+      if (active) {
+        setFavorites(prev => 
+          prev.includes(active.id) ? prev.filter(f => f !== active.id) : [...prev, active.id]
+        );
+      }
     } else if (gesture === 'peace') {
       handleCaptureScreenshot();
     } else if (gesture === 'hands_together') {
@@ -543,13 +567,13 @@ export default function SmartMirror({
 
   // Toggle Automated Fashion Show Mode
   const toggleFashionShow = () => {
-    if (isFashionShowActive) {
+    if (isFashionShowActiveRef.current) {
       if (fashionShowTimerRef.current) clearInterval(fashionShowTimerRef.current);
       setIsFashionShowActive(false);
     } else {
       setIsFashionShowActive(true);
       fashionShowTimerRef.current = setInterval(() => {
-        handleNextOutfit();
+        setActiveOutfitIndex(prev => (prev + 1) % genderOutfitsRef.current.length);
       }, 4000);
     }
   };
@@ -598,7 +622,7 @@ export default function SmartMirror({
     const imageSrc = screenshotCanvas.toDataURL('image/png');
     const newSnap = {
       id: `snap_${Date.now()}`,
-      outfit: activeOutfit!,
+      outfit: activeOutfitRef.current || activeOutfit!,
       imageSrc,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
