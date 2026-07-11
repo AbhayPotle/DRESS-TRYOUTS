@@ -476,6 +476,7 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
 function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any, rH: any) {
   ctx.save();
+  ctx.globalCompositeOperation = 'source-atop'; // Restrict all specular highlights and shadows strictly within the garment bounds!
   
   const shMidX = (lS.x + rS.x) / 2;
   const shMidY = (lS.y + rS.y) / 2;
@@ -520,7 +521,6 @@ function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any
   gradSides.addColorStop(1, 'rgba(0,0,0,0.22)');
   ctx.fillStyle = gradSides;
   
-  ctx.globalCompositeOperation = 'source-atop';
   ctx.fillRect(lS.x - 100, lS.y - 10, rS.x - lS.x + 200, (lH.y - lS.y) + 150);
   
   ctx.restore();
