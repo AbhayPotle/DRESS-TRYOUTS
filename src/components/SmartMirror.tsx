@@ -95,6 +95,18 @@ export default function SmartMirror({
   const [showScannerHUD, setShowScannerHUD] = useState(false);
   const showScannerHUDRef = useRef<boolean>(showScannerHUD);
 
+  // Design Studio overrides
+  const [customColor, setCustomColor] = useState<string | null>(null);
+  const [customTexture, setCustomTexture] = useState<string | null>(null);
+  const customColorRef = useRef<string | null>(null);
+  const customTextureRef = useRef<string | null>(null);
+
+  // Auto-reset overrides when outfit index changes
+  useEffect(() => {
+    setCustomColor(null);
+    setCustomTexture(null);
+  }, [activeOutfitIndex]);
+
   // References for Gesture Detector and Hand Tracker
   const gestureDetectorRef = useRef<GestureDetector>(new GestureDetector());
   const handLandmarksRef = useRef<any>(null);
@@ -123,6 +135,8 @@ export default function SmartMirror({
     genderOutfitsRef.current = genderOutfits;
     isFashionShowActiveRef.current = isFashionShowActive;
     showScannerHUDRef.current = showScannerHUD;
+    customColorRef.current = customColor;
+    customTextureRef.current = customTexture;
   });
 
   // Setup stream and MediaPipe Pose
@@ -280,11 +294,27 @@ export default function SmartMirror({
         // Proceed to render on canvas
         ctx.save();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Draw the warped clothing textures using up-to-date activeOutfitRef
+        // Draw the warped clothing textures using up-to-date activeOutfitRef with Design Studio overrides
+        const itemsToDraw = activeOutfitRef.current
+          ? activeOutfitRef.current.items.map(item => {
+              if (['top', 'bottom', 'full', 'outerwear'].includes(item.type)) {
+                return {
+                  ...item,
+                  renderConfig: {
+                    ...item.renderConfig,
+                    baseColor: customColorRef.current || item.renderConfig.baseColor,
+                    texture: customTextureRef.current || item.renderConfig.texture
+                  }
+                };
+              }
+              return item;
+            })
+          : [];
+
         drawGarments(
           ctx, 
           results.poseLandmarks, 
-          activeOutfitRef.current ? activeOutfitRef.current.items : [], 
+          itemsToDraw, 
           measurementsRef.current, 
           canvas.width, 
           canvas.height
@@ -520,11 +550,27 @@ export default function SmartMirror({
         { x: 0.57 + sway/1000, y: 0.9, z: 0.2, visibility: 0.9 }  // 28: R ankle
       ];
 
-      // Draw the warped clothing garments
+      // Draw the warped clothing garments with Design Studio overrides
+      const itemsToDrawSim = activeOutfit
+        ? activeOutfit.items.map(item => {
+            if (['top', 'bottom', 'full', 'outerwear'].includes(item.type)) {
+              return {
+                ...item,
+                renderConfig: {
+                  ...item.renderConfig,
+                  baseColor: customColor || item.renderConfig.baseColor,
+                  texture: customTexture || item.renderConfig.texture
+                }
+              };
+            }
+            return item;
+          })
+        : [];
+
       drawGarments(
         ctx, 
         simLandmarks, 
-        activeOutfit ? activeOutfit.items : [], 
+        itemsToDrawSim, 
         measurements, 
         canvas.width, 
         canvas.height
