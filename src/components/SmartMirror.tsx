@@ -87,6 +87,11 @@ export default function SmartMirror({
   const handLandmarksRef = useRef<any>(null);
   const lastPinchTimeRef = useRef<number>(0);
 
+  // References to stop background tracking leaks
+  const activeCameraRef = useRef<any>(null);
+  const activePoseRef = useRef<any>(null);
+  const activeHandsRef = useRef<any>(null);
+
   // State synchronization Refs to prevent MediaPipe stale closure bugs
   const activeOutfitRef = useRef<Outfit | null>(activeOutfit);
   const measurementsRef = useRef<ScanMeasurements>(measurements);
@@ -162,6 +167,10 @@ export default function SmartMirror({
 
     return () => {
       if (fashionShowTimerRef.current) clearInterval(fashionShowTimerRef.current);
+      if (activeCameraRef.current) {
+        try { activeCameraRef.current.stop(); } catch (e) {}
+        activeCameraRef.current = null;
+      }
     };
   }, []);
 
@@ -182,9 +191,18 @@ export default function SmartMirror({
       return;
     }
 
+    // Clean up any existing active camera loops to prevent duplicate overlays (double dresses)
+    if (activeCameraRef.current) {
+      try { activeCameraRef.current.stop(); } catch (e) {}
+      activeCameraRef.current = null;
+    }
+    activePoseRef.current = null;
+    activeHandsRef.current = null;
+
     const pose = new mpPose({
       locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
     });
+    activePoseRef.current = pose;
 
     pose.setOptions({
       modelComplexity: 1,
@@ -198,6 +216,7 @@ export default function SmartMirror({
       hands = new mpHands({
         locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
       });
+      activeHandsRef.current = hands;
       hands.setOptions({
         maxNumHands: 2,
         modelComplexity: 1,
@@ -401,6 +420,7 @@ export default function SmartMirror({
       height: 720
     });
 
+    activeCameraRef.current = camera;
     camera.start();
     setMediaPipeLoaded(true);
   };
