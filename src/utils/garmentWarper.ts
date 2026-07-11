@@ -350,30 +350,36 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const scaledLH = { x: hpCenter + (lH.x - hpCenter) * wScale, y: lH.y };
   const scaledRH = { x: hpCenter + (rH.x - hpCenter) * wScale, y: rH.y };
 
+  const shWidth = distance(lS, rS);
+  const neckYOffset = shWidth * 0.11; // Shift up to align precisely with neck base/collarbone
+  const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset };
+  const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset };
+  const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
+
   const leftSleeveEnd = item.styleTags.includes('Oversized') 
-    ? interpolate(scaledLS, lE, 0.65) 
-    : interpolate(scaledLS, lE, 0.42);
+    ? interpolate(raisedLS, lE, 0.65) 
+    : interpolate(raisedLS, lE, 0.42);
   const rightSleeveEnd = item.styleTags.includes('Oversized') 
-    ? interpolate(scaledRS, rE, 0.65) 
-    : interpolate(scaledRS, rE, 0.42);
+    ? interpolate(raisedRS, rE, 0.65) 
+    : interpolate(raisedRS, rE, 0.42);
 
   ctx.beginPath();
-  ctx.moveTo(scaledRS.x, scaledRS.y);
-  ctx.quadraticCurveTo(shoulderMidX, shoulderMidY + 16, scaledLS.x, scaledLS.y);
+  ctx.moveTo(raisedRS.x, raisedRS.y);
+  ctx.quadraticCurveTo(shoulderMidX, raisedMidY + shWidth * 0.05, raisedLS.x, raisedLS.y);
   ctx.lineTo(leftSleeveEnd.x, leftSleeveEnd.y);
-  const leftUnderarm = { x: scaledLS.x + (scaledLH.x - scaledLS.x) * 0.22, y: scaledLS.y + (scaledLH.y - scaledLS.y) * 0.25 };
+  const leftUnderarm = { x: raisedLS.x + (scaledLH.x - raisedLS.x) * 0.22, y: raisedLS.y + (scaledLH.y - raisedLS.y) * 0.25 };
   ctx.lineTo(leftUnderarm.x + 12, leftUnderarm.y + 12);
   ctx.lineTo(leftUnderarm.x, leftUnderarm.y);
-  ctx.quadraticCurveTo(scaledLH.x + 10, interpolate(scaledLS, scaledLH, 0.6).y, scaledLH.x + 16, scaledLH.y + 6);
+  ctx.quadraticCurveTo(scaledLH.x + 10, interpolate(raisedLS, scaledLH, 0.6).y, scaledLH.x + 16, scaledLH.y + 6);
   ctx.quadraticCurveTo(hipMidX, hipMidY + 12, scaledRH.x - 16, scaledRH.y + 6);
-  const rUnder = rightUnderarm(scaledRH, scaledRS);
-  ctx.quadraticCurveTo(scaledRH.x - 10, interpolate(scaledRS, scaledRH, 0.6).y, rUnder.x, rUnder.y);
+  const rUnder = rightUnderarm(scaledRH, raisedRS);
+  ctx.quadraticCurveTo(scaledRH.x - 10, interpolate(raisedRS, scaledRH, 0.6).y, rUnder.x, rUnder.y);
   ctx.lineTo(rightSleeveEnd.x - 12, rightSleeveEnd.y + 12);
   ctx.lineTo(rightSleeveEnd.x, rightSleeveEnd.y);
   ctx.closePath();
 
   // Apply realistic fabric texture pattern
-  ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, scaledLS.y, distance(scaledLS, scaledRS));
+  ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, raisedLS.y, distance(raisedLS, raisedRS));
   ctx.fill();
 
   // Apply soft edge ambient outlines
@@ -382,23 +388,23 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.stroke();
 
   // Stitching Details (collars, sleeves, hems)
-  drawStitchingLine(ctx, scaledRS.x, scaledRS.y, scaledLS.x, scaledLS.y, shoulderMidX, shoulderMidY + 16);
+  drawStitchingLine(ctx, raisedRS.x, raisedRS.y, raisedLS.x, raisedLS.y, shoulderMidX, raisedMidY + shWidth * 0.05);
   drawStitchingLine(ctx, leftSleeveEnd.x, leftSleeveEnd.y, leftUnderarm.x + 12, leftUnderarm.y + 12);
   drawStitchingLine(ctx, rightSleeveEnd.x, rightSleeveEnd.y, rUnder.x - 12, rUnder.y + 12);
   drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 6, scaledRH.x - 16, scaledRH.y + 6, hipMidX, hipMidY + 12);
 
   // Secondary details
   if (config.texture === 'stripes') {
-    drawStripes(ctx, scaledLS, scaledRS, scaledLH, scaledRH, config.secondaryColor || '#FFFFFF');
+    drawStripes(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#FFFFFF');
   } else if (config.texture === 'plaid') {
-    drawPlaid(ctx, scaledLS, scaledRS, scaledLH, scaledRH, config.baseColor, config.secondaryColor || '#000000');
+    drawPlaid(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.baseColor, config.secondaryColor || '#000000');
   }
 
   // Realistic Specular Shading overlay
-  drawTopShading(ctx, scaledLS, scaledRS, scaledLH, scaledRH);
+  drawTopShading(ctx, raisedLS, raisedRS, scaledLH, scaledRH);
 
   // Creases & Shadows (Creases add realistic wrinkles)
-  drawTopCreases(ctx, scaledLS, scaledRS, scaledLH, scaledRH, leftUnderarm, rUnder);
+  drawTopCreases(ctx, raisedLS, raisedRS, scaledLH, scaledRH, leftUnderarm, rUnder);
 
   if (config.logoText) {
     ctx.save();
@@ -600,12 +606,16 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const scaledLH = { x: hpCenter + (lH.x - hpCenter) * hScale, y: lH.y };
   const scaledRH = { x: hpCenter + (rH.x - hpCenter) * hScale, y: rH.y };
 
+  const neckYOffset = shWidth * 0.11; // Shift up to align precisely with neck base/collarbone
+  const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset };
+  const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset };
+  const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
+
   ctx.beginPath();
-  const shoulderMidX = (scaledLS.x + scaledRS.x) / 2;
-  const shoulderMidY = (scaledLS.y + scaledRS.y) / 2;
-  ctx.moveTo(scaledRS.x, scaledRS.y);
-  ctx.quadraticCurveTo(shoulderMidX, shoulderMidY + 12, scaledLS.x, scaledLS.y);
-  ctx.quadraticCurveTo(scaledLS.x - 10, scaledLH.y * 0.7, scaledLH.x - 6, scaledLH.y);
+  const shoulderMidX = (raisedLS.x + raisedRS.x) / 2;
+  ctx.moveTo(raisedRS.x, raisedRS.y);
+  ctx.quadraticCurveTo(shoulderMidX, raisedMidY + shWidth * 0.04, raisedLS.x, raisedLS.y);
+  ctx.quadraticCurveTo(raisedLS.x - 10, scaledLH.y * 0.7, scaledLH.x - 6, scaledLH.y);
 
   const bottomY = lA.vis > 0.5 ? lA.y : lK.y + shWidth * 1.2;
   const leftFlareX = scaledLH.x - (isLehenga ? shWidth * 0.45 : shWidth * 0.2);
@@ -614,11 +624,11 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.quadraticCurveTo(leftFlareX - 12, (scaledLH.y + bottomY) / 2, leftFlareX, bottomY);
   ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, rightFlareX, bottomY);
   ctx.quadraticCurveTo(rightFlareX + 12, (scaledRH.y + bottomY) / 2, scaledRH.x + 6, scaledRH.y);
-  ctx.quadraticCurveTo(scaledRS.x + 10, scaledRH.y * 0.7, scaledRS.x, scaledRS.y);
+  ctx.quadraticCurveTo(raisedRS.x + 10, scaledRH.y * 0.7, raisedRS.x, raisedRS.y);
   ctx.closePath();
 
   // Weave texture or silk sheen gradient
-  ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, scaledLS.y, shWidth);
+  ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, raisedLS.y, shWidth);
   ctx.fill();
 
   ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
@@ -626,7 +636,7 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.stroke();
 
   // Stitching Details
-  drawStitchingLine(ctx, scaledRS.x, scaledRS.y, scaledLS.x, scaledLS.y, shoulderMidX, shoulderMidY + 12);
+  drawStitchingLine(ctx, raisedRS.x, raisedRS.y, raisedLS.x, raisedLS.y, shoulderMidX, raisedMidY + shWidth * 0.04);
   drawStitchingLine(ctx, leftFlareX, bottomY - 4, rightFlareX, bottomY - 4, (leftFlareX + rightFlareX) / 2, bottomY + 18);
 
   if (isLehenga && config.secondaryColor) {
@@ -642,8 +652,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   }
 
   // 3D Shading
-  drawTopShading(ctx, scaledLS, scaledRS, scaledLH, scaledRH);
-  drawDressCreases(ctx, scaledLS, scaledRS, scaledLH, scaledRH, bottomY, isLehenga);
+  drawTopShading(ctx, raisedLS, raisedRS, scaledLH, scaledRH);
+  drawDressCreases(ctx, raisedLS, raisedRS, scaledLH, scaledRH, bottomY, isLehenga);
 }
 
 function drawSaree(ctx: CanvasRenderingContext2D, p: any[], config: any) {
