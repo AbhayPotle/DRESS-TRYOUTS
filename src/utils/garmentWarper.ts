@@ -1,6 +1,10 @@
 import { Garment } from './outfitLibrary';
 import { ScanMeasurements } from './aiRecommender';
 
+/**
+ * Represents a 3D coordinate point captured from computer vision models (e.g. MediaPipe).
+ * Includes x, y coordinates normalized between 0.0 and 1.0, depth coordinate z, and confidence visibility score.
+ */
 export interface Point3D {
   x: number;
   y: number;
@@ -8,7 +12,12 @@ export interface Point3D {
   visibility?: number;
 }
 
-// Helper to darken/lighten hex colors
+/**
+ * Programmatically adjusts hex color codes for realistic cloth shade mapping.
+ * @param hex Hex color code string.
+ * @param percent Positive value to lighten, negative value to darken.
+ * @returns Modified hex color code.
+ */
 function adjustColorBrightness(hex: string, percent: number): string {
   let num = parseInt(hex.replace("#", ""), 16),
     amt = Math.round(2.55 * percent),
