@@ -100,7 +100,7 @@ function getFabricFill(
   return pattern || color;
 }
 
-// Renders a realistic 3D fold crease (shadow stroke + highlight stroke)
+// Renders a realistic soft-blurred 3D fold crease (shadow stroke + highlight stroke)
 function draw3DCrease(
   ctx: CanvasRenderingContext2D,
   startX: number,
@@ -113,20 +113,64 @@ function draw3DCrease(
 ) {
   ctx.save();
   
-  // 1. Crease Shadow (dark)
-  ctx.strokeStyle = `rgba(0, 0, 0, ${0.12 * intensity})`;
-  ctx.lineWidth = 2.5;
+  // 1. Crease Shadow (dark) with soft blur filter for realism
+  ctx.strokeStyle = `rgba(0, 0, 0, ${0.15 * intensity})`;
+  ctx.lineWidth = 3.5;
+  ctx.filter = 'blur(2px)'; // apply soft-blur filter to shadow
   ctx.beginPath();
   ctx.moveTo(startX, startY);
   ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
   ctx.stroke();
 
+  // Reset filter for highlight
+  ctx.filter = 'none';
+
   // 2. Crease Highlight (light, offset slightly to catch highlights)
-  ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 * intensity})`;
+  ctx.strokeStyle = `rgba(255, 255, 255, ${0.18 * intensity})`;
   ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.moveTo(startX + 1, startY - 1);
-  ctx.quadraticCurveTo(ctrlX + 1, ctrlY - 1, endX + 1, endY - 1);
+  ctx.moveTo(startX + 1.2, startY - 0.8);
+  ctx.quadraticCurveTo(ctrlX + 1.2, ctrlY - 0.8, endX + 1.2, endY - 0.8);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// Draws double stitching details (dashed parallel lines)
+function drawStitchingLine(
+  ctx: CanvasRenderingContext2D,
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  ctrlX?: number,
+  ctrlY?: number
+) {
+  ctx.save();
+  
+  // Faint dark stitch line
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+  ctx.lineWidth = 1.0;
+  ctx.setLineDash([3, 3]);
+  
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  if (ctrlX !== undefined && ctrlY !== undefined) {
+    ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+  } else {
+    ctx.lineTo(endX, endY);
+  }
+  ctx.stroke();
+
+  // Parallel light highlight stitch line
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.beginPath();
+  ctx.moveTo(startX + 1.5, startY + 1.5);
+  if (ctrlX !== undefined && ctrlY !== undefined) {
+    ctx.quadraticCurveTo(ctrlX + 1.5, ctrlY + 1.5, endX + 1.5, endY + 1.5);
+  } else {
+    ctx.lineTo(endX + 1.5, endY + 1.5);
+  }
   ctx.stroke();
 
   ctx.restore();
@@ -260,13 +304,11 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   // Calculate dynamic point-by-point fitting ratios based on scanned measurements
   const isFemale = item.gender === 'woman' || item.gender === 'girl' || item.subcategory.includes('Crop Tops');
   const baseShoulder = isFemale ? 38 : 44;
-  const baseChest = isFemale ? 88 : 96;
   const baseWaist = isFemale ? 68 : 82;
 
   const shoulderScale = m.shoulderWidthCm ? (m.shoulderWidthCm / baseShoulder) : 1.0;
   const waistScale = m.waistCm ? (m.waistCm / baseWaist) : 1.0;
 
-  // Restrict bounds to prevent camera glitches from blowing up coordinates
   const shScale = Math.max(0.78, Math.min(1.35, shoulderScale));
   const wScale = Math.max(0.78, Math.min(1.35, waistScale));
 
@@ -325,6 +367,17 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, scaledLS.y, distance(scaledLS, scaledRS));
   ctx.fill();
 
+  // Apply soft edge ambient outlines
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Stitching Details (collars, sleeves, hems)
+  drawStitchingLine(ctx, scaledRS.x, scaledRS.y, scaledLS.x, scaledLS.y, shoulderMidX, shoulderMidY + 16);
+  drawStitchingLine(ctx, leftSleeveEnd.x, leftSleeveEnd.y, leftUnderarm.x + 12, leftUnderarm.y + 12);
+  drawStitchingLine(ctx, rightSleeveEnd.x, rightSleeveEnd.y, rUnder.x - 12, rUnder.y + 12);
+  drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 6, scaledRH.x - 16, scaledRH.y + 6, hipMidX, hipMidY + 12);
+
   // Secondary details
   if (config.texture === 'stripes') {
     drawStripes(ctx, scaledLS, scaledRS, scaledLH, scaledRH, config.secondaryColor || '#FFFFFF');
@@ -368,30 +421,30 @@ function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any
   ctx.closePath();
   ctx.fill();
 
-  // 2. Specular lighting reflections on shoulders (simulating overhead store lighting)
-  const leftShoulderGrad = ctx.createRadialGradient(lS.x, lS.y + 10, 5, lS.x, lS.y + 10, bodyW * 0.3);
-  leftShoulderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+  // 2. Specular lighting reflections on shoulders (overhead store lighting)
+  const leftShoulderGrad = ctx.createRadialGradient(lS.x, lS.y + 10, 5, lS.x, lS.y + 10, bodyW * 0.35);
+  leftShoulderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
   leftShoulderGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
   ctx.fillStyle = leftShoulderGrad;
   ctx.beginPath();
-  ctx.arc(lS.x, lS.y + 10, bodyW * 0.3, 0, Math.PI * 2);
+  ctx.arc(lS.x, lS.y + 10, bodyW * 0.35, 0, Math.PI * 2);
   ctx.fill();
 
-  const rightShoulderGrad = ctx.createRadialGradient(rS.x, rS.y + 10, 5, rS.x, rS.y + 10, bodyW * 0.3);
-  rightShoulderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+  const rightShoulderGrad = ctx.createRadialGradient(rS.x, rS.y + 10, 5, rS.x, rS.y + 10, bodyW * 0.35);
+  rightShoulderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
   rightShoulderGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
   ctx.fillStyle = rightShoulderGrad;
   ctx.beginPath();
-  ctx.arc(rS.x, rS.y + 10, bodyW * 0.3, 0, Math.PI * 2);
+  ctx.arc(rS.x, rS.y + 10, bodyW * 0.35, 0, Math.PI * 2);
   ctx.fill();
 
-  // 3. Ambient occlusion shading along the sides (makes it look 3D and rounded)
+  // 3. Ambient occlusion shading along the sides
   const gradSides = ctx.createLinearGradient(lS.x, lS.y, rS.x, rS.y);
-  gradSides.addColorStop(0, 'rgba(0,0,0,0.2)');
+  gradSides.addColorStop(0, 'rgba(0,0,0,0.22)');
   gradSides.addColorStop(0.18, 'rgba(0,0,0,0)');
   gradSides.addColorStop(0.5, 'rgba(255,255,255,0.12)'); // Chest specular bulge highlight
   gradSides.addColorStop(0.82, 'rgba(0,0,0,0)');
-  gradSides.addColorStop(1, 'rgba(0,0,0,0.2)');
+  gradSides.addColorStop(1, 'rgba(0,0,0,0.22)');
   ctx.fillStyle = gradSides;
   
   ctx.globalCompositeOperation = 'source-atop';
@@ -467,6 +520,16 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
   ctx.closePath();
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', hpCenter, scaledLH.y, hipWidth);
   ctx.fill();
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Stitch bottom hems of trousers
+  if (!isShorts) {
+    drawStitchingLine(ctx, scaledLA.x - 10, scaledLA.y - 4, scaledLA.x + 10, scaledLA.y - 4);
+    drawStitchingLine(ctx, scaledRA.x - 10, scaledRA.y - 4, scaledRA.x + 10, scaledRA.y - 4);
+  }
 
   // Denim shading/highlights
   if (config.texture === 'denim') {
@@ -548,6 +611,14 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   // Weave texture or silk sheen gradient
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, scaledLS.y, shWidth);
   ctx.fill();
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Stitching Details
+  drawStitchingLine(ctx, scaledRS.x, scaledRS.y, scaledLS.x, scaledLS.y, shoulderMidX, shoulderMidY + 12);
+  drawStitchingLine(ctx, leftFlareX, bottomY - 4, rightFlareX, bottomY - 4, (leftFlareX + rightFlareX) / 2, bottomY + 18);
 
   if (isLehenga && config.secondaryColor) {
     ctx.save();
@@ -657,6 +728,14 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   ctx.lineTo((lH.x + rH.x)/2 + 5, lH.y + 15);
   ctx.closePath();
   ctx.fill();
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Outerwear double-stitching
+  drawStitchingLine(ctx, lS.x, lS.y, lW.x - 5, lW.y);
+  drawStitchingLine(ctx, rS.x, rS.y, rW.x + 5, rW.y);
 
   // Specular reflection lines for leather
   if (isLeather) {
