@@ -279,6 +279,48 @@ export const BASE_GARMENTS: Garment[] = [
     description: 'Elegant silk kurti with intricate floral motifs and gold zari border details.',
     renderConfig: { baseColor: '#D63031', secondaryColor: '#FFD700', texture: 'plain' }
   },
+  {
+    id: 'w_top_silk_satin',
+    name: 'Silk Satin Wrap Blouse',
+    type: 'top',
+    category: 'Luxury',
+    subcategory: 'Blouses',
+    gender: 'woman',
+    colors: ['#E84393', '#FFFFFF', '#2D3436'],
+    price: 68,
+    rating: 4.8,
+    styleTags: ['Silk', 'Satin', 'Luxury', 'Elegant'],
+    description: 'Luxurious silk satin blouse featuring a wrap bodice and elegant cuffed bishop sleeves.',
+    renderConfig: { baseColor: '#D63031', texture: 'silk' }
+  },
+  {
+    id: 'w_top_tiedye_pink',
+    name: 'Tie-Dye Summer Tee',
+    type: 'top',
+    category: 'Casual',
+    subcategory: 'T-Shirts',
+    gender: 'woman',
+    colors: ['#FF7675', '#74B9FF', '#FFEAA7'],
+    price: 32,
+    rating: 4.5,
+    styleTags: ['Tie-Dye', 'Relaxed Fit', 'Cotton', 'Summer'],
+    description: 'Fun, pastel tie-dye crop tee made of ultra-soft organic combed cotton.',
+    renderConfig: { baseColor: '#E84393', secondaryColor: '#FFEAA7', texture: 'stripes' }
+  },
+  {
+    id: 'w_top_offshoulder_black',
+    name: 'Off-Shoulder Ribbed Top',
+    type: 'top',
+    category: 'Streetwear',
+    subcategory: 'Tops',
+    gender: 'woman',
+    colors: ['#0A0A0A', '#FFFFFF', '#6C5CE7'],
+    price: 38,
+    rating: 4.6,
+    styleTags: ['Off-Shoulder', 'Ribbed', 'Chic', 'Night Out'],
+    description: 'Fashionable fold-over off-the-shoulder ribbed top that defines collarbones.',
+    renderConfig: { baseColor: '#0A0A0A', texture: 'knitted' }
+  },
 
   // --- WOMEN'S BOTTOMS ---
   {
