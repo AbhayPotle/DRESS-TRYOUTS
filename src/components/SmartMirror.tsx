@@ -11,7 +11,7 @@ import AdminDashboard from './AdminDashboard';
 import { generateOutfitLibrary, Outfit, Garment } from '../utils/outfitLibrary';
 import { calculateMeasurements, analyzeSkinTone, RecommendationFactors, getAIRecommendations, ScanMeasurements } from '../utils/aiRecommender';
 import { GestureDetector, GestureType } from '../utils/gestureControls';
-import { drawGarments } from '../utils/garmentWarper';
+import { drawGarments, drawScanningHUD } from '../utils/garmentWarper';
 
 // Import CSS animations locally
 const styles = `
@@ -91,6 +91,10 @@ export default function SmartMirror({
   const [isFashionShowActive, setIsFashionShowActive] = useState(false);
   const fashionShowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Body Scanner HUD overlay toggle
+  const [showScannerHUD, setShowScannerHUD] = useState(false);
+  const showScannerHUDRef = useRef<boolean>(showScannerHUD);
+
   // References for Gesture Detector and Hand Tracker
   const gestureDetectorRef = useRef<GestureDetector>(new GestureDetector());
   const handLandmarksRef = useRef<any>(null);
@@ -118,6 +122,7 @@ export default function SmartMirror({
     compareLooksRef.current = compareLooks;
     genderOutfitsRef.current = genderOutfits;
     isFashionShowActiveRef.current = isFashionShowActive;
+    showScannerHUDRef.current = showScannerHUD;
   });
 
   // Setup stream and MediaPipe Pose
@@ -284,6 +289,17 @@ export default function SmartMirror({
           canvas.width, 
           canvas.height
         );
+
+        // Draw futuristic real-time Body Scanner HUD if enabled
+        if (showScannerHUDRef.current) {
+          drawScanningHUD(
+            ctx,
+            results.poseLandmarks,
+            measurementsRef.current,
+            canvas.width,
+            canvas.height
+          );
+        }
 
         // Check for Precise Pinch Gesture using MediaPipe Hands!
         let hasPrecisePinch = false;
@@ -514,6 +530,16 @@ export default function SmartMirror({
         canvas.height
       );
 
+      if (showScannerHUD) {
+        drawScanningHUD(
+          ctx,
+          simLandmarks,
+          measurements,
+          canvas.width,
+          canvas.height
+        );
+      }
+
       // Draw a simulated skeleton overlay in the top-right corner to show tracker state
       drawSkeletonHUD(ctx, simLandmarks);
 
@@ -739,6 +765,17 @@ export default function SmartMirror({
                 >
                   <Settings className="w-3.5 h-3.5" />
                   <span>Admin Panel</span>
+                </button>
+                <button
+                  onClick={() => setShowScannerHUD(prev => !prev)}
+                  className={`px-4 py-2.5 rounded-full border text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg backdrop-blur-md ${
+                    showScannerHUD 
+                      ? 'bg-cyan-500 hover:bg-cyan-400 text-black border-cyan-400 shadow-cyan-500/20' 
+                      : 'bg-black/60 hover:bg-black/80 text-cyan-400 border-cyan-500/30'
+                  }`}
+                >
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>{showScannerHUD ? "Scanner HUD: ON" : "Scanner HUD: OFF"}</span>
                 </button>
               </div>
 

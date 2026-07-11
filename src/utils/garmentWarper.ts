@@ -1134,3 +1134,135 @@ function drawDressCreases(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: a
     draw3DCrease(ctx, startPt.x, startPt.y, startPt.x + (endX - startPt.x) * 0.4, (startPt.y + bottomY) / 2, endX, bottomY, 1.1);
   }
 }
+
+export function drawScanningHUD(
+  ctx: CanvasRenderingContext2D,
+  landmarks: Point3D[],
+  measurements: ScanMeasurements,
+  width: number,
+  height: number
+) {
+  if (!landmarks || landmarks.length < 25) return;
+
+  ctx.save();
+  // Flip coordinate space to align with mirrored webcam stream
+  ctx.translate(width, 0);
+  ctx.scale(-1, 1);
+
+  // Convert points
+  const points = landmarks.map(lm => {
+    if (!lm) return { x: 0, y: 0, z: 0, vis: 0 };
+    return {
+      x: lm.x * width,
+      y: lm.y * height,
+      z: lm.z,
+      vis: lm.visibility ?? 0
+    };
+  });
+
+  const lS = points[11];
+  const rS = points[12];
+  const lE = points[13];
+  const rE = points[14];
+  const lW = points[15];
+  const rW = points[16];
+  const lH = points[23];
+  const rH = points[24];
+
+  // Draw glowing joint nodes
+  const nodes = [lS, rS, lE, rE, lW, rW, lH, rH];
+  ctx.lineWidth = 1.5;
+  nodes.forEach(node => {
+    if (node && node.vis > 0.3) {
+      // Glow ring
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.85)';
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.2)';
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 12, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  });
+
+  // Helper to draw a dashed measurement bridge line with text label
+  const drawBridge = (p1: { x: number, y: number }, p2: { x: number, y: number }, label: string, value: number | null) => {
+    if (!p1 || !p2) return;
+    const midX = (p1.x + p2.x) / 2;
+    const midY = (p1.y + p2.y) / 2;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.65)';
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+    ctx.restore();
+
+    // Text Label Box
+    if (value !== null && value !== undefined) {
+      ctx.save();
+      // Mirror the text context back so text renders readable (not backwards!)
+      ctx.translate(midX, midY - 14);
+      ctx.scale(-1, 1);
+      
+      const text = `${label}: ${value} cm`;
+      ctx.font = 'bold 9px monospace';
+      const textWidth = ctx.measureText(text).width;
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.fillRect(-textWidth/2 - 6, -8, textWidth + 12, 14);
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-textWidth/2 - 6, -8, textWidth + 12, 14);
+
+      ctx.fillStyle = '#22D3EE'; // cyan-400
+      ctx.textAlign = 'center';
+      ctx.fillText(text, 0, 2);
+      ctx.restore();
+    }
+  };
+
+  // Draw measurement lines
+  if (lS && rS && lS.vis > 0.3 && rS.vis > 0.3) {
+    drawBridge(lS, rS, 'SHOULDERS', measurements.shoulderWidthCm);
+  }
+  if (lS && rS && lH && rH) {
+    const chestL = interpolate(lS, lH, 0.28);
+    const chestR = interpolate(rS, rH, 0.28);
+    drawBridge(chestL, chestR, 'CHEST', measurements.chestCm);
+
+    const waistL = interpolate(lS, lH, 0.68);
+    const waistR = interpolate(rS, rH, 0.68);
+    drawBridge(waistL, waistR, 'WAIST', measurements.waistCm);
+  }
+  if (lH && rH && lH.vis > 0.3 && rH.vis > 0.3) {
+    drawBridge(lH, rH, 'HIPS', measurements.hipCm);
+  }
+
+  // Draw Scanner Active Tag (un-mirrored in the top right)
+  ctx.save();
+  ctx.translate(width - 165, 24);
+  ctx.scale(-1, 1);
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+  ctx.fillRect(0, 0, 145, 45);
+  ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(0, 0, 145, 45);
+
+  ctx.font = 'bold 8px monospace';
+  ctx.fillStyle = '#22D3EE';
+  ctx.fillText('• CV BODY SCANNER', 10, 16);
+  ctx.fillStyle = '#94A3B8';
+  ctx.fillText(`Type: ${measurements.bodyType || 'Active'}`, 10, 28);
+  ctx.fillText(`Calib: ${measurements.heightCm ? '100% OK' : 'Estimate'}`, 10, 38);
+  ctx.restore();
+
+  ctx.restore();
+}
