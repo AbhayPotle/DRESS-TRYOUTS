@@ -43,6 +43,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   });
 
   const isCalibrationFrameValidRef = useRef<boolean>(false);
+  const currentScanModeRef = useRef<'sitting' | 'standing'>('standing');
 
   // Fix: Set video source object on re-render after the element mounts
   useEffect(() => {
@@ -175,23 +176,36 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         const lK = results.poseLandmarks[25]; // L knee
         const lA = results.poseLandmarks[27]; // L ankle
 
-        // Only buffer if shoulders, chest, and waist/hips are all detected with high visibility
+        // Only require shoulders and face to be visible to initiate a scan (makes sitting scan possible!)
         const isLSVisible = lS && lS.visibility > 0.55;
         const isRSVisible = rS && rS.visibility > 0.55;
-        const isLHVisible = lH && lH.visibility > 0.55;
-        const isRHVisible = rH && rH.visibility > 0.55;
 
-        if (isLSVisible && isRSVisible && isLHVisible && isRHVisible) {
+        if (isLSVisible && isRSVisible) {
           isCalibrationFrameValidRef.current = true;
           const buffer = measurementsBufferRef.current;
           
+          const isLHVisible = lH && lH.visibility > 0.55;
+          const isRHVisible = rH && rH.visibility > 0.55;
+          const isHipsVisible = isLHVisible && isRHVisible;
+
           const shWidth = Math.abs(lS.x - rS.x);
-          const torsoH = Math.abs((lS.y + rS.y)/2 - (lH.y + rH.y)/2);
-          const hipW = Math.abs(lH.x - rH.x);
-          
-          // Approximate chest/waist width from shoulder/hip relationships
-          const chestW = shWidth * 0.9;
-          const waistW = hipW * 0.85;
+          let torsoH, hipW, chestW, waistW;
+
+          if (isHipsVisible) {
+            // Full Body Scan Mode (Standing)
+            torsoH = Math.abs((lS.y + rS.y)/2 - (lH.y + rH.y)/2);
+            hipW = Math.abs(lH.x - rH.x);
+            chestW = shWidth * 0.9;
+            waistW = hipW * 0.85;
+            currentScanModeRef.current = 'standing';
+          } else {
+            // Portrait Scan Mode (Sitting) - estimate body proportions from shoulders
+            torsoH = shWidth * 1.35; // standard proportional ratio
+            hipW = shWidth * 0.92;
+            chestW = shWidth * 0.92;
+            waistW = shWidth * 0.82;
+            currentScanModeRef.current = 'sitting';
+          }
 
           buffer.shoulderWidths.push(shWidth);
           buffer.torsoHeights.push(torsoH);
@@ -232,19 +246,23 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
     scanIntervalRef.current = setInterval(() => {
       if (!isCalibrationFrameValidRef.current) {
-        // Paused because landmarks (especially waist/hips) are missing!
-        setScanStatus('⚠️ Stand back: Waist and hips must be visible to calibrate!');
+        // Paused because shoulder/face is missing
+        setScanStatus('⚠️ Please align your shoulders and face in the camera frame!');
         return;
       }
 
       progress += 2;
       setScanProgress(progress);
 
+      const modeText = currentScanModeRef.current === 'sitting'
+        ? '🎥 Portrait Mode (Sitting)'
+        : '🚶 Full Body Mode (Standing)';
+
       const statusIdx = Math.min(
         statuses.length - 1,
         Math.floor((progress / 100) * statuses.length)
       );
-      setScanStatus(statuses[statusIdx]);
+      setScanStatus(`${modeText} - ${statuses[statusIdx]}`);
 
       if (progress >= 100) {
         clearInterval(scanIntervalRef.current!);
