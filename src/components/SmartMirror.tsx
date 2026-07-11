@@ -94,6 +94,11 @@ export default function SmartMirror({
     // Load MediaPipe Pose from CDNs dynamically
     const loadMediaPipe = async () => {
       try {
+        if ((window as any).Pose && (window as any).Camera) {
+          setupMediaPipeTracker();
+          return;
+        }
+
         const poseScript = document.createElement('script');
         poseScript.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js';
         poseScript.async = true;
