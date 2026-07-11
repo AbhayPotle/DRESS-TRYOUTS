@@ -356,12 +356,34 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset };
   const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
 
-  const leftSleeveEnd = item.styleTags.includes('Oversized') 
-    ? interpolate(raisedLS, lE, 0.65) 
-    : interpolate(raisedLS, lE, 0.42);
-  const rightSleeveEnd = item.styleTags.includes('Oversized') 
-    ? interpolate(raisedRS, rE, 0.65) 
-    : interpolate(raisedRS, rE, 0.42);
+  let leftSleeveEnd = { ...raisedLS };
+  let rightSleeveEnd = { ...raisedRS };
+
+  // Check if elbow landmarks are visible to track sleeve length dynamically (standing poses)
+  const isLeftElbowVisible = lE && lE.vis > 0.45;
+  const isRightElbowVisible = rE && rE.vis > 0.45;
+
+  if (isLeftElbowVisible && isRightElbowVisible) {
+    leftSleeveEnd = item.styleTags.includes('Oversized') 
+      ? interpolate(raisedLS, lE, 0.65) 
+      : interpolate(raisedLS, lE, 0.42);
+    rightSleeveEnd = item.styleTags.includes('Oversized') 
+      ? interpolate(raisedRS, rE, 0.65) 
+      : interpolate(raisedRS, rE, 0.42);
+  } else {
+    // Symmetrical fallback for portrait/sitting poses where elbows are out of frame
+    const sleeveLen = item.styleTags.includes('Oversized') ? shWidth * 0.28 : shWidth * 0.18;
+    
+    // Extend outward along the shoulder line, with a slight downward drape
+    leftSleeveEnd = { 
+      x: raisedLS.x - sleeveLen, 
+      y: raisedLS.y + sleeveLen * 0.45 
+    };
+    rightSleeveEnd = { 
+      x: raisedRS.x + sleeveLen, 
+      y: raisedRS.y + sleeveLen * 0.45 
+    };
+  }
 
   const collarWidth = shWidth * 0.28; // collar width is 28% of shoulder width
   const neckBaseL = { x: shoulderMidX - collarWidth / 2, y: raisedMidY - shWidth * 0.01 };
