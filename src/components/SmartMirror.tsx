@@ -690,7 +690,7 @@ export default function SmartMirror({
                 <span>Mirror Guidelines</span>
               </div>
               <p className="text-neutral-400 leading-normal">
-                Stand <strong>4-6 feet</strong> back. Keep your chest and waist inside the camera frame for a perfect size fit.
+                Align your shoulders and face in the frame. Works whether you are sitting close or standing back!
               </p>
               <div className="space-y-1.5 pt-1.5 border-t border-white/5">
                 <span className="text-[9px] uppercase tracking-widest text-neutral-500 font-bold">Gesture Shortcuts:</span>

@@ -182,9 +182,9 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         const lK = results.poseLandmarks[25]; // L knee
         const lA = results.poseLandmarks[27]; // L ankle
 
-        // Only require shoulders and face to be visible to initiate a scan (lowered threshold to 0.22 for backlit/window environments)
-        const isLSVisible = lS && lS.visibility > 0.22;
-        const isRSVisible = rS && rS.visibility > 0.22;
+        // Lenient shoulder checks (allows scanning even if sitting very close and shoulders are near bottom edge)
+        const isLSVisible = lS && (lS.visibility > 0.12 || lS.y > 0.8);
+        const isRSVisible = rS && (rS.visibility > 0.12 || rS.y > 0.8);
 
         if (isLSVisible && isRSVisible) {
           isCalibrationFrameValidRef.current = true;
@@ -524,7 +524,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <div className="w-full max-w-2xl text-center space-y-6 animate-fade-in">
           <h2 className="text-3xl font-bold tracking-tight">AI Body Scan Calibration</h2>
           <p className="text-neutral-400 text-sm max-w-md mx-auto">
-            Stand back so your shoulders and chest are fully inside the frame. Keep posture straight.
+            Align your shoulders and face in the camera frame to calibrate your fit. You can sit close or stand back!
           </p>
 
           <div className="relative aspect-video w-full rounded-3xl overflow-hidden bg-neutral-900 border border-white/10 shadow-2xl">
