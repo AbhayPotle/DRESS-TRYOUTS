@@ -12,6 +12,16 @@ interface OnboardingFlowProps {
   }) => void;
 }
 
+/**
+ * Calculates the real-world scale factor (cm per pixel) using average pupil distance as calibration reference.
+ * @param avgEyePx Average measured eye-to-eye distance in pixels.
+ * @returns Centimeters per pixel scale ratio.
+ */
+function calculateSittingScaleFactor(avgEyePx: number): number {
+  const averagePupilDistanceCm = 6.3; // Static human biometric constant
+  return avgEyePx > 0 ? (averagePupilDistanceCm / avgEyePx) : 0.08;
+}
+
 export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState<'gender' | 'camera' | 'scan' | 'result'>('gender');
   const [gender, setGender] = useState<'male' | 'female'>('male');
@@ -368,8 +378,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       const avgEyePx = avg(buffer.eyeDistances) * 1280;
       const finalShoulderPx = avg(buffer.shoulderWidths) * 1280;
       
-      // Calculate calibration scale factor (cm per pixel)
-      const scaleFactor = avgEyePx > 0 ? (6.3 / avgEyePx) : 0.08;
+      // Calculate calibration scale factor (cm per pixel) using eye-to-eye distance reference
+      const scaleFactor = calculateSittingScaleFactor(avgEyePx);
       
       // Calculate realistic shoulders and chest sizing
       const shoulderWidthCm = Math.round(finalShoulderPx * scaleFactor * 1.02);
