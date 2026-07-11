@@ -82,8 +82,10 @@ export default function SmartMirror({
   const [isFashionShowActive, setIsFashionShowActive] = useState(false);
   const fashionShowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // References for Gesture Detector
+  // References for Gesture Detector and Hand Tracker
   const gestureDetectorRef = useRef<GestureDetector>(new GestureDetector());
+  const handLandmarksRef = useRef<any>(null);
+  const lastPinchTimeRef = useRef<number>(0);
 
   // Setup stream and MediaPipe Pose
   useEffect(() => {
@@ -91,10 +93,10 @@ export default function SmartMirror({
       videoRef.current.srcObject = initialStream;
     }
 
-    // Load MediaPipe Pose from CDNs dynamically
+    // Load MediaPipe Pose and Hands from CDNs dynamically
     const loadMediaPipe = async () => {
       try {
-        if ((window as any).Pose && (window as any).Camera) {
+        if ((window as any).Pose && (window as any).Camera && (window as any).Hands) {
           setupMediaPipeTracker();
           return;
         }
@@ -109,20 +111,23 @@ export default function SmartMirror({
         cameraScript.async = true;
         document.body.appendChild(cameraScript);
 
+        const handsScript = document.createElement('script');
+        handsScript.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
+        handsScript.async = true;
+        document.body.appendChild(handsScript);
+
         await new Promise((resolve) => {
-          poseScript.onload = () => {
-            if (window.hasOwnProperty('Pose') || (window as any).Pose) {
+          let loaded = 0;
+          const checkLoad = () => {
+            loaded++;
+            if (loaded >= 3 || ((window as any).Pose && (window as any).Camera && (window as any).Hands)) {
               resolve(true);
-            } else {
-              // Poll until Pose is attached to window
-              const interval = setInterval(() => {
-                if ((window as any).Pose) {
-                  clearInterval(interval);
-                  resolve(true);
-                }
-              }, 100);
             }
           };
+          poseScript.onload = checkLoad;
+          cameraScript.onload = checkLoad;
+          handsScript.onload = checkLoad;
+          setTimeout(() => resolve(true), 3000); // safety fallback timeout
         });
 
         setupMediaPipeTracker();
@@ -152,6 +157,7 @@ export default function SmartMirror({
   const setupMediaPipeTracker = () => {
     const mpPose = (window as any).Pose;
     const mpCamera = (window as any).Camera;
+    const mpHands = (window as any).Hands;
 
     if (!mpPose || !mpCamera || !videoRef.current) {
       startSkeletonSimulation();
@@ -168,6 +174,22 @@ export default function SmartMirror({
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5
     });
+
+    let hands: any = null;
+    if (mpHands) {
+      hands = new mpHands({
+        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      });
+      hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.6
+      });
+      hands.onResults((results: any) => {
+        handLandmarksRef.current = results.multiHandLandmarks || null;
+      });
+    }
 
     pose.onResults((results: any) => {
       if (!canvasRef.current || !videoRef.current) return;
@@ -190,59 +212,141 @@ export default function SmartMirror({
           canvas.height
         );
 
+        // Check for Precise Pinch Gesture using MediaPipe Hands!
+        let hasPrecisePinch = false;
+        if (handLandmarksRef.current && handLandmarksRef.current.length > 0) {
+          for (const hand of handLandmarksRef.current) {
+            const thumbTip = hand[4];
+            const indexTip = hand[8];
+            if (thumbTip && indexTip) {
+              const d = Math.sqrt(Math.pow(thumbTip.x - indexTip.x, 2) + Math.pow(thumbTip.y - indexTip.y, 2));
+              if (d < 0.045) { // sub-pixel pinch threshold
+                hasPrecisePinch = true;
+              }
+            }
+          }
+        }
+
         // Draw Hand Tracking indicator overlay for better user feedback
-        const lWrist = results.poseLandmarks[15];
-        const rWrist = results.poseLandmarks[16];
-        const lIndex = results.poseLandmarks[19];
-        const rIndex = results.poseLandmarks[20];
-        
-        ctx.save();
-        // Flip the drawing since the canvas is mirrored inside drawGarments
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-        
-        ctx.fillStyle = '#10B981'; // Emerald Green
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 1.5;
+        if (handLandmarksRef.current && handLandmarksRef.current.length > 0) {
+          ctx.save();
+          // Flip the drawing since the canvas is mirrored inside drawGarments
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
 
-        // Reference Y level (shoulder level or default mid-screen)
-        const lSh = results.poseLandmarks[11];
-        const rSh = results.poseLandmarks[12];
-        const shY = (lSh && rSh) ? (lSh.y + rSh.y)/2 : 0.45;
+          for (const hand of handLandmarksRef.current) {
+            const thumbTip = hand[4];
+            const indexTip = hand[8];
+            const wrist = hand[0];
 
-        [ { wrist: lWrist, index: lIndex }, { wrist: rWrist, index: rIndex } ].forEach(hand => {
-          if (hand.wrist) {
-            const isRaised = hand.wrist.y < shY + 0.18; // Match the 0.18 height gate
-            
-            // Draw a faint glowing ring around the hand when raised in the active zone
-            if (isRaised) {
-              const wx = hand.wrist.x * canvas.width;
-              const wy = hand.wrist.y * canvas.height;
-              const ix = hand.index ? hand.index.x * canvas.width : wx;
-              const iy = hand.index ? hand.index.y * canvas.height : wy;
+            if (wrist) {
+              const wx = wrist.x * canvas.width;
+              const wy = wrist.y * canvas.height;
 
               ctx.shadowColor = '#10B981';
               ctx.shadowBlur = 10;
-              ctx.fillStyle = 'rgba(16, 185, 129, 0.6)';
+              ctx.fillStyle = 'rgba(16, 185, 129, 0.5)';
               ctx.beginPath();
               ctx.arc(wx, wy, 8, 0, Math.PI * 2);
               ctx.fill();
+              ctx.strokeStyle = '#FFFFFF';
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+            }
+
+            if (thumbTip && indexTip) {
+              const tx = thumbTip.x * canvas.width;
+              const ty = thumbTip.y * canvas.height;
+              const ix = indexTip.x * canvas.width;
+              const iy = indexTip.y * canvas.height;
+
+              const d = Math.sqrt(Math.pow(thumbTip.x - indexTip.x, 2) + Math.pow(thumbTip.y - indexTip.y, 2));
+              const isPinching = d < 0.045;
+
+              ctx.fillStyle = isPinching ? '#F59E0B' : '#10B981';
+              ctx.strokeStyle = '#FFFFFF';
+              ctx.lineWidth = 1.5;
+              ctx.shadowColor = isPinching ? '#F59E0B' : '#10B981';
+              ctx.shadowBlur = 12;
+
+              ctx.beginPath();
+              ctx.arc(tx, ty, 6, 0, Math.PI * 2);
+              ctx.fill();
               ctx.stroke();
 
-              ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
               ctx.beginPath();
-              ctx.arc(ix, iy, 5, 0, Math.PI * 2);
+              ctx.arc(ix, iy, 6, 0, Math.PI * 2);
               ctx.fill();
               ctx.stroke();
             }
           }
-        });
-        ctx.restore();
+          ctx.restore();
+        } else {
+          // Fallback to drawing pose wrist indicators if hands aren't loaded yet
+          const lWrist = results.poseLandmarks[15];
+          const rWrist = results.poseLandmarks[16];
+          const lIndex = results.poseLandmarks[19];
+          const rIndex = results.poseLandmarks[20];
+          
+          ctx.save();
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+          
+          ctx.fillStyle = '#10B981';
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 1.5;
+
+          const lSh = results.poseLandmarks[11];
+          const rSh = results.poseLandmarks[12];
+          const shY = (lSh && rSh) ? (lSh.y + rSh.y)/2 : 0.45;
+
+          [ { wrist: lWrist, index: lIndex }, { wrist: rWrist, index: rIndex } ].forEach(hand => {
+            if (hand.wrist) {
+              const isRaised = hand.wrist.y < shY + 0.18;
+              
+              if (isRaised) {
+                const wx = hand.wrist.x * canvas.width;
+                const wy = hand.wrist.y * canvas.height;
+                const ix = hand.index ? hand.index.x * canvas.width : wx;
+                const iy = hand.index ? hand.index.y * canvas.height : wy;
+
+                ctx.shadowColor = '#10B981';
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.6)';
+                ctx.beginPath();
+                ctx.arc(wx, wy, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
+                ctx.beginPath();
+                ctx.arc(ix, iy, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+              }
+            }
+          });
+          ctx.restore();
+        }
 
         // Process Gestures
-        const detected = gestureDetectorRef.current.update(results.poseLandmarks, Date.now());
-        if (detected.gesture !== 'none') {
-          triggerGestureAction(detected.gesture);
+        let gestureToTrigger: GestureType = 'none';
+        
+        if (hasPrecisePinch) {
+          const now = Date.now();
+          if (now - lastPinchTimeRef.current > 1200) {
+            gestureToTrigger = 'pinch';
+            lastPinchTimeRef.current = now;
+          }
+        } else {
+          const detected = gestureDetectorRef.current.update(results.poseLandmarks, Date.now());
+          if (detected.gesture !== 'none') {
+            gestureToTrigger = detected.gesture;
+          }
+        }
+
+        if (gestureToTrigger !== 'none') {
+          triggerGestureAction(gestureToTrigger);
         }
 
         // Periodically extract skin tone color from face region if camera is active
@@ -270,8 +374,9 @@ export default function SmartMirror({
 
     const camera = new mpCamera(videoRef.current, {
       onFrame: async () => {
-        if (pose && videoRef.current) {
-          await pose.send({ image: videoRef.current });
+        if (videoRef.current) {
+          if (pose) await pose.send({ image: videoRef.current });
+          if (hands) await hands.send({ image: videoRef.current });
         }
       },
       width: 1280,
