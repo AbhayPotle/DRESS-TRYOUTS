@@ -466,10 +466,13 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   if (config.logoText) {
     ctx.save();
+    // Translate to center of chest, then scale horizontally by -1 to counter-mirror logo letters so they read straight
+    ctx.translate(shoulderMidX, shoulderMidY + (scaledLH.y - scaledLS.y) * 0.3);
+    ctx.scale(-1, 1);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
     ctx.font = '800 12px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(config.logoText, shoulderMidX, shoulderMidY + (scaledLH.y - scaledLS.y) * 0.3);
+    ctx.fillText(config.logoText, 0, 0);
     ctx.restore();
   }
 }
