@@ -44,6 +44,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const isCalibrationFrameValidRef = useRef<boolean>(false);
   const currentScanModeRef = useRef<'sitting' | 'standing'>('standing');
+  const trackerActiveRef = useRef<boolean>(false);
 
   // Fix: Set video source object on re-render after the element mounts
   useEffect(() => {
@@ -113,6 +114,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   // Stop MediaPipe tracking loops
   const stopScanningTracker = () => {
+    setTrackerActive(false);
+    trackerActiveRef.current = false;
     if (mpCameraRef.current) {
       try {
         mpCameraRef.current.stop();
@@ -142,6 +145,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
     setScanStatus('Initializing MediaPipe Pose models...');
     setTrackerActive(true);
+    trackerActiveRef.current = true;
 
     const pose = new mpPose({
       locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
@@ -220,7 +224,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
     const camera = new mpCamera(videoRef.current, {
       onFrame: async () => {
-        if (pose && videoRef.current && trackerActive) {
+        if (pose && videoRef.current && trackerActiveRef.current) {
           await pose.send({ image: videoRef.current });
         }
       },
