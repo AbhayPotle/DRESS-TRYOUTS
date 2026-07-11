@@ -220,11 +220,18 @@ export function drawGarments(
     return (order[a.type] ?? 0) - (order[b.type] ?? 0);
   });
 
+  const hasOuterwear = sortedItems.some(item => item.type === 'outerwear');
+
   // Render each garment
   sortedItems.forEach(item => {
     ctx.save();
     
     if (item.type === 'top') {
+      // If a jacket/outerwear is present, skip rendering the shirt underlay to provide a clean single-garment outline
+      if (hasOuterwear) {
+        ctx.restore();
+        return;
+      }
       drawTop(ctx, points, item, measurements);
     } else if (item.type === 'bottom') {
       drawBottom(ctx, points, item, measurements);
