@@ -727,21 +727,27 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   const config = item.renderConfig;
   const isLeather = config.texture === 'leather';
 
+  const shWidth = distance(lS, rS);
+  const neckYOffset = shWidth * 0.11; // Shift up to match T-shirt neck base
+  const raisedLS = { x: lS.x, y: lS.y - neckYOffset };
+  const raisedRS = { x: rS.x, y: rS.y - neckYOffset };
+  const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
+
   // Left Jacket Half
   ctx.beginPath();
-  ctx.moveTo((lS.x + rS.x)/2 - 5, lS.y + 15);
-  ctx.lineTo(lS.x, lS.y);
+  ctx.moveTo((raisedLS.x + raisedRS.x)/2 - 5, raisedMidY + shWidth * 0.05);
+  ctx.lineTo(raisedLS.x, raisedLS.y);
   ctx.lineTo(lW.x - 5, lW.y);
   ctx.lineTo(lH.x - 14, lH.y + 20);
   ctx.lineTo((lH.x + rH.x)/2 - 5, lH.y + 15);
   ctx.closePath();
-  ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', (lS.x + rS.x)/2, lS.y, distance(lS, rS));
+  ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', (raisedLS.x + raisedRS.x)/2, raisedLS.y, shWidth);
   ctx.fill();
 
   // Right Jacket Half
   ctx.beginPath();
-  ctx.moveTo((lS.x + rS.x)/2 + 5, lS.y + 15);
-  ctx.lineTo(rS.x, rS.y);
+  ctx.moveTo((raisedLS.x + raisedRS.x)/2 + 5, raisedMidY + shWidth * 0.05);
+  ctx.lineTo(raisedRS.x, raisedRS.y);
   ctx.lineTo(rW.x + 5, rW.y);
   ctx.lineTo(rH.x + 14, rH.y + 20);
   ctx.lineTo((lH.x + rH.x)/2 + 5, lH.y + 15);
@@ -753,16 +759,16 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   ctx.stroke();
 
   // Outerwear double-stitching
-  drawStitchingLine(ctx, lS.x, lS.y, lW.x - 5, lW.y);
-  drawStitchingLine(ctx, rS.x, rS.y, rW.x + 5, rW.y);
+  drawStitchingLine(ctx, raisedLS.x, raisedLS.y, lW.x - 5, lW.y);
+  drawStitchingLine(ctx, raisedRS.x, raisedRS.y, rW.x + 5, rW.y);
 
   // Specular reflection lines for leather
   if (isLeather) {
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
     ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.moveTo(lS.x, lS.y + 3);
-    ctx.lineTo(interpolate(lS, lW, 0.35).x, interpolate(lS, lW, 0.35).y);
+    ctx.moveTo(raisedLS.x, raisedLS.y + 3);
+    ctx.lineTo(interpolate(raisedLS, lW, 0.35).x, interpolate(raisedLS, lW, 0.35).y);
     ctx.stroke();
   }
 
@@ -770,14 +776,14 @@ function drawOuterwear(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m
   ctx.strokeStyle = config.secondaryColor || 'rgba(0,0,0,0.3)';
   ctx.lineWidth = 6;
   ctx.beginPath();
-  ctx.moveTo(lS.x - 5, lS.y);
-  ctx.lineTo((lS.x + rS.x)/2 - 12, lS.y + 35);
-  ctx.moveTo(rS.x + 5, rS.y);
-  ctx.lineTo((lS.x + rS.x)/2 + 12, lS.y + 35);
+  ctx.moveTo(raisedLS.x - 5, raisedLS.y);
+  ctx.lineTo((raisedLS.x + raisedRS.x)/2 - 12, raisedMidY + shWidth * 0.12);
+  ctx.moveTo(raisedRS.x + 5, raisedRS.y);
+  ctx.lineTo((raisedLS.x + raisedRS.x)/2 + 12, raisedMidY + shWidth * 0.12);
   ctx.stroke();
 
   // Integration Shading
-  drawTopShading(ctx, lS, rS, lH, rH);
+  drawTopShading(ctx, raisedLS, raisedRS, lH, rH);
 }
 
 function drawAccessory(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: ScanMeasurements) {
