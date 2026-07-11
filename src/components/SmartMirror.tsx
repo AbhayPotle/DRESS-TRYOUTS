@@ -97,9 +97,9 @@ export default function SmartMirror({
 
   // Design Studio overrides
   const [customColor, setCustomColor] = useState<string | null>(null);
-  const [customTexture, setCustomTexture] = useState<string | null>(null);
+  const [customTexture, setCustomTexture] = useState<Garment['renderConfig']['texture'] | null>(null);
   const customColorRef = useRef<string | null>(null);
-  const customTextureRef = useRef<string | null>(null);
+  const customTextureRef = useRef<Garment['renderConfig']['texture'] | null>(null);
 
   // Auto-reset overrides when outfit index changes
   useEffect(() => {
@@ -948,6 +948,60 @@ export default function SmartMirror({
                 </button>
               </div>
             </div>
+
+            {/* Design Customization Bar */}
+            {activeOutfit && (
+              <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-black/75 border border-white/10 backdrop-blur-lg px-6 py-3.5 rounded-3xl flex flex-col gap-2.5 items-center z-20 shadow-2xl animate-fade-in w-[90%] max-w-md">
+                <div className="flex items-center gap-1.5 text-[9px] text-cyan-400 font-bold uppercase tracking-widest">
+                  <Sparkles className="w-3 h-3" />
+                  <span>Interactive Design Studio</span>
+                </div>
+                
+                <div className="flex gap-4 w-full justify-between items-center border-t border-white/5 pt-2">
+                  {/* Colors */}
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-neutral-400 font-bold uppercase tracking-wider">Garment Color</span>
+                    <div className="flex gap-1.5">
+                      {['#960A0A', '#0A0A0A', '#FAFAFA', '#0F4C81', '#1B4D3E'].map(hex => (
+                        <button
+                          key={hex}
+                          onClick={() => setCustomColor(hex)}
+                          className={`w-5 h-5 rounded-full border transition-all cursor-pointer ${
+                            (customColor || activeOutfit.items[0]?.renderConfig.baseColor) === hex 
+                              ? 'border-cyan-400 scale-110 shadow-lg shadow-cyan-400/20' 
+                              : 'border-white/20 hover:scale-105'
+                          }`}
+                          style={{ backgroundColor: hex }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-[1px] h-8 bg-white/5" />
+
+                  {/* Fabrics */}
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] text-neutral-400 font-bold uppercase tracking-wider">Fabric Texture</span>
+                    <div className="flex gap-1">
+                      {(['plain', 'stripes', 'plaid', 'denim', 'silk'] as const).map(tex => (
+                        <button
+                          key={tex}
+                          onClick={() => setCustomTexture(tex)}
+                          className={`px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                            (customTexture || activeOutfit.items[0]?.renderConfig.texture || 'plain') === tex 
+                              ? 'bg-cyan-500 text-black border-cyan-400 shadow-md shadow-cyan-500/10' 
+                              : 'bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white'
+                          }`}
+                        >
+                          {tex}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Simulated Scanning sweeping line or calibration success check */}
             {!mediaPipeLoaded && (

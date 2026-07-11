@@ -14,7 +14,7 @@ export interface Garment {
   renderConfig: {
     baseColor: string;
     secondaryColor?: string;
-    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver';
+    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk';
     opacity?: number;
     logoText?: string;
     patternScale?: number;
