@@ -1,3 +1,6 @@
+/**
+ * Supported touch-free gestures for interactive smart mirror navigation.
+ */
 export type GestureType =
   | 'none'
   | 'pinch'
@@ -9,6 +12,9 @@ export type GestureType =
   | 'open_palm'
   | 'hands_together';
 
+/**
+ * Normalized 3D point structure for body skeleton keypoint mapping.
+ */
 export interface Point3D {
   x: number;
   y: number;
@@ -16,6 +22,10 @@ export interface Point3D {
   visibility?: number;
 }
 
+/**
+ * GestureDetector class maps raw multi-frame coordinate inputs from MediaPipe
+ * into discrete high-level user navigation gestures using spatial thresholds.
+ */
 export class GestureDetector {
   private history: { leftHand: Point3D[]; rightHand: Point3D[]; leftWrist: Point3D[]; rightWrist: Point3D[] }[] = [];
   private maxHistoryLen = 30; // 1 second at 30 FPS
@@ -91,46 +101,25 @@ export class GestureDetector {
       }
     }
 
-    // Detect gestures
     let activeGesture: GestureType = 'none';
     let activeConfidence = 0;
 
+    // Enforce strict high visibility check on joints to ignore out-of-frame limbs (sitting modes)
+    const isLeftWristVisible = leftWrist.visibility! > 0.82;
+    const isRightWristVisible = rightWrist.visibility! > 0.82;
+
     // 1. Hands Together (Wrists are close)
     const wristDist = this.distance(leftWrist, rightWrist);
-    if (wristDist < 0.12 && leftWrist.visibility! > 0.3 && rightWrist.visibility! > 0.3) {
+    if (wristDist < 0.12 && isLeftWristVisible && isRightWristVisible) {
       activeGesture = 'hands_together';
-      activeConfidence = 0.9;
-    }
-
-    // 2. Pinch (Index tip close to thumb tip)
-    // We check both left and right hands
-    const leftPinchDist = this.distance(leftIndex, leftThumb);
-    const rightPinchDist = this.distance(rightIndex, rightThumb);
-    
-    const lSh = landmarks[11];
-    const rSh = landmarks[12];
-    const shY = (lSh && rSh) ? (lSh.y + rSh.y)/2 : 0.45;
-    
-    // Scale-invariant body scale factor using shoulder width (distance between shoulders)
-    const bodyScale = (lSh && rSh) ? this.distance(lSh, rSh) : 0.22;
-    const pinchThreshold = bodyScale * 0.22; // approx 22% of shoulder width for reliable detection
-
-    // To prevent false pinch triggers when hands are down, we require the wrist to be raised near/above shoulder level
-    const leftWristRaised = leftWrist.y < shY + 0.18;
-    const rightWristRaised = rightWrist.y < shY + 0.18;
-
-    const isLeftPinching = leftWristRaised && leftPinchDist < pinchThreshold;
-    const isRightPinching = rightWristRaised && rightPinchDist < pinchThreshold;
-
-    const isPinching = isLeftPinching || isRightPinching;
-
-    if (isPinching && activeGesture === 'none') {
-      activeGesture = 'pinch';
       activeConfidence = 0.95;
     }
 
+    // 2. Pinch (Index tip close to thumb tip) - Disabled in Pose to leave only precise hand pinch active
+    // We bypass this entirely to prevent false triggers from Pose landmarks!
+
     // 3. Wave Right Hand (Right wrist X oscillates)
-    if (activeGesture === 'none') {
+    if (activeGesture === 'none' && isRightWristVisible) {
       const isWavingRight = this.checkWaving(this.history.map(h => h.rightWrist[0]));
       if (isWavingRight) {
         activeGesture = 'wave_right';
@@ -139,7 +128,7 @@ export class GestureDetector {
     }
 
     // 4. Wave Left Hand (Left wrist X oscillates)
-    if (activeGesture === 'none') {
+    if (activeGesture === 'none' && isLeftWristVisible) {
       const isWavingLeft = this.checkWaving(this.history.map(h => h.leftWrist[0]));
       if (isWavingLeft) {
         activeGesture = 'wave_left';
@@ -149,8 +138,8 @@ export class GestureDetector {
 
     // 5. Thumbs Up (Thumb is higher than index/wrist, others closed)
     if (activeGesture === 'none') {
-      const isThumbsUpRight = rightThumb.y < rightIndex.y - 0.035;
-      const isThumbsUpLeft = leftThumb.y < leftIndex.y - 0.035;
+      const isThumbsUpRight = isRightWristVisible && rightThumb.y < rightIndex.y - 0.035;
+      const isThumbsUpLeft = isLeftWristVisible && leftThumb.y < leftIndex.y - 0.035;
       if (isThumbsUpRight || isThumbsUpLeft) {
         activeGesture = 'thumbs_up';
         activeConfidence = 0.8;
@@ -159,9 +148,8 @@ export class GestureDetector {
 
     // 6. Peace Sign (Index and middle fingers are high above wrist, pinky low)
     if (activeGesture === 'none') {
-      // In Pose model, we approximate peace sign if index is high above pinky
-      const isPeaceRight = rightIndex.y < (landmarks[18]?.y ?? 0.8) - 0.045;
-      const isPeaceLeft = leftIndex.y < (landmarks[17]?.y ?? 0.8) - 0.045;
+      const isPeaceRight = isRightWristVisible && rightIndex.y < (landmarks[18]?.y ?? 0.8) - 0.045;
+      const isPeaceLeft = isLeftWristVisible && leftIndex.y < (landmarks[17]?.y ?? 0.8) - 0.045;
       if (isPeaceRight || isPeaceLeft) {
         activeGesture = 'peace';
         activeConfidence = 0.8;
