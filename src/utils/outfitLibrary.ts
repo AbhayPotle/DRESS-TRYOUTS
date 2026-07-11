@@ -105,6 +105,62 @@ export const BASE_GARMENTS: Garment[] = [
     description: 'Premium white linen kurta with detailed embroidery around the collar.',
     renderConfig: { baseColor: '#F5F5F5', secondaryColor: '#D4AF37', texture: 'plain' }
   },
+  {
+    id: 'm_top_henley_grey',
+    name: 'Henley Long-Sleeve Shirt',
+    type: 'top',
+    category: 'Casual',
+    subcategory: 'Shirts',
+    gender: 'man',
+    colors: ['#636E72', '#2D3436', '#B2BEC3'],
+    price: 45,
+    rating: 4.6,
+    styleTags: ['Henley', 'Regular Fit', 'Ribbed', 'Waffle Knit'],
+    description: 'A cozy cotton Henley shirt featuring a classic 3-button placket and ribbed fabric.',
+    renderConfig: { baseColor: '#636E72', texture: 'knitted' }
+  },
+  {
+    id: 'm_top_polo_navy',
+    name: 'Classic Polo Collar Tee',
+    type: 'top',
+    category: 'Business',
+    subcategory: 'T-Shirts',
+    gender: 'man',
+    colors: ['#0F81C4', '#FFFFFF', '#0A0A0A'],
+    price: 49,
+    rating: 4.7,
+    styleTags: ['Polo', 'Pique', 'Sporty', 'Smart Casual'],
+    description: 'Timeless pique knit polo shirt featuring contrasting collar tipping and custom branding.',
+    renderConfig: { baseColor: '#0F4C81', secondaryColor: '#FFFFFF', texture: 'plain' }
+  },
+  {
+    id: 'm_top_hawaiian_floral',
+    name: 'Hawaiian Floral Summer Shirt',
+    type: 'top',
+    category: 'Vacation',
+    subcategory: 'Shirts',
+    gender: 'man',
+    colors: ['#FF7675', '#0984E3', '#00B894'],
+    price: 52,
+    rating: 4.8,
+    styleTags: ['Floral', 'Hawaiian', 'Vacation', 'Summer'],
+    description: 'Vibrant tropical flower pattern camp shirt designed to keep you cool under the sun.',
+    renderConfig: { baseColor: '#D63031', secondaryColor: '#FDCB6E', texture: 'stripes' }
+  },
+  {
+    id: 'm_top_mandarin_white',
+    name: 'Mandarin Collar Linen Shirt',
+    type: 'top',
+    category: 'Luxury',
+    subcategory: 'Shirts',
+    gender: 'man',
+    colors: ['#FFFFFF', '#DFE6E9', '#2C3E50'],
+    price: 75,
+    rating: 4.9,
+    styleTags: ['Mandarin Collar', 'Linen', 'Luxury', 'Clean Fit'],
+    description: 'A sophisticated collarless shirt tailored from breathable linen for an effortless resort feel.',
+    renderConfig: { baseColor: '#FAFAFA', texture: 'plain' }
+  },
 
   // --- MEN'S BOTTOMS ---
   {
