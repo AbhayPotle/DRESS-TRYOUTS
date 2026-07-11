@@ -184,29 +184,11 @@ export class GestureDetector {
     if (activeGesture !== 'none' && this.gestureConfidence[activeGesture] >= requiredFrames) {
       // Check cooldown
       if (this.gestureCooldowns[activeGesture] <= 0) {
-        // Trigger double pinch check
-        if (activeGesture === 'pinch') {
-          const now = Date.now();
-          if (now - this.pinchDetectedTime < 450 && !this.pinchActive) {
-            // double pinch triggered!
-            this.pinchDetectedTime = 0;
-            this.setCooldown('double_pinch', 1500);
-            this.resetConfidence();
-            return { gesture: 'double_pinch', confidence: 1 };
-          }
-          this.pinchDetectedTime = now;
-          this.pinchActive = true;
-        }
-
-        // Set cooldown and return
+        // Cooldown trigger and reset
         this.setCooldown(activeGesture, 1500); // 1.5s default cooldown
         this.resetConfidence();
         return { gesture: activeGesture, confidence: activeConfidence };
       }
-    }
-
-    if (activeGesture !== 'pinch') {
-      this.pinchActive = false;
     }
 
     return { gesture: 'none', confidence: 0 };
