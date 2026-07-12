@@ -503,6 +503,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
     drawStripes(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#FFFFFF');
   } else if (config.texture === 'plaid') {
     drawPlaid(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.baseColor, config.secondaryColor || '#000000');
+  } else if (config.texture === 'artistic') {
+    drawArtisticPatterns(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#EC4899');
   }
 
   // Realistic Specular Shading overlay
@@ -874,6 +876,10 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     ctx.restore();
   }
 
+  if (config.texture === 'artistic') {
+    drawArtisticPatterns(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#EC4899');
+  }
+
   // 3D Shading
   drawTopShading(ctx, raisedLS, raisedRS, scaledLH, scaledRH);
   drawSkirtShading(ctx, scaledLH, scaledRH, bottomY, isLehenga);
@@ -1214,6 +1220,39 @@ function drawPlaid(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any, rH:
     ctx.lineTo(rightPt.x, rightPt.y);
     ctx.stroke();
   }
+  ctx.restore();
+}
+
+function drawArtisticPatterns(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any, rH: any, secondaryColor: string) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-atop'; // Restrict drawing within the garment boundaries!
+  
+  const midS = { x: (lS.x + rS.x)/2, y: (lS.y + rS.y)/2 };
+  const midH = { x: (lH.x + rH.x)/2, y: (lH.y + rH.y)/2 };
+
+  // Draw flowing, wavy artistic brushstrokes of modern colors
+  const colors = [secondaryColor || '#EC4899', '#3B82F6', '#10B981', '#F59E0B'];
+  ctx.globalAlpha = 0.55;
+  ctx.lineCap = 'round';
+
+  colors.forEach((col, idx) => {
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 14 + idx * 4;
+
+    const startX = lS.x + (rS.x - lS.x) * (0.15 + idx * 0.22);
+    const startY = lS.y + 10;
+    const endX = lH.x + (rH.x - lH.x) * (0.2 + idx * 0.18);
+    const endY = lH.y - 20;
+
+    const ctrlX = midS.x + (idx % 2 === 0 ? -40 : 40);
+    const ctrlY = (startY + endY) / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+    ctx.stroke();
+  });
+
   ctx.restore();
 }
 
