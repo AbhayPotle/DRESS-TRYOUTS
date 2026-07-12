@@ -387,6 +387,7 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset + offShoulderOffset };
   const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset + offShoulderOffset };
   const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
+  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.05);
 
   let leftSleeveEnd = { ...raisedLS };
   let rightSleeveEnd = { ...raisedRS };
@@ -449,7 +450,6 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.lineTo(raisedLS.x, raisedLS.y);
   ctx.lineTo(neckBaseL.x, neckBaseL.y);
   // Curve or straight lines defining the front dip of the neckband
-  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.05);
   if (isVNeck) {
     ctx.lineTo(shoulderMidX, neckDipY);
     ctx.lineTo(neckBaseR.x, neckBaseR.y);
@@ -479,7 +479,6 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(neckBaseL.x, neckBaseL.y);
-  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.05);
   if (isVNeck) {
     ctx.lineTo(shoulderMidX, neckDipY);
     ctx.lineTo(neckBaseR.x, neckBaseR.y);
@@ -767,6 +766,7 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset + offShoulderOffset };
   const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset + offShoulderOffset };
   const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
+  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.04);
 
   const shoulderMidX = (raisedLS.x + raisedRS.x) / 2;
   const collarWidth = shWidth * 0.28;
@@ -816,7 +816,6 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.lineTo(neckBaseL.x, neckBaseL.y);
   
   // Curve defining the front dip of the neckband
-  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.04);
   if (isVNeck) {
     ctx.lineTo(shoulderMidX, neckDipY);
     ctx.lineTo(neckBaseR.x, neckBaseR.y);
@@ -846,7 +845,6 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(neckBaseL.x, neckBaseL.y);
-  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.04);
   if (isVNeck) {
     ctx.lineTo(shoulderMidX, neckDipY);
     ctx.lineTo(neckBaseR.x, neckBaseR.y);
