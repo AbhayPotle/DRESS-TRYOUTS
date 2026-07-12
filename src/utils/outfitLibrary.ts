@@ -14,7 +14,7 @@ export interface Garment {
   renderConfig: {
     baseColor: string;
     secondaryColor?: string;
-    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk' | 'brocade';
+    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk' | 'brocade' | 'artistic';
     opacity?: number;
     logoText?: string;
     patternScale?: number;
@@ -482,6 +482,34 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Suede', 'Chelsea', 'Slip-on', 'Classic'],
     description: 'Premium Italian suede Chelsea boots with flexible side panels and crepe soles.',
     renderConfig: { baseColor: '#A0522D', texture: 'plain' }
+  },
+  {
+    id: 'm_top_artistic_paint',
+    name: 'Abstract Paint Splatter Tee',
+    type: 'top',
+    category: 'Streetwear',
+    subcategory: 'T-Shirts',
+    gender: 'unisex',
+    colors: ['#0A0A0A', '#FFFFFF'],
+    price: 55,
+    rating: 4.9,
+    styleTags: ['Artistic', 'Paint Splatter', 'Streetwear', 'Oversized', 'Colorful'],
+    description: 'A premium heavy-weight cotton tee featuring abstract hand-painted brushstroke splash patterns.',
+    renderConfig: { baseColor: '#0A0A0A', secondaryColor: '#EC4899', texture: 'artistic' }
+  },
+  {
+    id: 'w_full_artistic_dress',
+    name: 'Artistic Paint Splash Dress',
+    type: 'full',
+    category: 'Vacation',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#FFFFFF', '#EC4899', '#3B82F6'],
+    price: 135,
+    rating: 4.9,
+    styleTags: ['Artistic', 'Boho', 'Maxi', 'Paint Splatter', 'Colorful'],
+    description: 'A beautiful flowing maxi dress printed with wavy abstract designer brushstrokes.',
+    renderConfig: { baseColor: '#FFFFFF', secondaryColor: '#EC4899', texture: 'artistic' }
   }
 ];
 
