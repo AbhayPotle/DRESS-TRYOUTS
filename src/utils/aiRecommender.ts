@@ -1,14 +1,14 @@
 import { Outfit, Garment } from './outfitLibrary';
 
 export interface ScanMeasurements {
-  heightCm: number;
-  chestCm: number;
-  waistCm: number;
-  hipCm: number;
-  shoulderWidthCm: number;
-  armLengthCm: number;
-  legLengthCm: number;
-  bodyType: 'Slim' | 'Athletic' | 'Average' | 'Muscular' | 'Curvy' | 'Plus Size' | 'Tall' | 'Short';
+  heightCm: number | null;
+  chestCm: number | null;
+  waistCm: number | null;
+  hipCm: number | null;
+  shoulderWidthCm: number | null;
+  armLengthCm: number | null;
+  legLengthCm: number | null;
+  bodyType: 'Slim' | 'Athletic' | 'Average' | 'Muscular' | 'Curvy' | 'Plus Size' | 'Tall' | 'Short' | 'Portrait (Sitting)';
 }
 
 export interface RecommendationFactors {
@@ -22,6 +22,7 @@ export interface RecommendationFactors {
   occasion: string;
   weather: 'sunny' | 'rainy' | 'cold' | 'cloudy';
   season: 'Summer' | 'Winter' | 'Autumn' | 'Spring';
+  styleVibe?: 'elegant' | 'artistic' | 'casual';
 }
 
 /**
@@ -211,6 +212,32 @@ export function getAIRecommendations(
       // Slightly penalize heavy outerwear in hot summer weather
       if (factors.weather === 'sunny' && styleTags.includes('winter') || styleTags.includes('puffer') || styleTags.includes('leather')) {
         score -= 15;
+      }
+
+      // 4. Style Personality Vibe Match (Weight: 35 points!)
+      if (factors.styleVibe) {
+        const styleTags = outfit.styleTags.map(t => t.toLowerCase());
+        const catLower = outfit.category.toLowerCase();
+        
+        if (factors.styleVibe === 'elegant') {
+          // Elegant vibe looks for tailored, traditional, formal, blazer, silk, luxury
+          const matches = ['traditional', 'formal', 'wedding', 'silk', 'leather', 'tailored', 'blazer', 'luxury'];
+          const matchCount = styleTags.filter(t => matches.includes(t)).length;
+          if (matchCount > 0) score += 20 + Math.min(15, matchCount * 5);
+          if (catLower === 'traditional' || catLower === 'formal') score += 10;
+        } else if (factors.styleVibe === 'artistic') {
+          // Artistic vibe looks for tie-dye, floral, creative, colorful, streetwear, oversized, boho
+          const matches = ['artistic', 'floral', 'tie-dye', 'pattern', 'oversized', 'streetwear', 'colorful', 'boho'];
+          const matchCount = styleTags.filter(t => matches.includes(t)).length;
+          if (matchCount > 0) score += 20 + Math.min(15, matchCount * 5);
+          if (catLower === 'streetwear' || catLower === 'vacation') score += 10;
+        } else if (factors.styleVibe === 'casual') {
+          // Casual vibe looks for casual, denim, cotton, relaxed, staples, minimal
+          const matches = ['casual', 'denim', 'cotton', 'relaxed', 'staples', 'minimalist', 'utility', 'polo'];
+          const matchCount = styleTags.filter(t => matches.includes(t)).length;
+          if (matchCount > 0) score += 20 + Math.min(15, matchCount * 5);
+          if (catLower === 'casual' || catLower === 'sporty') score += 10;
+        }
       }
 
       return { outfit, score };
