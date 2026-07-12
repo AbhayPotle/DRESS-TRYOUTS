@@ -14,7 +14,7 @@ export interface Garment {
   renderConfig: {
     baseColor: string;
     secondaryColor?: string;
-    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk';
+    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk' | 'brocade';
     opacity?: number;
     logoText?: string;
     patternScale?: number;
@@ -393,7 +393,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 5.0,
     styleTags: ['Silk', 'Traditional', 'Banarasi', 'Wedding'],
     description: 'Luxury gold-woven Banarasi silk saree with ornate floral border borders.',
-    renderConfig: { baseColor: '#800020', secondaryColor: '#FFD700', texture: 'plain' }
+    renderConfig: { baseColor: '#800020', secondaryColor: '#FFD700', texture: 'brocade' }
   },
   {
     id: 'w_full_lehenga_choli',
@@ -407,7 +407,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.9,
     styleTags: ['Traditional', 'Lehenga', 'Embroidery', 'Festive'],
     description: 'Stunning three-piece lehenga choli set with dense mirror and floral thread work.',
-    renderConfig: { baseColor: '#FF1493', secondaryColor: '#FFE4E1', texture: 'plain' }
+    renderConfig: { baseColor: '#FF1493', secondaryColor: '#FFE4E1', texture: 'brocade' }
   },
 
   // --- ACCESSORIES ---
