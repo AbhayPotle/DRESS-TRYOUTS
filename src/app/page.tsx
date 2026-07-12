@@ -11,15 +11,18 @@ export default function Home() {
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [measurements, setMeasurements] = useState<ScanMeasurements | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [styleVibe, setStyleVibe] = useState<'elegant' | 'artistic' | 'casual'>('casual');
 
   const handleOnboardingComplete = (data: {
     gender: 'male' | 'female';
     measurements: ScanMeasurements;
     stream: MediaStream | null;
+    styleVibe: 'elegant' | 'artistic' | 'casual';
   }) => {
     setGender(data.gender);
     setMeasurements(data.measurements);
     setCameraStream(data.stream);
+    setStyleVibe(data.styleVibe);
     setAppState('mirror');
   };
 
@@ -130,6 +133,7 @@ export default function Home() {
           gender={gender}
           initialMeasurements={measurements}
           initialStream={cameraStream}
+          styleVibe={styleVibe}
           onExit={handleExitMirror}
         />
       )}
