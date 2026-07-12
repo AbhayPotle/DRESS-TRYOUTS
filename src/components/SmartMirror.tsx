@@ -29,6 +29,7 @@ interface SmartMirrorProps {
   gender: 'male' | 'female';
   initialMeasurements: ScanMeasurements;
   initialStream: MediaStream | null;
+  styleVibe: 'elegant' | 'artistic' | 'casual';
   onExit: () => void;
 }
 
@@ -36,6 +37,7 @@ export default function SmartMirror({
   gender,
   initialMeasurements,
   initialStream,
+  styleVibe,
   onExit
 }: SmartMirrorProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -76,7 +78,8 @@ export default function SmartMirror({
     measurements: initialMeasurements,
     occasion: 'Casual',
     weather: 'sunny',
-    season: 'Summer'
+    season: 'Summer',
+    styleVibe
   });
   const [aiRecommendations, setAiRecommendations] = useState<Outfit[]>([]);
 
@@ -191,8 +194,8 @@ export default function SmartMirror({
 
     loadMediaPipe();
 
-    // Recalculate AI Recommendations
-    recalculateRecommendations();
+    // Recommendations will recalculate reactively via useEffect on factors change
+
 
     return () => {
       if (fashionShowTimerRef.current) clearInterval(fashionShowTimerRef.current);
@@ -208,6 +211,10 @@ export default function SmartMirror({
     const recs = getAIRecommendations(genderOutfits, factors);
     setAiRecommendations(recs);
   };
+
+  useEffect(() => {
+    recalculateRecommendations();
+  }, [factors]);
 
   // Setup MediaPipe Tracker
   const setupMediaPipeTracker = () => {
@@ -832,7 +839,6 @@ export default function SmartMirror({
                     key={oc}
                     onClick={() => {
                       setFactors(prev => ({ ...prev, occasion: oc }));
-                      recalculateRecommendations();
                     }}
                     className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                       factors.occasion === oc 
