@@ -192,11 +192,13 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         const lK = results.poseLandmarks[25]; // L knee
         const lA = results.poseLandmarks[27]; // L ankle
 
-        // Lenient shoulder checks (allows scanning even if sitting very close and shoulders are near bottom edge)
-        const isLSVisible = lS && (lS.visibility > 0.12 || lS.y > 0.8);
-        const isRSVisible = rS && (rS.visibility > 0.12 || rS.y > 0.8);
+        // Require shoulders and face (nose) to be detected with solid visibility confidence (filters out empty frames)
+        const isLSVisible = lS && lS.visibility > 0.48;
+        const isRSVisible = rS && rS.visibility > 0.48;
+        const nose = results.poseLandmarks[0];
+        const isFaceVisible = nose && nose.visibility > 0.48;
 
-        if (isLSVisible && isRSVisible) {
+        if (isLSVisible && isRSVisible && isFaceVisible) {
           isCalibrationFrameValidRef.current = true;
           const buffer = measurementsBufferRef.current;
           
