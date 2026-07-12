@@ -751,9 +751,21 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const scaledLH = { x: hpCenter + (lH.x - hpCenter) * hScale, y: lH.y };
   const scaledRH = { x: hpCenter + (rH.x - hpCenter) * hScale, y: rH.y };
 
+  const tags = item.styleTags || [];
+  const nameLower = item.name.toLowerCase();
+  const subcatLower = item.subcategory.toLowerCase();
+
+  const isMini = tags.includes('Mini') || tags.includes('Cocktail') || nameLower.includes('mini') || subcatLower.includes('mini');
+  const isBodycon = tags.includes('Bodycon') || nameLower.includes('bodycon') || subcatLower.includes('bodycon');
+  const isVNeck = tags.includes('V-Neck') || nameLower.includes('v-neck') || nameLower.includes('wrap') || nameLower.includes('plunging');
+  const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder');
+
   const neckYOffset = shWidth * 0.11; // Shift up to align precisely with neck base/collarbone
-  const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset };
-  const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset };
+  
+  // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
+  const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
+  const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset + offShoulderOffset };
+  const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset + offShoulderOffset };
   const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
 
   const shoulderMidX = (raisedLS.x + raisedRS.x) / 2;
@@ -778,17 +790,39 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.lineTo(raisedRS.x, raisedRS.y);
   ctx.quadraticCurveTo(raisedRS.x + 10, scaledRH.y * 0.7, scaledRH.x + 6, scaledRH.y);
 
-  const bottomY = lA.vis > 0.5 ? lA.y : lK.y + shWidth * 1.2;
-  const leftFlareX = scaledLH.x - (isLehenga ? shWidth * 0.45 : shWidth * 0.2);
-  const rightFlareX = scaledRH.x + (isLehenga ? shWidth * 0.45 : shWidth * 0.2);
+  // Set dress length based on mini vs maxi cuts
+  let bottomY = lA.vis > 0.5 ? lA.y : lK.y + shWidth * 1.2;
+  if (isMini) {
+    bottomY = lK.y + shWidth * 0.15; // end just below knee for cocktail length
+  }
+
+  // Adjust flared skirts vs pencil bodycon skirts
+  let flareAmount = shWidth * 0.2; // standard A-line
+  if (isLehenga) {
+    flareAmount = shWidth * 0.48; // traditional lehenga wide flare
+  } else if (isBodycon) {
+    flareAmount = shWidth * 0.03; // sleek pencil bodycon fit
+  } else if (tags.includes('Maxi') || subcatLower.includes('maxi')) {
+    flareAmount = shWidth * 0.35; // maxi flared skirt
+  }
+
+  const leftFlareX = scaledLH.x - flareAmount;
+  const rightFlareX = scaledRH.x + flareAmount;
 
   ctx.quadraticCurveTo(rightFlareX + 12, (scaledRH.y + bottomY) / 2, rightFlareX, bottomY);
   ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, rightFlareX, bottomY);
   ctx.quadraticCurveTo(leftFlareX - 12, (scaledLH.y + bottomY) / 2, scaledLH.x - 6, scaledLH.y);
   ctx.quadraticCurveTo(raisedLS.x - 10, scaledLH.y * 0.7, raisedLS.x, raisedLS.y);
   ctx.lineTo(neckBaseL.x, neckBaseL.y);
+  
   // Curve defining the front dip of the neckband
-  ctx.quadraticCurveTo(shoulderMidX, raisedMidY + shWidth * 0.04, neckBaseR.x, neckBaseR.y);
+  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.04);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
   ctx.closePath();
 
   // Apply realistic fabric texture pattern + drop shadow to ground the garment
@@ -812,12 +846,22 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(neckBaseL.x, neckBaseL.y);
-  ctx.quadraticCurveTo(shoulderMidX, raisedMidY + shWidth * 0.04, neckBaseR.x, neckBaseR.y);
+  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.04);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
   ctx.stroke();
   ctx.restore();
 
   // Stitching Details
-  drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.04 + 2);
+  if (isVNeck) {
+    drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.15 + 2);
+  } else {
+    drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.04 + 2);
+  }
   drawStitchingLine(ctx, leftFlareX, bottomY - 4, rightFlareX, bottomY - 4, (leftFlareX + rightFlareX) / 2, bottomY + 18);
 
   if (isLehenga && config.secondaryColor) {
