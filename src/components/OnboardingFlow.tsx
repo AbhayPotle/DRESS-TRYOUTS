@@ -9,6 +9,7 @@ interface OnboardingFlowProps {
     gender: 'male' | 'female';
     measurements: ScanMeasurements;
     stream: MediaStream | null;
+    styleVibe: 'elegant' | 'artistic' | 'casual';
   }) => void;
 }
 
@@ -23,8 +24,9 @@ function calculateSittingScaleFactor(avgEyePx: number): number {
 }
 
 export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
-  const [step, setStep] = useState<'gender' | 'camera' | 'scan' | 'result'>('gender');
+  const [step, setStep] = useState<'gender' | 'vibe' | 'camera' | 'scan' | 'result'>('gender');
   const [gender, setGender] = useState<'male' | 'female'>('male');
+  const [styleVibe, setStyleVibe] = useState<'elegant' | 'artistic' | 'casual'>('casual');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanStatus, setScanStatus] = useState('Initializing camera stream...');
@@ -106,7 +108,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const handleGenderSelect = (selectedGender: 'male' | 'female') => {
     setGender(selectedGender);
-    setStep('camera');
+    setStep('vibe');
   };
 
   const requestCamera = async () => {
@@ -455,7 +457,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       onComplete({
         gender,
         measurements: computedMeasurements,
-        stream
+        stream,
+        styleVibe
       });
     }
   };
@@ -491,6 +494,65 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </div>
                 <span className="text-xl font-bold capitalize tracking-wide">{p}</span>
                 <span className="text-xs text-neutral-500 mt-2">Select Profile</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Style Vibe Selection Step */}
+      {step === 'vibe' && (
+        <div className="w-full max-w-4xl text-center space-y-8 animate-fade-in">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-yellow-500 text-sm">
+              <Sparkles className="w-4 h-4" />
+              <span>AI Fashion Stylist</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-neutral-300 to-neutral-500">
+              Select Your Style Vibe
+            </h1>
+            <p className="text-neutral-400 text-md max-w-xl mx-auto">
+              Our AI Stylist will curate designer clothing recommendations based on your looks and style personality.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 max-w-4xl mx-auto w-full px-4">
+            {[
+              {
+                id: 'elegant' as const,
+                title: 'Classic & Elegant',
+                desc: 'Tailored blazers, luxury silks, evening gowns, and clean cuts.',
+                emoji: '👔'
+              },
+              {
+                id: 'artistic' as const,
+                title: 'Streetwear & Artistic',
+                desc: 'Bold tie-dyes, oversized cuts, colorful prints, and creative designs.',
+                emoji: '🎨'
+              },
+              {
+                id: 'casual' as const,
+                title: 'Casual & Boho Chic',
+                desc: 'Classic denims, summer boho dresses, relaxed polos, and everyday staples.',
+                emoji: '👟'
+              }
+            ].map(v => (
+              <button
+                key={v.id}
+                onClick={() => {
+                  setStyleVibe(v.id);
+                  setStep('camera');
+                }}
+                className="group relative flex flex-col items-center p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-yellow-500/50 hover:bg-white/10 transition-all duration-500 overflow-hidden cursor-pointer text-center w-full"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-500">{v.emoji}</div>
+                <h3 className="text-lg font-bold tracking-wide group-hover:text-yellow-500 transition-colors">{v.title}</h3>
+                <p className="text-xs text-neutral-400 mt-3 leading-relaxed">{v.desc}</p>
+                <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-neutral-500 group-hover:text-white transition-colors">
+                  <span>Select Vibe</span>
+                  <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                </div>
               </button>
             ))}
           </div>
