@@ -551,6 +551,36 @@ function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any
   ctx.restore();
 }
 
+function drawSkirtShading(ctx: CanvasRenderingContext2D, lH: any, rH: any, bottomY: number, isLehenga: boolean) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-atop'; // Clean clipping to the skirt borders!
+
+  const hpCenter = (lH.x + rH.x) / 2;
+  const hpWidth = Math.abs(rH.x - lH.x);
+  
+  // 1. Specular highlight down the center crest of the skirt (3D cylindrical volume)
+  const gradHighlight = ctx.createLinearGradient(lH.x - hpWidth * 0.5, lH.y, rH.x + hpWidth * 0.5, lH.y);
+  gradHighlight.addColorStop(0, 'rgba(0, 0, 0, 0.12)'); // left edge shadow
+  gradHighlight.addColorStop(0.35, 'rgba(0, 0, 0, 0)');
+  gradHighlight.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)'); // center bulge highlight
+  gradHighlight.addColorStop(0.65, 'rgba(0, 0, 0, 0)');
+  gradHighlight.addColorStop(1, 'rgba(0, 0, 0, 0.12)'); // right edge shadow
+  
+  ctx.fillStyle = gradHighlight;
+  ctx.fillRect(lH.x - hpWidth * 1.5, lH.y - 10, hpWidth * 4.0, bottomY - lH.y + 40);
+
+  // 2. Hem shadow (soft darkening at the bottom hem representing contact shadows near floor)
+  const gradHem = ctx.createLinearGradient(hpCenter, lH.y, hpCenter, bottomY);
+  gradHem.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  gradHem.addColorStop(0.85, 'rgba(0, 0, 0, 0)');
+  gradHem.addColorStop(1, 'rgba(0, 0, 0, 0.25)'); // soft dark bottom hem shadow
+  
+  ctx.fillStyle = gradHem;
+  ctx.fillRect(lH.x - hpWidth * 1.5, lH.y - 10, hpWidth * 4.0, bottomY - lH.y + 40);
+
+  ctx.restore();
+}
+
 function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: ScanMeasurements) {
   let lH = p[23];
   let rH = p[24];
@@ -778,6 +808,7 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
 
   // 3D Shading
   drawTopShading(ctx, raisedLS, raisedRS, scaledLH, scaledRH);
+  drawSkirtShading(ctx, scaledLH, scaledRH, bottomY, isLehenga);
   drawDressCreases(ctx, raisedLS, raisedRS, scaledLH, scaledRH, bottomY, isLehenga);
 }
 
