@@ -95,6 +95,18 @@ function getFabricFill(
     pCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
     pCtx.fillRect(3, 3, 1, 1);
     pCtx.fillRect(11, 11, 1, 1);
+  } else if (textureType === 'brocade') {
+    // Ornate gold brocade zari weave pattern
+    pCtx.strokeStyle = 'rgba(212, 175, 55, 0.32)'; // gold zari color
+    pCtx.lineWidth = 1.0;
+    pCtx.beginPath();
+    pCtx.moveTo(0, 0); pCtx.lineTo(16, 16);
+    pCtx.moveTo(16, 0); pCtx.lineTo(0, 16);
+    pCtx.stroke();
+    
+    // Add tiny central diamond motifs (4px)
+    pCtx.fillStyle = 'rgba(212, 175, 55, 0.48)';
+    pCtx.fillRect(7, 7, 2, 2);
   } else {
     // Tactile Plain Cotton Weave (micro threads)
     pCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
