@@ -372,10 +372,20 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const scaledLH = { x: hpCenter + (lH.x - hpCenter) * wScale, y: lH.y };
   const scaledRH = { x: hpCenter + (rH.x - hpCenter) * wScale, y: rH.y };
 
+  const tags = item.styleTags || [];
+  const nameLower = item.name.toLowerCase();
+  const subcatLower = item.subcategory.toLowerCase();
+
+  const isVNeck = tags.includes('V-Neck') || nameLower.includes('v-neck') || nameLower.includes('polo') || nameLower.includes('henley') || nameLower.includes('mandarin') || subcatLower.includes('polo');
+  const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder') || subcatLower.includes('off-shoulder');
+
   const shWidth = distance(lS, rS);
   const neckYOffset = shWidth * 0.11; // Shift up to align precisely with neck base/collarbone
-  const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset };
-  const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset };
+  
+  // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
+  const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
+  const raisedLS = { x: scaledLS.x, y: scaledLS.y - neckYOffset + offShoulderOffset };
+  const raisedRS = { x: scaledRS.x, y: scaledRS.y - neckYOffset + offShoulderOffset };
   const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
 
   let leftSleeveEnd = { ...raisedLS };
@@ -438,8 +448,14 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.lineTo(leftSleeveEnd.x, leftSleeveEnd.y);
   ctx.lineTo(raisedLS.x, raisedLS.y);
   ctx.lineTo(neckBaseL.x, neckBaseL.y);
-  // Curve defining the front dip of the neckband
-  ctx.quadraticCurveTo(shoulderMidX, raisedMidY + shWidth * 0.05, neckBaseR.x, neckBaseR.y);
+  // Curve or straight lines defining the front dip of the neckband
+  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.05);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
   ctx.closePath();
 
   // Apply realistic fabric texture pattern + drop shadow to ground the garment
@@ -463,12 +479,22 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(neckBaseL.x, neckBaseL.y);
-  ctx.quadraticCurveTo(shoulderMidX, raisedMidY + shWidth * 0.05, neckBaseR.x, neckBaseR.y);
+  const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.05);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
   ctx.stroke();
   ctx.restore();
 
   // Stitching Details (collars, sleeves, hems)
-  drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.05 + 2);
+  if (isVNeck) {
+    drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.15 + 2);
+  } else {
+    drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.05 + 2);
+  }
   drawStitchingLine(ctx, leftSleeveEnd.x, leftSleeveEnd.y, leftUnderarm.x + 12, leftUnderarm.y + 12);
   drawStitchingLine(ctx, rightSleeveEnd.x, rightSleeveEnd.y, rUnder.x - 12, rUnder.y + 12);
   drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 6, scaledRH.x - 16, scaledRH.y + 6, hipMidX, hipMidY + 12);
