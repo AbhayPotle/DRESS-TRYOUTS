@@ -188,36 +188,40 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         const lS = results.poseLandmarks[11]; // L shoulder
         const rS = results.poseLandmarks[12]; // R shoulder
         const lE = results.poseLandmarks[13]; // L elbow
-        const lW = results.poseLandmarks[15]; // L wrist
         const lH = results.poseLandmarks[23]; // L hip
         const rH = results.poseLandmarks[24]; // R hip
         const lK = results.poseLandmarks[25]; // L knee
         const lA = results.poseLandmarks[27]; // L ankle
 
-        // Require shoulders and face (nose) to be detected with solid visibility confidence (filters out empty frames)
+        // Require face (nose) to be detected with solid visibility confidence (allows scanning when shoulders are cut off near the camera)
         const isLSVisible = lS && lS.visibility > 0.48;
         const isRSVisible = rS && rS.visibility > 0.48;
         const nose = results.poseLandmarks[0];
         const isFaceVisible = nose && nose.visibility > 0.48;
 
-        if (isLSVisible && isRSVisible && isFaceVisible) {
+        if (isFaceVisible) {
           isCalibrationFrameValidRef.current = true;
           const buffer = measurementsBufferRef.current;
           
           const isLHVisible = lH && lH.visibility > 0.22;
           const isRHVisible = rH && rH.visibility > 0.22;
-          const isHipsVisible = isLHVisible && isRHVisible;
-
-          const shWidth = Math.abs(lS.x - rS.x);
-          let torsoH, hipW, chestW, waistW;
+          const isHipsVisible = isLHVisible && isRHVisible && isLSVisible && isRSVisible; // Needs shoulders and hips visible for standing mode
 
           // Capture eye-to-eye distance in pixels (average human eye distance is ~6.3 cm)
           const lEye = results.poseLandmarks[2];
           const rEye = results.poseLandmarks[5];
+          let eyeDistPx = 0.05;
           if (lEye && rEye) {
-            const eyeDistPx = Math.sqrt(Math.pow(lEye.x - rEye.x, 2) + Math.pow(lEye.y - rEye.y, 2));
+            eyeDistPx = Math.sqrt(Math.pow(lEye.x - rEye.x, 2) + Math.pow(lEye.y - rEye.y, 2));
             buffer.eyeDistances.push(eyeDistPx);
           }
+
+          // Estimate shoulder width: if shoulders are in frame, use them; if cut off (near sitting mode), estimate from eyes!
+          const shWidth = (isLSVisible && isRSVisible) 
+            ? Math.abs(lS.x - rS.x) 
+            : (eyeDistPx * 6.2);
+
+          let torsoH, hipW, chestW, waistW;
 
           if (isHipsVisible) {
             // Full Body Scan Mode (Standing)
@@ -227,7 +231,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             waistW = hipW * 0.85;
             currentScanModeRef.current = 'standing';
           } else {
-            // Portrait Scan Mode (Sitting) - estimate body proportions from shoulders
+            // Portrait Scan Mode (Sitting) - estimate body proportions from shoulders/eyes
             torsoH = shWidth * 1.35; // standard proportional ratio
             hipW = shWidth * 0.92;
             chestW = shWidth * 0.92;
