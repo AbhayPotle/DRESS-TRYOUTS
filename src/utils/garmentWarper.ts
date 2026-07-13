@@ -460,9 +460,10 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   // Apply realistic fabric texture pattern + drop shadow to ground the garment
   ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetY = 8;
+  const isGlow = tags.includes('Glow') || tags.includes('Glitter') || tags.includes('Sequin');
+  ctx.shadowColor = isGlow ? (config.secondaryColor || 'rgba(212, 175, 55, 0.88)') : 'rgba(0, 0, 0, 0.22)';
+  ctx.shadowBlur = isGlow ? 24 : 16;
+  ctx.shadowOffsetY = isGlow ? 0 : 8;
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, raisedLS.y, distance(raisedLS, raisedRS));
   ctx.fill();
   ctx.restore();
@@ -505,6 +506,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
     drawPlaid(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.baseColor, config.secondaryColor || '#000000');
   } else if (config.texture === 'artistic') {
     drawArtisticPatterns(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#EC4899');
+  } else if (config.texture === 'sequins') {
+    drawSequinSparkles(ctx, raisedLS, raisedRS, scaledLH, scaledRH, scaledLH.y + 6, config.baseColor);
   }
 
   // Realistic Specular Shading overlay
@@ -828,9 +831,10 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
 
   // Apply realistic fabric texture pattern + drop shadow to ground the garment
   ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetY = 8;
+  const isGlow = tags.includes('Glow') || tags.includes('Glitter') || tags.includes('Sequin');
+  ctx.shadowColor = isGlow ? (config.secondaryColor || 'rgba(212, 175, 55, 0.88)') : 'rgba(0, 0, 0, 0.22)';
+  ctx.shadowBlur = isGlow ? 24 : 16;
+  ctx.shadowOffsetY = isGlow ? 0 : 8;
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, raisedLS.y, shWidth);
   ctx.fill();
   ctx.restore();
@@ -878,6 +882,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
 
   if (config.texture === 'artistic') {
     drawArtisticPatterns(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#EC4899');
+  } else if (config.texture === 'sequins') {
+    drawSequinSparkles(ctx, raisedLS, raisedRS, scaledLH, scaledRH, bottomY, config.baseColor);
   }
 
   // 3D Shading
@@ -1252,6 +1258,51 @@ function drawArtisticPatterns(ctx: CanvasRenderingContext2D, lS: any, rS: any, l
     ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
     ctx.stroke();
   });
+
+  ctx.restore();
+}
+
+function drawSequinSparkles(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any, rH: any, bottomY: number, baseColor: string) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-atop'; // restrict within garment boundaries!
+
+  const startX = Math.min(lS.x, lH.x) - 40;
+  const endX = Math.max(rS.x, rH.x) + 40;
+  const startY = Math.min(lS.y, rS.y);
+  const endY = bottomY;
+  const density = 14; // spacing between sequins
+
+  for (let y = startY; y < endY; y += density) {
+    // Alternate horizontal offsets slightly for a packing layout
+    const isOdd = Math.floor(y / density) % 2 === 1;
+    const offsetX = isOdd ? density / 2 : 0;
+
+    for (let x = startX + offsetX; x < endX; x += density) {
+      // Add a subtle wave offset to simulate natural folding fabric curves
+      const waveX = Math.sin(y * 0.04 + x * 0.015) * 5;
+      const px = x + waveX;
+      const py = y;
+
+      // Shimmer reflection oscillations based on current timestamp and coordinates
+      const timeVal = Date.now() * 0.0035;
+      const shineVal = Math.sin(px * 0.08 + py * 0.06 + timeVal);
+      const opacity = 0.5 + shineVal * 0.5;
+
+      // Sequin scale body
+      ctx.fillStyle = adjustColorBrightness(baseColor, shineVal * 22);
+      ctx.beginPath();
+      ctx.arc(px, py, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Reflective white metallic glint highlight
+      if (shineVal > 0.45) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.95})`;
+        ctx.beginPath();
+        ctx.arc(px - 1.5, py - 1.5, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
 
   ctx.restore();
 }
