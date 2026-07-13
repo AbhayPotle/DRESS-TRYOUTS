@@ -323,12 +323,28 @@ function eraseHandsForOcclusion(ctx: CanvasRenderingContext2D, points: any[]) {
 }
 
 function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: ScanMeasurements) {
-  const lS = p[11];
-  const rS = p[12];
+  let lS = { ...p[11] };
+  let rS = { ...p[12] };
   const lE = p[13];
   const rE = p[14];
 
-  if (!lS || !rS || lS.vis < 0.15 || rS.vis < 0.15) return;
+  if (!p[11] || !p[12] || p[11].vis < 0.15 || p[12].vis < 0.15) return;
+
+  // Real-time shoulder width auto-correction using face pupil reference for close-up sitting scans
+  const detectedShWidth = distance(lS, rS);
+  const eyeDist = (p[2] && p[5] && p[2].vis > 0.4 && p[5].vis > 0.4) ? distance(p[2], p[5]) : 0;
+  if (eyeDist > 0) {
+    const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
+    if (detectedShWidth < expectedShWidth * 0.9) {
+      const shCenter = (lS.x + rS.x) / 2;
+      const shCenterY = (lS.y + rS.y) / 2;
+      const scale = expectedShWidth / detectedShWidth;
+      lS.x = shCenter + (lS.x - shCenter) * scale;
+      lS.y = shCenterY + (lS.y - shCenterY) * scale;
+      rS.x = shCenter + (rS.x - shCenter) * scale;
+      rS.y = shCenterY + (rS.y - shCenterY) * scale;
+    }
+  }
 
   const config = item.renderConfig;
   
@@ -380,7 +396,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder') || subcatLower.includes('off-shoulder');
 
   const shWidth = distance(lS, rS);
-  const neckYOffset = shWidth * 0.11; // Shift up to align precisely with neck base/collarbone
+  const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
+  const neckYOffset = shWidth * (isSitting ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
@@ -704,10 +721,10 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
 }
 
 function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: ScanMeasurements) {
-  const lS = p[11];
-  const rS = p[12];
+  let lS = { ...p[11] };
+  let rS = { ...p[12] };
 
-  if (!lS || !rS || lS.vis < 0.15 || rS.vis < 0.15) return;
+  if (!p[11] || !p[12] || p[11].vis < 0.15 || p[12].vis < 0.15) return;
 
   const config = item.renderConfig;
   const isSaree = item.subcategory.includes('Sarees');
@@ -716,6 +733,22 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   if (isSaree) {
     drawSaree(ctx, p, config);
     return;
+  }
+
+  // Real-time shoulder width auto-correction using face pupil reference for close-up sitting scans
+  const detectedShWidth = distance(lS, rS);
+  const eyeDist = (p[2] && p[5] && p[2].vis > 0.4 && p[5].vis > 0.4) ? distance(p[2], p[5]) : 0;
+  if (eyeDist > 0) {
+    const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
+    if (detectedShWidth < expectedShWidth * 0.9) {
+      const shCenter = (lS.x + rS.x) / 2;
+      const shCenterY = (lS.y + rS.y) / 2;
+      const scale = expectedShWidth / detectedShWidth;
+      lS.x = shCenter + (lS.x - shCenter) * scale;
+      lS.y = shCenterY + (lS.y - shCenterY) * scale;
+      rS.x = shCenter + (rS.x - shCenter) * scale;
+      rS.y = shCenterY + (rS.y - shCenterY) * scale;
+    }
   }
 
   // Calculate dynamic point-by-point fitting ratios based on scanned measurements
@@ -764,7 +797,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const isVNeck = tags.includes('V-Neck') || nameLower.includes('v-neck') || nameLower.includes('wrap') || nameLower.includes('plunging');
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder');
 
-  const neckYOffset = shWidth * 0.11; // Shift up to align precisely with neck base/collarbone
+  const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
+  const neckYOffset = shWidth * (isSitting ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
