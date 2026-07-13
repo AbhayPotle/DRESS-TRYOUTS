@@ -693,13 +693,26 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </div>
           </div>
 
-          <button
-            onClick={handleFinish}
-            className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-yellow-500/20"
-          >
-            <span>Open Virtual Smart Mirror</span>
-            <ChevronRight className="w-5 h-5" />
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => {
+                setComputedMeasurements(null);
+                setScanProgress(0);
+                setScanStatus('Initializing camera stream...');
+                setStep('camera');
+              }}
+              className="flex-1 py-4 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 font-semibold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Rescan Body</span>
+            </button>
+            <button
+              onClick={handleFinish}
+              className="flex-[2] py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-yellow-500/20"
+            >
+              <span>Open Smart Mirror</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       )}
     </div>
