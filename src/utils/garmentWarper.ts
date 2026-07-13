@@ -340,8 +340,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const shoulderScale = m.shoulderWidthCm ? (m.shoulderWidthCm / baseShoulder) : 1.0;
   const waistScale = m.waistCm ? (m.waistCm / baseWaist) : 1.0;
 
-  const shScale = Math.max(0.95, Math.min(1.4, shoulderScale));
-  const wScale = Math.max(0.95, Math.min(1.4, waistScale));
+  const shScale = Math.max(0.74, Math.min(1.65, shoulderScale));
+  const wScale = Math.max(0.74, Math.min(1.65, waistScale));
 
   let lH = p[23];
   let rH = p[24];
@@ -624,7 +624,7 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
   const isFemale = item.gender === 'woman' || item.gender === 'girl' || item.subcategory.includes('Skirts');
   const baseHip = isFemale ? 94 : 96;
   const hipScale = m.hipCm ? (m.hipCm / baseHip) : 1.0;
-  const hScale = Math.max(0.95, Math.min(1.4, hipScale));
+  const hScale = Math.max(0.74, Math.min(1.65, hipScale));
 
   const hipWidth = distance(lH, rH);
   
@@ -726,8 +726,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const shoulderScale = m.shoulderWidthCm ? (m.shoulderWidthCm / baseShoulder) : 1.0;
   const hipScale = m.hipCm ? (m.hipCm / baseHip) : 1.0;
 
-  const shScale = Math.max(0.95, Math.min(1.4, shoulderScale));
-  const hScale = Math.max(0.95, Math.min(1.4, hipScale));
+  const shScale = Math.max(0.74, Math.min(1.65, shoulderScale));
+  const hScale = Math.max(0.74, Math.min(1.65, hipScale));
 
   const shWidth = distance(lS, rS);
 
