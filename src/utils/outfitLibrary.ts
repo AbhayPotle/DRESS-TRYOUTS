@@ -14,7 +14,7 @@ export interface Garment {
   renderConfig: {
     baseColor: string;
     secondaryColor?: string;
-    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk' | 'brocade' | 'artistic';
+    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk' | 'brocade' | 'artistic' | 'sequins';
     opacity?: number;
     logoText?: string;
     patternScale?: number;
@@ -510,6 +510,20 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Artistic', 'Boho', 'Maxi', 'Paint Splatter', 'Colorful'],
     description: 'A beautiful flowing maxi dress printed with wavy abstract designer brushstrokes.',
     renderConfig: { baseColor: '#FFFFFF', secondaryColor: '#EC4899', texture: 'artistic' }
+  },
+  {
+    id: 'w_full_sequin_gold',
+    name: 'Glitzy Gold Sequin Dress',
+    type: 'full',
+    category: 'Party',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#D4AF37', '#FFDF00', '#B8860B'],
+    price: 290,
+    rating: 5.0,
+    styleTags: ['Sequin', 'Maxi', 'Runway', 'Glow', 'Glitter', 'Luxury'],
+    description: 'An absolute show-stopper maxi gown drenched in hundreds of hand-stitched gold sequins that shimmer under lights.',
+    renderConfig: { baseColor: '#D4AF37', secondaryColor: '#FFFFFF', texture: 'sequins' }
   }
 ];
 
