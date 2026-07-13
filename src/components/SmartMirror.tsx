@@ -71,6 +71,9 @@ export default function SmartMirror({
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
+  // UI Display state
+  const [isUiHidden, setIsUiHidden] = useState(false);
+
   // Recommendations State
   const [measurements, setMeasurements] = useState<ScanMeasurements>(initialMeasurements);
   const [factors, setFactors] = useState<RecommendationFactors>({
@@ -804,159 +807,159 @@ export default function SmartMirror({
             />
 
             {/* Upper HUD (Calibration status & Admin buttons) */}
-            <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-20">
-              <div className="flex gap-3">
-                <button
-                  onClick={onExit}
-                  className="px-4 py-2.5 rounded-full bg-black/60 border border-white/10 hover:bg-black/80 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-all cursor-pointer"
-                >
-                  Exit Mirror
-                </button>
-                <button
-                  onClick={() => setIsAdminOpen(true)}
-                  className="px-4 py-2.5 rounded-full bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-yellow-500/10"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>Admin Panel</span>
-                </button>
-                <button
-                  onClick={() => setShowScannerHUD(prev => !prev)}
-                  className={`px-4 py-2.5 rounded-full border text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg backdrop-blur-md ${
-                    showScannerHUD 
-                      ? 'bg-cyan-500 hover:bg-cyan-400 text-black border-cyan-400 shadow-cyan-500/20' 
-                      : 'bg-black/60 hover:bg-black/80 text-cyan-400 border-cyan-500/30'
-                  }`}
-                >
-                  <Scale className="w-3.5 h-3.5" />
-                  <span>{showScannerHUD ? "Scanner HUD: ON" : "Scanner HUD: OFF"}</span>
-                </button>
-              </div>
-
-              {/* Occasion weather selectors */}
-              <div className="flex gap-2 bg-black/60 backdrop-blur-md p-1 rounded-full border border-white/10">
-                {(['Casual', 'Business', 'Traditional', 'Party'] as const).map(oc => (
+            {!isUiHidden && (
+              <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-20">
+                <div className="flex gap-3">
                   <button
-                    key={oc}
-                    onClick={() => {
-                      setFactors(prev => ({ ...prev, occasion: oc }));
-                    }}
-                    className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                      factors.occasion === oc 
-                        ? 'bg-white text-black' 
-                        : 'text-neutral-400 hover:text-white'
+                    onClick={onExit}
+                    className="px-4 py-2.5 rounded-full bg-black/60 border border-white/10 hover:bg-black/80 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-all cursor-pointer"
+                  >
+                    Exit Mirror
+                  </button>
+                  <button
+                    onClick={() => setIsAdminOpen(true)}
+                    className="px-4 py-2.5 rounded-full bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-yellow-500/10"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                    <span>Admin Panel</span>
+                  </button>
+                  <button
+                    onClick={() => setShowScannerHUD(prev => !prev)}
+                    className={`px-4 py-2.5 rounded-full border text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg backdrop-blur-md ${
+                      showScannerHUD 
+                        ? 'bg-cyan-500 hover:bg-cyan-400 text-black border-cyan-400 shadow-cyan-500/20' 
+                        : 'bg-black/60 hover:bg-black/80 text-cyan-400 border-cyan-500/30'
                     }`}
                   >
-                    {oc}
+                    <Scale className="w-3.5 h-3.5" />
+                    <span>{showScannerHUD ? "Scanner HUD: ON" : "Scanner HUD: OFF"}</span>
                   </button>
-                ))}
+                </div>
+
+                {/* Occasion weather selectors */}
+                <div className="flex gap-2 bg-black/60 backdrop-blur-md p-1 rounded-full border border-white/10">
+                  {(['Casual', 'Business', 'Traditional', 'Party'] as const).map(oc => (
+                    <button
+                      key={oc}
+                      onClick={() => {
+                        setFactors(prev => ({ ...prev, occasion: oc }));
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                        factors.occasion === oc 
+                          ? 'bg-white text-black' 
+                          : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      {oc}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setIsUiHidden(true)}
+                    className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/40 hover:text-white flex items-center gap-1 ml-1"
+                  >
+                    <span>👁️ Hide HUD</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Guidelines Floating Card */}
-            <div className="absolute top-24 left-6 z-20 w-64 bg-black/60 border border-white/10 backdrop-blur-md rounded-2xl p-4 text-xs space-y-3">
-              <div className="flex items-center gap-1.5 text-yellow-500 font-bold uppercase tracking-wider text-[10px]">
-                <HelpCircle className="w-4 h-4" />
-                <span>Mirror Guidelines</span>
-              </div>
-              <p className="text-neutral-400 leading-normal">
-                Align your shoulders and face in the frame. Works whether you are sitting close or standing back!
-              </p>
-              <div className="space-y-1.5 pt-1.5 border-t border-white/5">
-                <span className="text-[9px] uppercase tracking-widest text-neutral-500 font-bold">Gesture Shortcuts:</span>
-                <div className="grid grid-cols-1 gap-1 font-mono text-[10px]">
-                  <div className="flex justify-between"><span className="text-neutral-300">👌 Pinch</span> <span className="text-yellow-500 font-bold">Next Look</span></div>
-                  <div className="flex justify-between"><span className="text-neutral-300">👌👌 Dbl Pinch</span> <span className="text-yellow-500 font-bold">Prev Look</span></div>
-                  <div className="flex justify-between"><span className="text-neutral-300">👋 Wave Right</span> <span className="text-yellow-500 font-bold">Random Fit</span></div>
-                  <div className="flex justify-between"><span className="text-neutral-300">👍 Thumbs Up</span> <span className="text-yellow-500 font-bold">Fav Look</span></div>
-                  <div className="flex justify-between"><span className="text-neutral-300">✌️ Peace Sign</span> <span className="text-yellow-500 font-bold">Snap Photo</span></div>
-                  <div className="flex justify-between"><span className="text-neutral-300">🤝 Wrists Close</span> <span className="text-yellow-500 font-bold">Show Mode</span></div>
+            {!isUiHidden && (
+              <div className="absolute top-24 left-6 z-20 w-64 bg-black/60 border border-white/10 backdrop-blur-md rounded-2xl p-4 text-xs space-y-3">
+                <div className="flex items-center gap-1.5 text-yellow-500 font-bold uppercase tracking-wider text-[10px]">
+                  <HelpCircle className="w-4 h-4" />
+                  <span>Mirror Guidelines</span>
+                </div>
+                <p className="text-neutral-400 leading-normal">
+                  Align your shoulders and face in the frame. Works whether you are sitting close or standing back!
+                </p>
+                <div className="space-y-1.5 pt-1.5 border-t border-white/5">
+                  <span className="text-[9px] uppercase tracking-widest text-neutral-500 font-bold">Gesture Shortcuts:</span>
+                  <div className="grid grid-cols-1 gap-1 font-mono text-[10px]">
+                    <div className="flex justify-between"><span className="text-neutral-300">👌 Pinch</span> <span className="text-yellow-500 font-bold">Next Look</span></div>
+                    <div className="flex justify-between"><span className="text-neutral-300">👌👌 Dbl Pinch</span> <span className="text-yellow-500 font-bold">Prev Look</span></div>
+                    <div className="flex justify-between"><span className="text-neutral-300">👋 Wave Right</span> <span className="text-yellow-500 font-bold">Random Fit</span></div>
+                    <div className="flex justify-between"><span className="text-neutral-300">👍 Thumbs Up</span> <span className="text-yellow-500 font-bold">Fav Look</span></div>
+                    <div className="flex justify-between"><span className="text-neutral-300">✌️ Peace Sign</span> <span className="text-yellow-500 font-bold">Snap Photo</span></div>
+                    <div className="flex justify-between"><span className="text-neutral-300">🤝 Wrists Close</span> <span className="text-yellow-500 font-bold">Show Mode</span></div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Bottom HUD (Control center & screenshot trigger) */}
-            <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end z-20">
-              {/* Captured Snap Gallery Drawer */}
-              <div className="flex flex-col gap-2">
-                <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest bg-black/60 px-2.5 py-1 rounded-full border border-white/10 w-fit">
-                  Captured Fits ({capturedSnaps.length})
-                </span>
-                <div className="flex gap-2 max-w-sm overflow-x-auto pb-1 scrollbar-thin">
-                  {capturedSnaps.map(snap => {
-                    const isInCompare = compareLooks.some(c => c.id === snap.id);
-                    return (
-                      <div
-                        key={snap.id}
-                        className="relative group w-14 h-18 rounded-lg overflow-hidden border border-white/20 hover:border-yellow-500 cursor-pointer transition-all flex-shrink-0"
-                        onClick={() => {
-                          // Toggle compare look
-                          if (isInCompare) {
-                            setCompareLooks(prev => prev.filter(c => c.id !== snap.id));
-                          } else if (compareLooks.length < 2) {
-                            setCompareLooks(prev => [...prev, snap]);
-                          }
-                        }}
-                      >
-                        <img src={snap.imageSrc} alt="" className="w-full h-full object-cover" />
-                        {isInCompare && (
-                          <div className="absolute inset-0 bg-yellow-500/30 flex items-center justify-center">
-                            <Scale className="w-4 h-4 text-white" />
-                          </div>
-                        )}
-                        
-                        {/* Hover delete */}
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            setCapturedSnaps(prev => prev.filter(c => c.id !== snap.id));
-                            setCompareLooks(prev => prev.filter(c => c.id !== snap.id));
+            {!isUiHidden && (
+              <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end z-20">
+                {/* Captured Snap Gallery Drawer */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest bg-black/60 px-2.5 py-1 rounded-full border border-white/10 w-fit">
+                    Captured Fits ({capturedSnaps.length})
+                  </span>
+                  <div className="flex gap-2 max-w-sm overflow-x-auto pb-1 scrollbar-thin">
+                    {capturedSnaps.map(snap => {
+                      const isInCompare = compareLooks.some(c => c.id === snap.id);
+                      return (
+                        <div
+                          key={snap.id}
+                          className="relative group w-14 h-18 rounded-lg overflow-hidden border border-white/20 hover:border-yellow-500 cursor-pointer transition-all flex-shrink-0"
+                          onClick={() => {
+                            // Toggle compare look
+                            if (isInCompare) {
+                              setCompareLooks(prev => prev.filter(c => c.id !== snap.id));
+                            } else if (compareLooks.length < 2) {
+                              setCompareLooks(prev => [...prev, snap]);
+                            }
                           }}
-                          className="absolute -top-1 -right-1 p-0.5 rounded-full bg-red-600 hover:bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <Trash className="w-2.5 h-2.5" />
-                        </button>
-                      </div>
-                    );
-                  })}
+                          <img src={snap.imageSrc} alt="" className="w-full h-full object-cover" />
+                          {isInCompare && (
+                            <div className="absolute inset-0 bg-yellow-500/30 flex items-center justify-center">
+                              <Scale className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Screenshot, fashion show, compare widgets */}
+                <div className="flex items-center gap-4">
+                  {compareLooks.length > 0 && (
+                    <button
+                      onClick={() => setIsCompareOpen(true)}
+                      className="px-5 py-3 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white border border-cyan-400 font-bold text-xs uppercase tracking-wider transition-transform hover:scale-105 flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/10"
+                    >
+                      <Scale className="w-4 h-4" />
+                      <span>Compare looks ({compareLooks.length}/2)</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleCaptureScreenshot}
+                    className="w-14 h-14 rounded-full bg-white hover:bg-neutral-200 text-black flex items-center justify-center transition-transform hover:scale-105 cursor-pointer shadow-xl shadow-white/5 border-4 border-black"
+                    title="Snap Look"
+                  >
+                    <Camera className="w-6 h-6" />
+                  </button>
+
+                  <button
+                    onClick={toggleFashionShow}
+                    className={`px-5 py-3 rounded-full font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border ${
+                      isFashionShowActive
+                        ? 'bg-green-600 border-green-500 text-white animate-pulse'
+                        : 'bg-black/60 border-white/10 hover:bg-black/80 text-neutral-300'
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4 text-yellow-500" />
+                    <span>{isFashionShowActive ? 'Fashion Show ON' : 'Fashion Show'}</span>
+                  </button>
                 </div>
               </div>
-
-              {/* Compare split Trigger */}
-              <div className="flex gap-3">
-                {compareLooks.length > 0 && (
-                  <button
-                    onClick={() => setIsCompareOpen(true)}
-                    className="px-5 py-3 rounded-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-yellow-500/20"
-                  >
-                    <Scale className="w-4 h-4" />
-                    <span>Compare looks ({compareLooks.length}/2)</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={handleCaptureScreenshot}
-                  className="w-14 h-14 rounded-full bg-white hover:bg-neutral-200 text-black flex items-center justify-center transition-transform hover:scale-105 cursor-pointer shadow-xl shadow-white/5 border-4 border-black"
-                  title="Snap Look"
-                >
-                  <Camera className="w-6 h-6" />
-                </button>
-
-                <button
-                  onClick={toggleFashionShow}
-                  className={`px-5 py-3 rounded-full font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer border ${
-                    isFashionShowActive
-                      ? 'bg-green-600 border-green-500 text-white animate-pulse'
-                      : 'bg-black/60 border-white/10 hover:bg-black/80 text-neutral-300'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-500" />
-                  <span>{isFashionShowActive ? 'Fashion Show ON' : 'Fashion Show'}</span>
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* Design Customization Bar */}
-            {activeOutfit && (
+            {activeOutfit && !isUiHidden && (
               <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-black/75 border border-white/10 backdrop-blur-lg px-6 py-3.5 rounded-3xl flex flex-col gap-2.5 items-center z-20 shadow-2xl animate-fade-in w-[90%] max-w-md">
                 <div className="flex items-center gap-1.5 text-[9px] text-cyan-400 font-bold uppercase tracking-widest">
                   <Sparkles className="w-3 h-3" />
@@ -1028,16 +1031,28 @@ export default function SmartMirror({
           </div>
 
           {/* Sidebar outfit custom selection catalog */}
-          <MirrorSidebar
-            outfits={genderOutfits}
-            activeOutfit={activeOutfit}
-            onSelectOutfit={handleSelectOutfit}
-            favorites={favorites}
-            onToggleFavorite={handleToggleFavorite}
-            recommendations={aiRecommendations}
-            factors={factors}
-            onRefreshRecommendations={recalculateRecommendations}
-          />
+          {!isUiHidden && (
+            <MirrorSidebar
+              outfits={genderOutfits}
+              activeOutfit={activeOutfit}
+              onSelectOutfit={handleSelectOutfit}
+              favorites={favorites}
+              onToggleFavorite={handleToggleFavorite}
+              recommendations={aiRecommendations}
+              factors={factors}
+              onRefreshRecommendations={recalculateRecommendations}
+            />
+          )}
+
+          {/* Floating Show Controls button when UI is hidden */}
+          {isUiHidden && (
+            <button
+              onClick={() => setIsUiHidden(false)}
+              className="absolute top-6 right-6 z-30 px-4.5 py-3 rounded-full bg-black/85 border border-white/20 hover:bg-white hover:text-black backdrop-blur-md text-xs font-bold uppercase tracking-wider text-white shadow-2xl hover:scale-105 transition-all flex items-center gap-2 cursor-pointer animate-fade-in"
+            >
+              <span>👁️ Show HUD controls</span>
+            </button>
+          )}
         </>
       )}
 

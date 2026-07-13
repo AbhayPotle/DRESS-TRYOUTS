@@ -815,7 +815,7 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const rightFlareX = scaledRH.x + flareAmount;
 
   ctx.quadraticCurveTo(rightFlareX + 12, (scaledRH.y + bottomY) / 2, rightFlareX, bottomY);
-  ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, rightFlareX, bottomY);
+  ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, leftFlareX, bottomY);
   ctx.quadraticCurveTo(leftFlareX - 12, (scaledLH.y + bottomY) / 2, scaledLH.x - 6, scaledLH.y);
   ctx.quadraticCurveTo(raisedLS.x - 10, scaledLH.y * 0.7, raisedLS.x, raisedLS.y);
   ctx.lineTo(neckBaseL.x, neckBaseL.y);
