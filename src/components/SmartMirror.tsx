@@ -884,6 +884,31 @@ export default function SmartMirror({
                     <div className="flex justify-between"><span className="text-neutral-300">🤝 Wrists Close</span> <span className="text-yellow-500 font-bold">Show Mode</span></div>
                   </div>
                 </div>
+
+                <div className="space-y-1.5 pt-1.5 border-t border-white/5">
+                  <span className="text-[9px] uppercase tracking-widest text-neutral-500 font-bold">Style Vibe:</span>
+                  <div className="flex gap-1">
+                    {[
+                      { id: 'elegant', label: 'Elegant' },
+                      { id: 'artistic', label: 'Artistic' },
+                      { id: 'casual', label: 'Casual' }
+                    ].map(v => (
+                      <button
+                        key={v.id}
+                        onClick={() => {
+                          setFactors(prev => ({ ...prev, styleVibe: v.id as any }));
+                        }}
+                        className={`flex-1 py-1 rounded text-[9px] font-bold transition-all cursor-pointer border ${
+                          factors.styleVibe === v.id
+                            ? 'bg-yellow-500 text-black border-yellow-400 font-black'
+                            : 'bg-white/5 text-neutral-300 border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
