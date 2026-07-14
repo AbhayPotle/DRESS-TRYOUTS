@@ -206,6 +206,14 @@ export default function SmartMirror({
         try { activeCameraRef.current.stop(); } catch (e) {}
         activeCameraRef.current = null;
       }
+      if (activePoseRef.current) {
+        try { activePoseRef.current.close(); } catch (e) {}
+        activePoseRef.current = null;
+      }
+      if (activeHandsRef.current) {
+        try { activeHandsRef.current.close(); } catch (e) {}
+        activeHandsRef.current = null;
+      }
     };
   }, []);
 
@@ -235,8 +243,14 @@ export default function SmartMirror({
       try { activeCameraRef.current.stop(); } catch (e) {}
       activeCameraRef.current = null;
     }
-    activePoseRef.current = null;
-    activeHandsRef.current = null;
+    if (activePoseRef.current) {
+      try { activePoseRef.current.close(); } catch (e) {}
+      activePoseRef.current = null;
+    }
+    if (activeHandsRef.current) {
+      try { activeHandsRef.current.close(); } catch (e) {}
+      activeHandsRef.current = null;
+    }
 
     const pose = new mpPose({
       locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
