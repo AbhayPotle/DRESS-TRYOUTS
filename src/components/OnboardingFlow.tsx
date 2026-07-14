@@ -663,64 +663,124 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
       {/* Calibration Scan Result Step */}
       {step === 'result' && computedMeasurements && (
-        <div className="w-full max-w-xl bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl animate-scale-up space-y-8">
+        <div className="w-full max-w-4xl bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl animate-scale-up space-y-8">
           <div className="text-center space-y-2">
             <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto text-green-500 mb-2">
               <CheckCircle className="w-8 h-8" />
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight text-white">Scan Successful</h2>
             <p className="text-neutral-400 text-sm">
-              Measurements compiled. Generative AI garment sizing has been calibrated.
+              Body dimensions compiled. Generative AI garment sizing has been calibrated.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 bg-white/5 p-6 rounded-2xl border border-white/5">
-            <div className="space-y-1">
-              <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Body Shape Profile</span>
-              <p className="text-xl font-bold text-yellow-500">{computedMeasurements.bodyType}</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Calibrated Height</span>
-              <p className="text-xl font-bold text-white">{computedMeasurements.heightCm ? `${computedMeasurements.heightCm} cm` : '-'}</p>
-            </div>
-            <hr className="col-span-2 border-white/10" />
-            <div className="space-y-1">
-              <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Chest Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.chestCm ? `${computedMeasurements.chestCm} cm` : '-'}</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Waist Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.waistCm ? `${computedMeasurements.waistCm} cm` : '-'}</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Hips Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.hipCm ? `${computedMeasurements.hipCm} cm` : '-'}</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Shoulders Sizing</span>
-              <p className="text-md font-semibold text-neutral-300">{computedMeasurements.shoulderWidthCm ? `${computedMeasurements.shoulderWidthCm} cm` : '-'}</p>
-            </div>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            {/* Column 1: High-Tech Avatar Wireframe */}
+            <div className="relative aspect-[4/3] md:aspect-[3/4] w-full rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm p-4 flex items-center justify-center overflow-hidden shadow-inner">
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px]" />
+              
+              <svg viewBox="0 0 200 280" className="w-full h-full max-h-[300px] text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.35)]">
+                {/* body wireframe silhouette path */}
+                <path
+                  d={
+                    computedMeasurements.bodyType === 'Curvy'
+                      ? "M 100 20 C 105 20, 112 28, 112 38 C 112 48, 100 52, 100 52 C 100 52, 88 48, 88 38 C 88 28, 95 20, 100 20 Z M 100 52 L 100 70 M 70 70 L 130 70 M 70 70 C 65 95, 78 120, 72 145 C 65 170, 70 200, 78 260 M 130 70 C 135 95, 122 120, 128 145 C 135 170, 130 200, 122 260 M 72 145 C 80 148, 120 148, 128 145 M 78 260 L 122 260"
+                      : "M 100 20 C 105 20, 112 28, 112 38 C 112 48, 100 52, 100 52 C 100 52, 88 48, 88 38 C 88 28, 95 20, 100 20 Z M 100 52 L 100 70 M 72 70 L 128 70 M 72 70 C 68 95, 76 120, 74 145 C 72 170, 76 200, 80 260 M 128 70 C 132 95, 124 120, 126 145 C 128 170, 124 200, 120 260 M 74 145 C 80 146, 120 146, 126 145 M 80 260 L 120 260"
+                  }
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeDasharray="4 2"
+                  className="animate-pulse"
+                />
+                
+                {/* glowing laser dimension lines with metric labels */}
+                <line x1="40" y1="70" x2="160" y2="70" stroke="rgba(234, 179, 8, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                <circle cx="70" cy="70" r="3" fill="#EAB308" />
+                <circle cx="130" cy="70" r="3" fill="#EAB308" />
+                <text x="100" y="65" fill="#EAB308" fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
+                  SH: {computedMeasurements.shoulderWidthCm || '-'}cm
+                </text>
 
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                setComputedMeasurements(null);
-                setScanProgress(0);
-                setScanStatus('Initializing camera stream...');
-                setStep('camera');
-              }}
-              className="flex-1 py-4 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 font-semibold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>Rescan Body</span>
-            </button>
-            <button
-              onClick={handleFinish}
-              className="flex-[2] py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-yellow-500/20"
-            >
-              <span>Open Smart Mirror</span>
-              <ChevronRight className="w-5 h-5" />
-            </button>
+                <line x1="40" y1="102" x2="160" y2="102" stroke="rgba(6, 182, 212, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                <circle cx="73" cy="102" r="3" fill="#06B6D4" />
+                <circle cx="127" cy="102" r="3" fill="#06B6D4" />
+                <text x="100" y="97" fill="#06B6D4" fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
+                  CH: {computedMeasurements.chestCm || '-'}cm
+                </text>
+
+                <line x1="40" y1="145" x2="160" y2="145" stroke="rgba(16, 185, 129, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                <circle cx="74" cy="145" r="3" fill="#10B981" />
+                <circle cx="126" cy="145" r="3" fill="#10B981" />
+                <text x="100" y="140" fill="#10B981" fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
+                  WA: {computedMeasurements.waistCm || '-'}cm
+                </text>
+
+                <line x1="40" y1="185" x2="160" y2="185" stroke="rgba(236, 72, 153, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                <circle cx="73" cy="185" r="3" fill="#EC4899" />
+                <circle cx="127" cy="185" r="3" fill="#EC4899" />
+                <text x="100" y="180" fill="#EC4899" fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
+                  HP: {computedMeasurements.hipCm || '-'}cm
+                </text>
+
+                {/* Scan boundary indicator overlay */}
+                <rect x="35" y="10" width="130" height="260" fill="none" stroke="rgba(6, 182, 212, 0.12)" strokeWidth="1" rx="10" />
+                <path d="M 35 25 L 35 10 L 50 10 M 165 25 L 165 10 L 150 10 M 35 255 L 35 270 L 50 270 M 165 255 L 165 270 L 150 270" fill="none" stroke="#06B6D4" strokeWidth="1.5" />
+              </svg>
+            </div>
+
+            {/* Column 2: Data grid & Buttons */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4 bg-white/5 p-6 rounded-2xl border border-white/5">
+                <div className="space-y-1">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Body Shape Profile</span>
+                  <p className="text-xl font-bold text-yellow-500">{computedMeasurements.bodyType}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Calibrated Height</span>
+                  <p className="text-xl font-bold text-white">{computedMeasurements.heightCm ? `${computedMeasurements.heightCm} cm` : '-'}</p>
+                </div>
+                <hr className="col-span-2 border-white/10" />
+                <div className="space-y-1">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Chest Sizing</span>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.chestCm ? `${computedMeasurements.chestCm} cm` : '-'}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Waist Sizing</span>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.waistCm ? `${computedMeasurements.waistCm} cm` : '-'}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Hips Sizing</span>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.hipCm ? `${computedMeasurements.hipCm} cm` : '-'}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Shoulders Sizing</span>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.shoulderWidthCm ? `${computedMeasurements.shoulderWidthCm} cm` : '-'}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    setComputedMeasurements(null);
+                    setScanProgress(0);
+                    setScanStatus('Initializing camera stream...');
+                    setStep('camera');
+                  }}
+                  className="flex-1 py-4 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 font-semibold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                >
+                  <span>Rescan Body</span>
+                </button>
+                <button
+                  onClick={handleFinish}
+                  className="flex-[2] py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-yellow-500/20 text-sm"
+                >
+                  <span>Open Smart Mirror</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
