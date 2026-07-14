@@ -43,7 +43,14 @@ function getFabricFill(
 ): string | CanvasPattern | CanvasGradient {
   // Silk/Saree gradient sheen
   if (textureType === 'silk' || color === '#800020' || color === '#D63031') {
-    const grad = ctx.createLinearGradient(shCenter - shWidth, shY, shCenter + shWidth, shY + shWidth * 2.5);
+    const timeVal = Date.now() * 0.0018;
+    const shiftX = Math.sin(timeVal) * (shWidth * 0.15);
+    const grad = ctx.createLinearGradient(
+      shCenter - shWidth + shiftX, 
+      shY, 
+      shCenter + shWidth + shiftX, 
+      shY + shWidth * 2.5
+    );
     grad.addColorStop(0, adjustColorBrightness(color, -25));
     grad.addColorStop(0.2, color);
     grad.addColorStop(0.4, adjustColorBrightness(color, 35)); // glossy silk highlight
