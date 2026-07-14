@@ -942,6 +942,42 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     drawSequinSparkles(ctx, raisedLS, raisedRS, scaledLH, scaledRH, bottomY, config.baseColor);
   }
 
+  // Draw luxury gold embroidery borders along collar and hem if tagged
+  const isLuxury = tags.includes('Luxury') || tags.includes('Brocade') || tags.includes('Runway') || config.secondaryColor === '#D4AF37';
+  if (isLuxury) {
+    ctx.save();
+    const goldGrad = ctx.createLinearGradient(raisedLS.x, raisedLS.y, raisedRS.x, raisedRS.y);
+    goldGrad.addColorStop(0, '#D4AF37');
+    goldGrad.addColorStop(0.25, '#FFDF00');
+    goldGrad.addColorStop(0.5, '#B8860B');
+    goldGrad.addColorStop(0.75, '#FFDF00');
+    goldGrad.addColorStop(1, '#D4AF37');
+    
+    ctx.strokeStyle = goldGrad;
+    ctx.lineWidth = 4;
+    ctx.shadowColor = 'rgba(212, 175, 55, 0.45)';
+    ctx.shadowBlur = 8;
+    
+    // 1. Gold embroidery along the collar
+    ctx.beginPath();
+    ctx.moveTo(neckBaseL.x, neckBaseL.y);
+    if (isVNeck) {
+      ctx.lineTo(shoulderMidX, neckDipY);
+      ctx.lineTo(neckBaseR.x, neckBaseR.y);
+    } else {
+      ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+    }
+    ctx.stroke();
+
+    // 2. Gold embroidery along the bottom hem line
+    ctx.beginPath();
+    ctx.moveTo(leftFlareX, bottomY);
+    ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, rightFlareX, bottomY);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
   // 3D Shading
   drawTopShading(ctx, raisedLS, raisedRS, scaledLH, scaledRH);
   drawSkirtShading(ctx, scaledLH, scaledRH, bottomY, isLehenga);
