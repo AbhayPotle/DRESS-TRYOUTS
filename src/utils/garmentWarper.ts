@@ -368,16 +368,17 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   let lH = p[23];
   let rH = p[24];
-  if (!lH || !rH || lH.vis < 0.5 || rH.vis < 0.5) {
+  const isSitting = m.bodyType?.includes('Sitting') || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
+  if (isSitting) {
     const shWidth = distance(lS, rS);
     lH = {
       x: lS.x - shWidth * 0.08,
-      y: lS.y + shWidth * 1.6,
+      y: lS.y + shWidth * 1.25, // shift waist higher to fit visible torso in sitting crop
       vis: 0.9
     };
     rH = {
       x: rS.x + shWidth * 0.08,
-      y: rS.y + shWidth * 1.6,
+      y: rS.y + shWidth * 1.25,
       vis: 0.9
     };
   }
@@ -403,8 +404,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder') || subcatLower.includes('off-shoulder');
 
   const shWidth = distance(lS, rS);
-  const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
-  const neckYOffset = shWidth * (isSitting ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
+  const isSittingMode = isSitting || !p[23] || p[23].vis < 0.3;
+  const neckYOffset = shWidth * (isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
@@ -835,9 +836,15 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   let lA = p[27];
   let rA = p[28];
 
-  if (!lH || !rH || lH.vis < 0.5 || rH.vis < 0.5) {
-    lH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.5, vis: 0.9 };
-    rH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.5, vis: 0.9 };
+  const isSitting = m.bodyType?.includes('Sitting') || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
+  if (isSitting) {
+    lH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.25, vis: 0.9 };
+    rH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.25, vis: 0.9 };
+  } else {
+    if (!lH || !rH || lH.vis < 0.5 || rH.vis < 0.5) {
+      lH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.5, vis: 0.9 };
+      rH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.5, vis: 0.9 };
+    }
   }
   if (!lK || lK.vis < 0.5) lK = { x: lH.x, y: lH.y + shWidth * 1.2, vis: 0.9 };
   if (!rK || rK.vis < 0.5) rK = { x: rH.x, y: rH.y + shWidth * 1.2, vis: 0.9 };
@@ -861,8 +868,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const isVNeck = tags.includes('V-Neck') || nameLower.includes('v-neck') || nameLower.includes('wrap') || nameLower.includes('plunging');
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder');
 
-  const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
-  const neckYOffset = shWidth * (isSitting ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
+  const isSittingMode = isSitting || !p[23] || p[23].vis < 0.3;
+  const neckYOffset = shWidth * (isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
@@ -895,7 +902,9 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
 
   // Set dress length based on mini vs maxi cuts
   let bottomY = lA.vis > 0.5 ? lA.y : lK.y + shWidth * 1.2;
-  if (isMini) {
+  if (isSitting) {
+    bottomY = lH.y + shWidth * 0.65; // draw dress extending slightly below waist for crop portrait!
+  } else if (isMini) {
     bottomY = lK.y + shWidth * 0.15; // end just below knee for cocktail length
   }
 
