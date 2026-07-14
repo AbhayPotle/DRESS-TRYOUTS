@@ -524,6 +524,62 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Sequin', 'Maxi', 'Runway', 'Glow', 'Glitter', 'Luxury'],
     description: 'An absolute show-stopper maxi gown drenched in hundreds of hand-stitched gold sequins that shimmer under lights.',
     renderConfig: { baseColor: '#D4AF37', secondaryColor: '#FFFFFF', texture: 'sequins' }
+  },
+  {
+    id: 'w_full_sequin_silver',
+    name: 'Starlight Silver Sequin Gown',
+    type: 'full',
+    category: 'Party',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#E6E6FA', '#FFFFFF', '#A9A9A9'],
+    price: 320,
+    rating: 4.9,
+    styleTags: ['Sequin', 'Maxi', 'Runway', 'Glow', 'Glitter', 'Luxury', 'V-Neck'],
+    description: 'A breathtaking runway sequin dress that glints with starlight silver shimmer. Features an elegant V-neck cut.',
+    renderConfig: { baseColor: '#E6E6FA', secondaryColor: '#FFFFFF', texture: 'sequins' }
+  },
+  {
+    id: 'w_full_royal_brocade',
+    name: 'Royal Emerald Zari Brocade Lehenga',
+    type: 'full',
+    category: 'Traditional',
+    subcategory: 'Lehengas',
+    gender: 'woman',
+    colors: ['#1B4D3E', '#D4AF37', '#0F2C20'],
+    price: 420,
+    rating: 5.0,
+    styleTags: ['Brocade', 'Traditional', 'Lehenga', 'Luxury', 'Embroidery'],
+    description: 'A magnificent lehenga choli made of heavy silk brocade with detailed hand-woven gold zari embroidery borders.',
+    renderConfig: { baseColor: '#1B4D3E', secondaryColor: '#D4AF37', texture: 'brocade' }
+  },
+  {
+    id: 'w_full_ruby_silk',
+    name: 'Ruby Red Silk Wrap Dress',
+    type: 'full',
+    category: 'Party',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#B31B1B', '#D4AF37', '#7A0A0A'],
+    price: 195,
+    rating: 4.8,
+    styleTags: ['Silk', 'Elegant', 'Maxi', 'Luxury', 'V-Neck'],
+    description: 'A luxurious ruby red silk wrap gown with a dynamic overhead shimmer sheen and a plunging V-neck collar.',
+    renderConfig: { baseColor: '#B31B1B', secondaryColor: '#D4AF37', texture: 'silk' }
+  },
+  {
+    id: 'w_full_galaxy_glow',
+    name: 'Celestial Galaxy Glow Gown',
+    type: 'full',
+    category: 'Vacation',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#3B0A4E', '#00F2FE', '#EC4899'],
+    price: 380,
+    rating: 4.9,
+    styleTags: ['Glow', 'Glitter', 'Maxi', 'Runway', 'Artistic'],
+    description: 'A futuristic runway gown reflecting celestial neon space dust paint strokes, glowing with a bright cyan outer rim.',
+    renderConfig: { baseColor: '#3B0A4E', secondaryColor: '#00F2FE', texture: 'artistic' }
   }
 ];
 
