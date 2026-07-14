@@ -340,7 +340,23 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   // Real-time shoulder width auto-correction using face pupil reference for close-up sitting scans
   const detectedShWidth = distance(lS, rS);
   const eyeDist = (p[2] && p[5] && p[2].vis > 0.4 && p[5].vis > 0.4) ? distance(p[2], p[5]) : 0;
-  if (eyeDist > 0) {
+  const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
+  const isFaceCutOff = !p[0] || p[0].vis < 0.4 || !p[2] || p[2].vis < 0.4;
+  
+  if (isSitting && isFaceCutOff) {
+    // Extreme close-up: force wide shoulders to cover screen bounds
+    const canvasWidth = ctx.canvas?.width || 1280;
+    const targetShWidth = canvasWidth * 0.86;
+    if (detectedShWidth < targetShWidth) {
+      const shCenter = (lS.x + rS.x) / 2;
+      const shCenterY = (lS.y + rS.y) / 2;
+      const scale = targetShWidth / detectedShWidth;
+      lS.x = shCenter + (lS.x - shCenter) * scale;
+      lS.y = shCenterY + (lS.y - shCenterY) * scale;
+      rS.x = shCenter + (rS.x - shCenter) * scale;
+      rS.y = shCenterY + (rS.y - shCenterY) * scale;
+    }
+  } else if (eyeDist > 0) {
     const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
     if (detectedShWidth < expectedShWidth * 0.9) {
       const shCenter = (lS.x + rS.x) / 2;
@@ -368,8 +384,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   let lH = p[23];
   let rH = p[24];
-  const isSitting = m.bodyType?.includes('Sitting') || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
-  if (isSitting) {
+  const isSittingFall = isSitting || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
+  if (isSittingFall) {
     const shWidth = distance(lS, rS);
     lH = {
       x: lS.x - shWidth * 0.08,
@@ -405,7 +421,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   const shWidth = distance(lS, rS);
   const isSittingMode = isSitting || !p[23] || p[23].vis < 0.3;
-  const neckYOffset = shWidth * (isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
+  const isExtremeCloseUp = isSittingMode && isFaceCutOff;
+  const neckYOffset = shWidth * (isExtremeCloseUp ? 0.32 : isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
@@ -803,7 +820,23 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   // Real-time shoulder width auto-correction using face pupil reference for close-up sitting scans
   const detectedShWidth = distance(lS, rS);
   const eyeDist = (p[2] && p[5] && p[2].vis > 0.4 && p[5].vis > 0.4) ? distance(p[2], p[5]) : 0;
-  if (eyeDist > 0) {
+  const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
+  const isFaceCutOff = !p[0] || p[0].vis < 0.4 || !p[2] || p[2].vis < 0.4;
+  
+  if (isSitting && isFaceCutOff) {
+    // Extreme close-up: force wide shoulders to cover screen bounds
+    const canvasWidth = ctx.canvas?.width || 1280;
+    const targetShWidth = canvasWidth * 0.86;
+    if (detectedShWidth < targetShWidth) {
+      const shCenter = (lS.x + rS.x) / 2;
+      const shCenterY = (lS.y + rS.y) / 2;
+      const scale = targetShWidth / detectedShWidth;
+      lS.x = shCenter + (lS.x - shCenter) * scale;
+      lS.y = shCenterY + (lS.y - shCenterY) * scale;
+      rS.x = shCenter + (rS.x - shCenter) * scale;
+      rS.y = shCenterY + (rS.y - shCenterY) * scale;
+    }
+  } else if (eyeDist > 0) {
     const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
     if (detectedShWidth < expectedShWidth * 0.9) {
       const shCenter = (lS.x + rS.x) / 2;
@@ -836,8 +869,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   let lA = p[27];
   let rA = p[28];
 
-  const isSitting = m.bodyType?.includes('Sitting') || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
-  if (isSitting) {
+  const isSittingFall = isSitting || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
+  if (isSittingFall) {
     lH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.25, vis: 0.9 };
     rH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.25, vis: 0.9 };
   } else {
@@ -869,7 +902,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder');
 
   const isSittingMode = isSitting || !p[23] || p[23].vis < 0.3;
-  const neckYOffset = shWidth * (isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
+  const isExtremeCloseUp = isSittingMode && isFaceCutOff;
+  const neckYOffset = shWidth * (isExtremeCloseUp ? 0.32 : isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
