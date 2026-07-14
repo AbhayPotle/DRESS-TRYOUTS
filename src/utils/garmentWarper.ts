@@ -625,6 +625,28 @@ function drawSkirtShading(ctx: CanvasRenderingContext2D, lH: any, rH: any, botto
   ctx.fillStyle = gradHem;
   ctx.fillRect(lH.x - hpWidth * 1.5, lH.y - 10, hpWidth * 4.0, bottomY - lH.y + 40);
 
+  // 3. Draw vertical pleat crease folds cascading down
+  const numPleats = isLehenga ? 8 : 5;
+  for (let i = 1; i < numPleats; i++) {
+    const ratio = i / numPleats;
+    
+    // Start along the waistline
+    const startX = lH.x + (rH.x - lH.x) * ratio;
+    const startY = lH.y + 4;
+    
+    // Flare outward towards the hem bottom
+    const bottomWidth = hpWidth * (isLehenga ? 1.96 : 1.4);
+    const bottomStart = hpCenter - bottomWidth / 2;
+    const endX = bottomStart + bottomWidth * ratio;
+    const endY = bottomY - 4;
+    
+    // Wave controls for natural curve folds
+    const ctrlX = (startX + endX) / 2 + Math.sin(ratio * Math.PI) * 12;
+    const ctrlY = (startY + endY) / 2;
+    
+    draw3DCrease(ctx, startX, startY, ctrlX, ctrlY, endX, endY, 0.75);
+  }
+
   ctx.restore();
 }
 
