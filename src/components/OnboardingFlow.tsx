@@ -136,7 +136,12 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       } catch (e) {}
       mpCameraRef.current = null;
     }
-    mpPoseRef.current = null;
+    if (mpPoseRef.current) {
+      try {
+        mpPoseRef.current.close();
+      } catch (e) {}
+      mpPoseRef.current = null;
+    }
   };
 
   // Start Real AI Body Scanning with MediaPipe Pose
