@@ -632,8 +632,17 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             
             {/* Scan Progress HUD */}
             <div className="absolute inset-0 bg-black/30 flex flex-col justify-between p-6 text-left z-20 pointer-events-none">
-              <div className="flex justify-between items-center bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 w-fit">
-                <span className="text-xs font-mono tracking-widest text-yellow-500 uppercase">SYSTEM STATUS: ACTIVE</span>
+              <div className="flex justify-between items-center w-full">
+                <div className="flex justify-between items-center bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 w-fit">
+                  <span className="text-xs font-mono tracking-widest text-yellow-500 uppercase">SYSTEM STATUS: ACTIVE</span>
+                </div>
+              </div>
+              
+              <div className="bg-black/75 border border-white/10 backdrop-blur-md p-3.5 rounded-2xl text-[11px] leading-relaxed text-neutral-300 pointer-events-auto flex items-start gap-2 shadow-xl">
+                <Sparkles className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-yellow-500">Sitting/Portrait Scan Pro-Tip:</span> Look directly at the camera. The scanner uses your eye pupil distance to automatically calibrate your shoulder span and chest sizing, even if your lower arms are cut off!
+                </div>
               </div>
               <div className="space-y-2 bg-black/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
                 <div className="flex justify-between text-sm font-mono">
