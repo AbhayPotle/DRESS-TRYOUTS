@@ -580,6 +580,34 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Glow', 'Glitter', 'Maxi', 'Runway', 'Artistic'],
     description: 'A futuristic runway gown reflecting celestial neon space dust paint strokes, glowing with a bright cyan outer rim.',
     renderConfig: { baseColor: '#3B0A4E', secondaryColor: '#00F2FE', texture: 'artistic' }
+  },
+  {
+    id: 'w_full_boho_paisley',
+    name: 'Vintage Boho Paisley Tiered Dress',
+    type: 'full',
+    category: 'Vacation',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#D2691E', '#D4AF37', '#8B4513'],
+    price: 165,
+    rating: 4.7,
+    styleTags: ['Boho', 'Paisley', 'Casual', 'Maxi', 'Orange'],
+    description: 'A beautiful tiered vintage boho dress printed with gold-embroidered paisley swirls.',
+    renderConfig: { baseColor: '#D2691E', secondaryColor: '#D4AF37', texture: 'artistic' }
+  },
+  {
+    id: 'w_full_midnight_glimmer',
+    name: 'Midnight Indigo Glimmer Gown',
+    type: 'full',
+    category: 'Party',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#191970', '#00BFFF', '#0B0B3B'],
+    price: 340,
+    rating: 4.9,
+    styleTags: ['Sequin', 'Maxi', 'Runway', 'Glow', 'Luxury'],
+    description: 'An exquisite evening gown reflecting deep indigo sequins that shimmer like a starry midnight sky.',
+    renderConfig: { baseColor: '#191970', secondaryColor: '#00BFFF', texture: 'sequins' }
   }
 ];
 
