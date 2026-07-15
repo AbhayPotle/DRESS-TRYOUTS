@@ -517,6 +517,25 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
+  // Draw women's bust contour volumetric shading
+  if (isFemale) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.055)';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(shoulderMidX - shWidth * 0.18, raisedMidY + shWidth * 0.28);
+    ctx.quadraticCurveTo(shoulderMidX - shWidth * 0.09, raisedMidY + shWidth * 0.35, shoulderMidX, raisedMidY + shWidth * 0.31);
+    ctx.quadraticCurveTo(shoulderMidX + shWidth * 0.09, raisedMidY + shWidth * 0.35, shoulderMidX + shWidth * 0.18, raisedMidY + shWidth * 0.28);
+    ctx.stroke();
+    
+    const bustShadow = ctx.createLinearGradient(shoulderMidX, raisedMidY + shWidth * 0.30, shoulderMidX, raisedMidY + shWidth * 0.44);
+    bustShadow.addColorStop(0, 'rgba(0,0,0,0.06)');
+    bustShadow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = bustShadow;
+    ctx.fillRect(shoulderMidX - shWidth * 0.25, raisedMidY + shWidth * 0.30, shWidth * 0.50, shWidth * 0.14);
+    ctx.restore();
+  }
+
   // 3. Draw front ribbed collarband overlay
   ctx.save();
   ctx.strokeStyle = adjustColorBrightness(config.baseColor, -12);
