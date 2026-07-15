@@ -402,14 +402,18 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       const safeShoulder = Math.max(34, Math.min(54, shoulderWidthCm));
       const safeChest = Math.max(76, Math.min(125, chestCm));
 
+      const estimatedHeight = Math.round(gender === 'male' ? safeShoulder * 4.0 : safeShoulder * 4.3);
+      const estimatedWaist = Math.round(safeChest * (gender === 'male' ? 0.85 : 0.78));
+      const estimatedHip = Math.round(safeChest * (gender === 'male' ? 1.02 : 1.08));
+
       const scannedProfile: ScanMeasurements = {
-        heightCm: null, // Not visible
+        heightCm: Math.max(140, Math.min(210, estimatedHeight)),
         chestCm: safeChest,
-        waistCm: null, // Not visible
-        hipCm: null, // Not visible
+        waistCm: Math.max(60, Math.min(130, estimatedWaist)),
+        hipCm: Math.max(70, Math.min(140, estimatedHip)),
         shoulderWidthCm: safeShoulder,
-        armLengthCm: null,
-        legLengthCm: null,
+        armLengthCm: Math.round(estimatedHeight * 0.35),
+        legLengthCm: Math.round(estimatedHeight * 0.45),
         bodyType: 'Portrait (Sitting)'
       };
 
