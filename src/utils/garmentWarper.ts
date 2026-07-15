@@ -517,6 +517,19 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
+  // Draw sleeve armhole seams for realism
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.065)';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(raisedLS.x, raisedLS.y);
+  ctx.quadraticCurveTo(raisedLS.x - shWidth * 0.05, (raisedLS.y + leftUnderarm.y) / 2, leftUnderarm.x, leftUnderarm.y);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(raisedRS.x, raisedRS.y);
+  ctx.quadraticCurveTo(raisedRS.x + shWidth * 0.05, (raisedRS.y + rUnder.y) / 2, rUnder.x, rUnder.y);
+  ctx.stroke();
+
   // Draw women's bust contour volumetric shading
   if (isFemale) {
     ctx.save();
@@ -1012,6 +1025,19 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   // Apply soft edge ambient outlines
   ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
   ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Draw sleeve armhole seams for realism
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.065)';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(raisedLS.x, raisedLS.y);
+  ctx.quadraticCurveTo(raisedLS.x - shWidth * 0.05, (raisedLS.y + scaledLH.y) / 2, scaledLH.x - 8, (raisedLS.y + scaledLH.y) / 2 + 10);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(raisedRS.x, raisedRS.y);
+  ctx.quadraticCurveTo(raisedRS.x + shWidth * 0.05, (raisedRS.y + scaledRH.y) / 2, scaledRH.x + 8, (raisedRS.y + scaledRH.y) / 2 + 10);
   ctx.stroke();
 
   // Draw women's bust contour volumetric shading
