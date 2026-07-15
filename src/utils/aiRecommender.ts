@@ -245,3 +245,24 @@ export function getAIRecommendations(
     .sort((a, b) => b.score - a.score)
     .map(entry => entry.outfit);
 }
+
+export function getRecommendedSize(m: ScanMeasurements, gender: 'male' | 'female' | string): 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL' {
+  const isFemale = gender.includes('woman') || gender.includes('girl') || gender.includes('female');
+  const chest = m.chestCm || 92;
+  
+  if (isFemale) {
+    if (chest < 82) return 'XS';
+    if (chest < 88) return 'S';
+    if (chest < 96) return 'M';
+    if (chest < 104) return 'L';
+    if (chest < 112) return 'XL';
+    return 'XXL';
+  } else {
+    if (chest < 90) return 'XS';
+    if (chest < 96) return 'S';
+    if (chest < 104) return 'M';
+    if (chest < 112) return 'L';
+    if (chest < 120) return 'XL';
+    return 'XXL';
+  }
+}
