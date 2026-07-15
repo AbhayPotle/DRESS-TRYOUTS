@@ -7,7 +7,7 @@ import {
   ChevronRight, CloudSun
 } from 'lucide-react';
 import { Outfit, OUTFIT_CATEGORIES } from '../utils/outfitLibrary';
-import { RecommendationFactors } from '../utils/aiRecommender';
+import { RecommendationFactors, getRecommendedSize } from '../utils/aiRecommender';
 
 interface MirrorSidebarProps {
   outfits: Outfit[];
@@ -142,7 +142,12 @@ export default function MirrorSidebar({
                           <h3 className="font-bold text-sm group-hover:text-yellow-500 transition-colors">
                             {outfit.name}
                           </h3>
-                          <span className="text-xs text-neutral-400">{outfit.category}</span>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                            <span className="text-xs text-neutral-400">{outfit.category}</span>
+                            <span className="text-[9px] bg-green-500/10 text-green-400 border border-green-500/20 px-1.5 py-0.2 rounded font-mono font-bold">
+                              Size: {getRecommendedSize(factors.measurements, outfit.gender)}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold">${outfit.totalPrice}</span>
