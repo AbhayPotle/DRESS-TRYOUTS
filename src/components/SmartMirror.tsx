@@ -9,7 +9,7 @@ import MirrorSidebar from './MirrorSidebar';
 import CompareView from './CompareView';
 import AdminDashboard from './AdminDashboard';
 import { generateOutfitLibrary, Outfit, Garment } from '../utils/outfitLibrary';
-import { calculateMeasurements, analyzeSkinTone, RecommendationFactors, getAIRecommendations, ScanMeasurements } from '../utils/aiRecommender';
+import { calculateMeasurements, analyzeSkinTone, RecommendationFactors, getAIRecommendations, ScanMeasurements, getRecommendedSize } from '../utils/aiRecommender';
 import { GestureDetector, GestureType } from '../utils/gestureControls';
 import { drawGarments, drawScanningHUD } from '../utils/garmentWarper';
 
@@ -896,6 +896,22 @@ export default function SmartMirror({
                     <div className="flex justify-between"><span className="text-neutral-300">👍 Thumbs Up</span> <span className="text-yellow-500 font-bold">Fav Look</span></div>
                     <div className="flex justify-between"><span className="text-neutral-300">✌️ Peace Sign</span> <span className="text-yellow-500 font-bold">Snap Photo</span></div>
                     <div className="flex justify-between"><span className="text-neutral-300">🤝 Wrists Close</span> <span className="text-yellow-500 font-bold">Show Mode</span></div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-1.5 border-t border-white/5">
+                  <span className="text-[9px] uppercase tracking-widest text-neutral-500 font-bold">Fit Calibration:</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-neutral-300">Your Recommended Size:</span>
+                    <span className="bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide">
+                      {getRecommendedSize(measurements, gender)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-2 text-[9px] text-neutral-500 font-mono">
+                    <span>Chest: {measurements.chestCm || '-'}cm</span>
+                    <span>Waist: {measurements.waistCm || '-'}cm</span>
+                    <span>Shoulders: {measurements.shoulderWidthCm || '-'}cm</span>
+                    <span>Height: {measurements.heightCm || '-'}cm</span>
                   </div>
                 </div>
 
