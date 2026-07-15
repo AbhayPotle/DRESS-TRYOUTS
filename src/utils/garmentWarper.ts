@@ -381,20 +381,25 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   let lH = p[23];
   let rH = p[24];
-  const isSittingFall = isSitting || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
-  if (isSittingFall) {
-    const shWidth = distance(lS, rS);
-    lH = {
-      x: lS.x - shWidth * 0.08,
-      y: lS.y + shWidth * 1.25, // shift waist higher to fit visible torso in sitting crop
-      vis: 0.9
-    };
-    rH = {
-      x: rS.x + shWidth * 0.08,
-      y: rS.y + shWidth * 1.25,
-      vis: 0.9
-    };
-  }
+  const shWidth = distance(lS, rS);
+
+  const fallbackLH = { x: lS.x - shWidth * 0.08, y: lS.y + shWidth * 1.25 };
+  const fallbackRH = { x: rS.x + shWidth * 0.08, y: rS.y + shWidth * 1.25 };
+  
+  const hipConfidence = (lH && rH) ? Math.min(lH.vis, rH.vis) : 0;
+  const isSittingProfile = m.bodyType?.includes('Sitting');
+  const blendFactor = isSittingProfile ? 0 : Math.max(0, Math.min(1, (hipConfidence - 0.35) / 0.25)); // 0 if confidence < 0.35, 1 if > 0.6
+  
+  lH = {
+    x: fallbackLH.x * (1 - blendFactor) + (lH ? lH.x : fallbackLH.x) * blendFactor,
+    y: fallbackLH.y * (1 - blendFactor) + (lH ? lH.y : fallbackLH.y) * blendFactor,
+    vis: 0.9
+  };
+  rH = {
+    x: fallbackRH.x * (1 - blendFactor) + (rH ? rH.x : fallbackRH.x) * blendFactor,
+    y: fallbackRH.y * (1 - blendFactor) + (rH ? rH.y : fallbackRH.y) * blendFactor,
+    vis: 0.9
+  };
 
   const shoulderMidX = (lS.x + rS.x) / 2;
   const shoulderMidY = (lS.y + rS.y) / 2;
@@ -416,7 +421,7 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const isVNeck = tags.includes('V-Neck') || nameLower.includes('v-neck') || nameLower.includes('polo') || nameLower.includes('henley') || nameLower.includes('mandarin') || subcatLower.includes('polo');
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder') || subcatLower.includes('off-shoulder');
 
-  const shWidth = distance(lS, rS);
+  // shWidth is already defined above
   const isSittingMode = isSitting || !p[23] || p[23].vis < 0.3;
   const isExtremeCloseUp = isSittingMode && isFaceCutOff;
   const neckYOffset = shWidth * (isExtremeCloseUp ? 0.32 : isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
@@ -863,16 +868,24 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   let lA = p[27];
   let rA = p[28];
 
-  const isSittingFall = isSitting || !lH || !rH || lH.vis < 0.5 || rH.vis < 0.5;
-  if (isSittingFall) {
-    lH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.25, vis: 0.9 };
-    rH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.25, vis: 0.9 };
-  } else {
-    if (!lH || !rH || lH.vis < 0.5 || rH.vis < 0.5) {
-      lH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.5, vis: 0.9 };
-      rH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.5, vis: 0.9 };
-    }
-  }
+  const fallbackLH = { x: lS.x - shWidth * 0.1, y: lS.y + shWidth * 1.25 };
+  const fallbackRH = { x: rS.x + shWidth * 0.1, y: rS.y + shWidth * 1.25 };
+  
+  const hipConfidence = (lH && rH) ? Math.min(lH.vis, rH.vis) : 0;
+  const isSittingProfile = m.bodyType?.includes('Sitting');
+  const blendFactor = isSittingProfile ? 0 : Math.max(0, Math.min(1, (hipConfidence - 0.35) / 0.25)); // 0 if confidence < 0.35, 1 if > 0.6
+  
+  lH = {
+    x: fallbackLH.x * (1 - blendFactor) + (lH ? lH.x : fallbackLH.x) * blendFactor,
+    y: fallbackLH.y * (1 - blendFactor) + (lH ? lH.y : fallbackLH.y) * blendFactor,
+    vis: 0.9
+  };
+  rH = {
+    x: fallbackRH.x * (1 - blendFactor) + (rH ? rH.x : fallbackRH.x) * blendFactor,
+    y: fallbackRH.y * (1 - blendFactor) + (rH ? rH.y : fallbackRH.y) * blendFactor,
+    vis: 0.9
+  };
+
   if (!lK || lK.vis < 0.5) lK = { x: lH.x, y: lH.y + shWidth * 1.2, vis: 0.9 };
   if (!rK || rK.vis < 0.5) rK = { x: rH.x, y: rH.y + shWidth * 1.2, vis: 0.9 };
   if (!lA || lA.vis < 0.5) lA = { x: lK.x, y: lK.y + shWidth * 1.3, vis: 0.9 };
@@ -929,10 +942,13 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.quadraticCurveTo(raisedRS.x + 10, scaledRH.y * 0.7, scaledRH.x + 6, scaledRH.y);
 
   // Set dress length based on mini vs maxi cuts
-  let bottomY = lA.vis > 0.5 ? lA.y : lK.y + shWidth * 1.2;
-  if (isSitting) {
-    bottomY = lH.y + shWidth * 0.65; // draw dress extending slightly below waist for crop portrait!
-  } else if (isMini) {
+  const ankleConfidence = lA ? lA.vis : 0;
+  const standLength = ankleConfidence > 0.45 ? lA.y : lK.y + shWidth * 1.2;
+  const sitLength = lH.y + shWidth * 0.65;
+  const sitBlend = isSittingProfile ? 1 : Math.max(0, Math.min(1, (0.6 - hipConfidence) / 0.3)); // fully sit length if hips not visible
+  
+  let bottomY = standLength * (1 - sitBlend) + sitLength * sitBlend;
+  if (isMini) {
     bottomY = lK.y + shWidth * 0.15; // end just below knee for cocktail length
   }
 
