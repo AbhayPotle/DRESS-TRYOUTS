@@ -343,30 +343,27 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
   const isFaceCutOff = !p[0] || p[0].vis < 0.4 || !p[2] || p[2].vis < 0.4;
   
+  let targetShWidth = detectedShWidth;
   if (isSitting && isFaceCutOff) {
     // Extreme close-up: force wide shoulders to cover screen bounds
     const canvasWidth = ctx.canvas?.width || 1280;
-    const targetShWidth = canvasWidth * 0.86;
-    if (detectedShWidth < targetShWidth) {
-      const shCenter = (lS.x + rS.x) / 2;
-      const shCenterY = (lS.y + rS.y) / 2;
-      const scale = targetShWidth / detectedShWidth;
-      lS.x = shCenter + (lS.x - shCenter) * scale;
-      lS.y = shCenterY + (lS.y - shCenterY) * scale;
-      rS.x = shCenter + (rS.x - shCenter) * scale;
-      rS.y = shCenterY + (rS.y - shCenterY) * scale;
-    }
+    targetShWidth = canvasWidth * 0.86;
   } else if (eyeDist > 0) {
     const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
-    if (detectedShWidth < expectedShWidth * 0.9) {
-      const shCenter = (lS.x + rS.x) / 2;
-      const shCenterY = (lS.y + rS.y) / 2;
-      const scale = expectedShWidth / detectedShWidth;
-      lS.x = shCenter + (lS.x - shCenter) * scale;
-      lS.y = shCenterY + (lS.y - shCenterY) * scale;
-      rS.x = shCenter + (rS.x - shCenter) * scale;
-      rS.y = shCenterY + (rS.y - shCenterY) * scale;
-    }
+    const collapseRatio = Math.max(0, Math.min(1, (expectedShWidth - detectedShWidth) / (expectedShWidth * 0.3)));
+    const blendRatio = 0.4 + 0.6 * collapseRatio; // ranges from 0.4 (low-pass stabilizer) to 1.0 (full correction)
+    targetShWidth = detectedShWidth * (1 - blendRatio) + expectedShWidth * blendRatio;
+  }
+
+  // Apply smooth shoulder scale
+  if (Math.abs(targetShWidth - detectedShWidth) > 1) {
+    const shCenter = (lS.x + rS.x) / 2;
+    const shCenterY = (lS.y + rS.y) / 2;
+    const scale = targetShWidth / detectedShWidth;
+    lS.x = shCenter + (lS.x - shCenter) * scale;
+    lS.y = shCenterY + (lS.y - shCenterY) * scale;
+    rS.x = shCenter + (rS.x - shCenter) * scale;
+    rS.y = shCenterY + (rS.y - shCenterY) * scale;
   }
 
   const config = item.renderConfig;
@@ -823,30 +820,27 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const isSitting = m.bodyType?.includes('Sitting') || !p[23] || p[23].vis < 0.3;
   const isFaceCutOff = !p[0] || p[0].vis < 0.4 || !p[2] || p[2].vis < 0.4;
   
+  let targetShWidth = detectedShWidth;
   if (isSitting && isFaceCutOff) {
     // Extreme close-up: force wide shoulders to cover screen bounds
     const canvasWidth = ctx.canvas?.width || 1280;
-    const targetShWidth = canvasWidth * 0.86;
-    if (detectedShWidth < targetShWidth) {
-      const shCenter = (lS.x + rS.x) / 2;
-      const shCenterY = (lS.y + rS.y) / 2;
-      const scale = targetShWidth / detectedShWidth;
-      lS.x = shCenter + (lS.x - shCenter) * scale;
-      lS.y = shCenterY + (lS.y - shCenterY) * scale;
-      rS.x = shCenter + (rS.x - shCenter) * scale;
-      rS.y = shCenterY + (rS.y - shCenterY) * scale;
-    }
+    targetShWidth = canvasWidth * 0.86;
   } else if (eyeDist > 0) {
     const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
-    if (detectedShWidth < expectedShWidth * 0.9) {
-      const shCenter = (lS.x + rS.x) / 2;
-      const shCenterY = (lS.y + rS.y) / 2;
-      const scale = expectedShWidth / detectedShWidth;
-      lS.x = shCenter + (lS.x - shCenter) * scale;
-      lS.y = shCenterY + (lS.y - shCenterY) * scale;
-      rS.x = shCenter + (rS.x - shCenter) * scale;
-      rS.y = shCenterY + (rS.y - shCenterY) * scale;
-    }
+    const collapseRatio = Math.max(0, Math.min(1, (expectedShWidth - detectedShWidth) / (expectedShWidth * 0.3)));
+    const blendRatio = 0.4 + 0.6 * collapseRatio; // ranges from 0.4 (low-pass stabilizer) to 1.0 (full correction)
+    targetShWidth = detectedShWidth * (1 - blendRatio) + expectedShWidth * blendRatio;
+  }
+
+  // Apply smooth shoulder scale
+  if (Math.abs(targetShWidth - detectedShWidth) > 1) {
+    const shCenter = (lS.x + rS.x) / 2;
+    const shCenterY = (lS.y + rS.y) / 2;
+    const scale = targetShWidth / detectedShWidth;
+    lS.x = shCenter + (lS.x - shCenter) * scale;
+    lS.y = shCenterY + (lS.y - shCenterY) * scale;
+    rS.x = shCenter + (rS.x - shCenter) * scale;
+    rS.y = shCenterY + (rS.y - shCenterY) * scale;
   }
 
   // Calculate dynamic point-by-point fitting ratios based on scanned measurements
