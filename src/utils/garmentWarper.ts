@@ -1287,6 +1287,61 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     ctx.restore();
   }
 
+  // Draw luxury satin waist sashes & gold buckles for flared gowns and dresses
+  const hasSash = tags.includes('Maxi') || tags.includes('Luxury') || tags.includes('Party') || item.category === 'Party' || subcatLower.includes('lehenga');
+  if (hasSash && !isLehenga) {
+    ctx.save();
+    
+    const sashHeight = shWidth * 0.08;
+    
+    // 1. Draw Sash Band Path
+    ctx.beginPath();
+    ctx.moveTo(scaledLH.x - 2, scaledLH.y - sashHeight / 2);
+    ctx.lineTo(scaledRH.x + 2, scaledRH.y - sashHeight / 2);
+    ctx.lineTo(scaledRH.x + 1, scaledRH.y + sashHeight / 2);
+    ctx.lineTo(scaledLH.x - 1, scaledLH.y + sashHeight / 2);
+    ctx.closePath();
+    
+    // Volumetric satin gradient highlight (shining in the middle, darker on sides)
+    const sashGrad = ctx.createLinearGradient(scaledLH.x, scaledLH.y, scaledRH.x, scaledRH.y);
+    sashGrad.addColorStop(0, adjustColorBrightness(config.baseColor, -25));
+    sashGrad.addColorStop(0.35, adjustColorBrightness(config.baseColor, 15));
+    sashGrad.addColorStop(0.5, adjustColorBrightness(config.baseColor, 28));
+    sashGrad.addColorStop(0.65, adjustColorBrightness(config.baseColor, 15));
+    sashGrad.addColorStop(1, adjustColorBrightness(config.baseColor, -25));
+    
+    ctx.fillStyle = sashGrad;
+    ctx.fill();
+    
+    // Sash borders for outline definition
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // 2. Draw central metallic gold buckle
+    const buckleX = (scaledLH.x + scaledRH.x) / 2;
+    const buckleY = (scaledLH.y + scaledLH.y) / 2;
+    
+    // Buckle shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillRect(buckleX - 8, buckleY - 6.5, 16, 13);
+    
+    // Gold buckle body
+    ctx.fillStyle = '#D4AF37';
+    ctx.fillRect(buckleX - 7, buckleY - 5.5, 14, 11);
+    
+    // Inner rectangle cutout to look like a real clasp buckle
+    ctx.fillStyle = adjustColorBrightness(config.baseColor, -10);
+    ctx.fillRect(buckleX - 4, buckleY - 2.5, 8, 5);
+    
+    // Gold border outline
+    ctx.strokeStyle = '#FFDF00';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(buckleX - 7, buckleY - 5.5, 14, 11);
+    
+    ctx.restore();
+  }
+
   if (isLehenga && config.secondaryColor) {
     ctx.save();
     ctx.strokeStyle = config.secondaryColor;
