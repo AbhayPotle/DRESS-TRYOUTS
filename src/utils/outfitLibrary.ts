@@ -678,6 +678,34 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Silk', 'Elegant', 'Maxi', 'V-Neck', 'Lavender'],
     description: 'A dreamy lavender silk wrap dress with subtle silver thread highlights and a flared sleeve.',
     renderConfig: { baseColor: '#E6E6FA', secondaryColor: '#C0C0C0', texture: 'silk' }
+  },
+  {
+    id: 'w_full_scarlet_brocade',
+    name: 'Scarlet Brocade Festive Lehenga',
+    type: 'full',
+    category: 'Traditional',
+    subcategory: 'Lehengas',
+    gender: 'woman',
+    colors: ['#FF2400', '#E5A93B', '#800A00'],
+    price: 450,
+    rating: 4.9,
+    styleTags: ['Brocade', 'Traditional', 'Lehenga', 'Luxury', 'Embroidery'],
+    description: 'A festive scarlet red lehenga featuring rich brocade fabric and detailed gold embroidery panels.',
+    renderConfig: { baseColor: '#FF2400', secondaryColor: '#E5A93B', texture: 'brocade' }
+  },
+  {
+    id: 'w_full_midnight_saree',
+    name: 'Midnight Georgette Zari Saree',
+    type: 'full',
+    category: 'Traditional',
+    subcategory: 'Sarees',
+    gender: 'woman',
+    colors: ['#120A2A', '#D4AF37', '#06030F'],
+    price: 380,
+    rating: 5.0,
+    styleTags: ['Traditional', 'Saree', 'Silk', 'Luxury', 'Gold'],
+    description: 'A royal midnight georgette saree featuring intricate hand-woven gold zari borders.',
+    renderConfig: { baseColor: '#120A2A', secondaryColor: '#D4AF37', texture: 'silk' }
   }
 ];
 
