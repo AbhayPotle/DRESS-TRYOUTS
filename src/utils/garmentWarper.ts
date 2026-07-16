@@ -565,6 +565,26 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.stroke();
   ctx.restore();
 
+  // Draw front collar band contact shadow
+  ctx.save();
+  const collarShadowGrad = ctx.createLinearGradient(shoulderMidX, raisedMidY + shWidth * 0.05, shoulderMidX, raisedMidY + shWidth * 0.15);
+  collarShadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.16)');
+  collarShadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = collarShadowGrad;
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y + 3);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY + 3);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y + 3);
+    ctx.lineTo(shoulderMidX, neckDipY + 12);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 3, neckBaseR.x, neckBaseR.y + 3);
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 12, neckBaseL.x, neckBaseL.y + 12);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
   // Stitching Details (collars, sleeves, hems)
   if (isVNeck) {
     drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.15 + 2);
@@ -1073,6 +1093,26 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
   }
   ctx.stroke();
+  ctx.restore();
+
+  // Draw front collar band contact shadow
+  ctx.save();
+  const collarShadowGrad = ctx.createLinearGradient(shoulderMidX, raisedMidY + shWidth * 0.05, shoulderMidX, raisedMidY + shWidth * 0.15);
+  collarShadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.16)');
+  collarShadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = collarShadowGrad;
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y + 3);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY + 3);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y + 3);
+    ctx.lineTo(shoulderMidX, neckDipY + 12);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 3, neckBaseR.x, neckBaseR.y + 3);
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 12, neckBaseL.x, neckBaseL.y + 12);
+  }
+  ctx.closePath();
+  ctx.fill();
   ctx.restore();
 
   // Stitching Details
