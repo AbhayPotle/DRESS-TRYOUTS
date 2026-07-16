@@ -706,6 +706,34 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Traditional', 'Saree', 'Silk', 'Luxury', 'Gold'],
     description: 'A royal midnight georgette saree featuring intricate hand-woven gold zari borders.',
     renderConfig: { baseColor: '#120A2A', secondaryColor: '#D4AF37', texture: 'silk' }
+  },
+  {
+    id: 'w_full_cyber_punk',
+    name: 'Cyberpunk Holographic Neon Dress',
+    type: 'full',
+    category: 'Streetwear',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#8A2BE2', '#00FFFF', '#4B0082'],
+    price: 220,
+    rating: 4.8,
+    styleTags: ['Streetwear', 'Hologram', 'Glow', 'Neon', 'Artistic'],
+    description: 'A streetwear holographic jersey dress with neon cyan accents that glow under dark light.',
+    renderConfig: { baseColor: '#8A2BE2', secondaryColor: '#00FFFF', texture: 'artistic' }
+  },
+  {
+    id: 'w_full_marigold_boho',
+    name: 'Marigold Boho Tassel Sundress',
+    type: 'full',
+    category: 'Vacation',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#FF8C00', '#FFFDD0', '#D2691E'],
+    price: 155,
+    rating: 4.7,
+    styleTags: ['Boho', 'Vacation', 'Maxi', 'Casual', 'Yellow'],
+    description: 'A breezy tiered boho sundress in marigold orange printed with cream mandala motifs.',
+    renderConfig: { baseColor: '#FF8C00', secondaryColor: '#FFFDD0', texture: 'artistic' }
   }
 ];
 
