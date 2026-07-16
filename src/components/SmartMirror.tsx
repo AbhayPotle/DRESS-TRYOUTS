@@ -907,11 +907,11 @@ export default function SmartMirror({
                       {getRecommendedSize(measurements, gender)}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-x-2 text-[9px] text-neutral-500 font-mono">
-                    <span>Chest: {measurements.chestCm || '-'}cm</span>
-                    <span>Waist: {measurements.waistCm || '-'}cm</span>
-                    <span>Shoulders: {measurements.shoulderWidthCm || '-'}cm</span>
-                    <span>Height: {measurements.heightCm || '-'}cm</span>
+                  <div className="grid grid-cols-2 gap-x-2 text-[9px] text-neutral-300 font-mono mt-1 pt-1 border-t border-white/5">
+                    <span>Chest: {measurements.chestCm ? `${measurements.chestCm}cm` : 'N/A'}</span>
+                    <span>Waist: {measurements.waistCm ? `${measurements.waistCm}cm` : 'N/A'}</span>
+                    <span>Shoulder: {measurements.shoulderWidthCm ? `${measurements.shoulderWidthCm}cm` : 'N/A'}</span>
+                    <span>Height: {measurements.heightCm ? `${measurements.heightCm}cm` : 'N/A'}</span>
                   </div>
                 </div>
 
