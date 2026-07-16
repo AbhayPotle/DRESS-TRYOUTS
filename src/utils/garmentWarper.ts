@@ -549,6 +549,38 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
     ctx.restore();
   }
 
+  // Draw left/right underarm fabric creases/wrinkles for realism
+  ctx.save();
+  ctx.lineWidth = 1.8;
+  
+  // Left Underarm fold
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.04)'; // crease shadow
+  ctx.beginPath();
+  ctx.moveTo(leftUnderarm.x + 12, leftUnderarm.y + 12);
+  ctx.quadraticCurveTo(shoulderMidX - shWidth * 0.1, (raisedLS.y + scaledLH.y) / 2 + 10, shoulderMidX - shWidth * 0.08, (raisedLS.y + scaledLH.y) / 2 + 35);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.085)'; // crease highlight
+  ctx.beginPath();
+  ctx.moveTo(leftUnderarm.x + 14, leftUnderarm.y + 10);
+  ctx.quadraticCurveTo(shoulderMidX - shWidth * 0.1, (raisedLS.y + scaledLH.y) / 2 + 7, shoulderMidX - shWidth * 0.08, (raisedLS.y + scaledLH.y) / 2 + 32);
+  ctx.stroke();
+
+  // Right Underarm fold
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.04)';
+  ctx.beginPath();
+  ctx.moveTo(rUnder.x - 12, rUnder.y + 12);
+  ctx.quadraticCurveTo(shoulderMidX + shWidth * 0.1, (raisedRS.y + scaledRH.y) / 2 + 10, shoulderMidX + shWidth * 0.08, (raisedRS.y + scaledRH.y) / 2 + 35);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.085)';
+  ctx.beginPath();
+  ctx.moveTo(rUnder.x - 14, rUnder.y + 10);
+  ctx.quadraticCurveTo(shoulderMidX + shWidth * 0.1, (raisedRS.y + scaledRH.y) / 2 + 7, shoulderMidX + shWidth * 0.08, (raisedRS.y + scaledRH.y) / 2 + 32);
+  ctx.stroke();
+  
+  ctx.restore();
+
   // 3. Draw front ribbed collarband overlay
   ctx.save();
   ctx.strokeStyle = adjustColorBrightness(config.baseColor, -12);
