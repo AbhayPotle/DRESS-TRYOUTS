@@ -472,20 +472,15 @@ export default function SmartMirror({
           ctx.restore();
         }
 
-        // Process Gestures
+        // Process Gestures via Unified GestureDetector
+        const detected = gestureDetectorRef.current.update(
+          results.poseLandmarks,
+          handLandmarksRef.current,
+          Date.now()
+        );
         let gestureToTrigger: GestureType = 'none';
-        
-        if (hasPrecisePinch) {
-          const now = Date.now();
-          if (now - lastPinchTimeRef.current > 1200) {
-            gestureToTrigger = 'pinch';
-            lastPinchTimeRef.current = now;
-          }
-        } else {
-          const detected = gestureDetectorRef.current.update(results.poseLandmarks, Date.now());
-          if (detected.gesture !== 'none') {
-            gestureToTrigger = detected.gesture;
-          }
+        if (detected.gesture !== 'none') {
+          gestureToTrigger = detected.gesture;
         }
 
         if (gestureToTrigger !== 'none') {
