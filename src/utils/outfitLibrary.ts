@@ -608,6 +608,34 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Sequin', 'Maxi', 'Runway', 'Glow', 'Luxury'],
     description: 'An exquisite evening gown reflecting deep indigo sequins that shimmer like a starry midnight sky.',
     renderConfig: { baseColor: '#191970', secondaryColor: '#00BFFF', texture: 'sequins' }
+  },
+  {
+    id: 'w_full_velvet_tuxedo',
+    name: 'Royal Crimson Velvet Tuxedo Dress',
+    type: 'full',
+    category: 'Formal',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#800020', '#D4AF37', '#3A000A'],
+    price: 360,
+    rating: 4.9,
+    styleTags: ['Formal', 'Runway', 'Brocade', 'Velvet', 'Luxury'],
+    description: 'A luxurious deep crimson velvet blazer-style dress featuring shiny gold buttons and gold brocade trim.',
+    renderConfig: { baseColor: '#800020', secondaryColor: '#D4AF37', texture: 'plain' }
+  },
+  {
+    id: 'w_full_vintage_summer',
+    name: 'Sunkissed Vintage Floral Sundress',
+    type: 'full',
+    category: 'Vacation',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#FFD700', '#FF6B6B', '#FFA500'],
+    price: 190,
+    rating: 4.8,
+    styleTags: ['Boho', 'Floral', 'Casual', 'Maxi', 'Artistic'],
+    description: 'A bright yellow vintage floral sundress with coral orange abstract brush strokes.',
+    renderConfig: { baseColor: '#FFD700', secondaryColor: '#FF6B6B', texture: 'artistic' }
   }
 ];
 
