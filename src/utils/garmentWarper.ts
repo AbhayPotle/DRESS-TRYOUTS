@@ -591,8 +591,31 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   } else {
     drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.05 + 2);
   }
-  drawStitchingLine(ctx, leftSleeveEnd.x, leftSleeveEnd.y, leftUnderarm.x + 12, leftUnderarm.y + 12);
-  drawStitchingLine(ctx, rightSleeveEnd.x, rightSleeveEnd.y, rUnder.x - 12, rUnder.y + 12);
+  // Draw thick folded sleeve cuff hems
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+  ctx.lineWidth = Math.max(5, shWidth * 0.024);
+  ctx.lineCap = 'butt';
+  
+  // Left Sleeve Hem
+  ctx.beginPath();
+  ctx.moveTo(leftSleeveEnd.x, leftSleeveEnd.y);
+  ctx.lineTo(leftUnderarm.x + 12, leftUnderarm.y + 12);
+  ctx.stroke();
+
+  // Right Sleeve Hem
+  ctx.beginPath();
+  ctx.moveTo(rightSleeveEnd.x, rightSleeveEnd.y);
+  ctx.lineTo(rUnder.x - 12, rUnder.y + 12);
+  ctx.stroke();
+  ctx.restore();
+
+  // Double stitching line on cuffs
+  drawStitchingLine(ctx, leftSleeveEnd.x - 2, leftSleeveEnd.y - 2, leftUnderarm.x + 10, leftUnderarm.y + 10);
+  drawStitchingLine(ctx, leftSleeveEnd.x + 2, leftSleeveEnd.y + 2, leftUnderarm.x + 14, leftUnderarm.y + 14);
+  drawStitchingLine(ctx, rightSleeveEnd.x - 2, rightSleeveEnd.y - 2, rUnder.x - 14, rUnder.y + 10);
+  drawStitchingLine(ctx, rightSleeveEnd.x + 2, rightSleeveEnd.y + 2, rUnder.x - 10, rUnder.y + 14);
+
   drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 6, scaledRH.x - 16, scaledRH.y + 6, hipMidX, hipMidY + 12);
 
   // Secondary details
