@@ -650,6 +650,34 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Maxi', 'Luxury', 'Party', 'Satin', 'Glow'],
     description: 'An exquisite emerald green satin gown featuring a waist sash ribbon and a polished golden belt buckle clasp.',
     renderConfig: { baseColor: '#004B23', secondaryColor: '#D4AF37', texture: 'plain' }
+  },
+  {
+    id: 'w_full_rosegold_glitz',
+    name: 'Rose Gold Glitz Evening Gown',
+    type: 'full',
+    category: 'Party',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#B76E79', '#F0E68C', '#8A4F58'],
+    price: 310,
+    rating: 4.9,
+    styleTags: ['Sequin', 'Maxi', 'Elegant', 'Glow', 'Luxury'],
+    description: 'A glamorous rose gold sequined evening gown that sparkles with champagne gold highlights.',
+    renderConfig: { baseColor: '#B76E79', secondaryColor: '#F0E68C', texture: 'sequins' }
+  },
+  {
+    id: 'w_full_lavender_haze',
+    name: 'Lavender Haze Silk Wrap Gown',
+    type: 'full',
+    category: 'Casual',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#E6E6FA', '#C0C0C0', '#B0B0D0'],
+    price: 175,
+    rating: 4.8,
+    styleTags: ['Silk', 'Elegant', 'Maxi', 'V-Neck', 'Lavender'],
+    description: 'A dreamy lavender silk wrap dress with subtle silver thread highlights and a flared sleeve.',
+    renderConfig: { baseColor: '#E6E6FA', secondaryColor: '#C0C0C0', texture: 'silk' }
   }
 ];
 
