@@ -636,6 +636,20 @@ export const BASE_GARMENTS: Garment[] = [
     styleTags: ['Boho', 'Floral', 'Casual', 'Maxi', 'Artistic'],
     description: 'A bright yellow vintage floral sundress with coral orange abstract brush strokes.',
     renderConfig: { baseColor: '#FFD700', secondaryColor: '#FF6B6B', texture: 'artistic' }
+  },
+  {
+    id: 'w_full_emerald_sash',
+    name: 'Royal Emerald Satin Ribbon Gown',
+    type: 'full',
+    category: 'Party',
+    subcategory: 'Dresses',
+    gender: 'woman',
+    colors: ['#004B23', '#D4AF37', '#00240F'],
+    price: 280,
+    rating: 4.9,
+    styleTags: ['Maxi', 'Luxury', 'Party', 'Satin', 'Glow'],
+    description: 'An exquisite emerald green satin gown featuring a waist sash ribbon and a polished golden belt buckle clasp.',
+    renderConfig: { baseColor: '#004B23', secondaryColor: '#D4AF37', texture: 'plain' }
   }
 ];
 
