@@ -402,18 +402,14 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       const safeShoulder = Math.max(34, Math.min(54, shoulderWidthCm));
       const safeChest = Math.max(76, Math.min(125, chestCm));
 
-      const estimatedHeight = Math.round(gender === 'male' ? safeShoulder * 4.0 : safeShoulder * 4.3);
-      const estimatedWaist = Math.round(safeChest * (gender === 'male' ? 0.85 : 0.78));
-      const estimatedHip = Math.round(safeChest * (gender === 'male' ? 1.02 : 1.08));
-
       const scannedProfile: ScanMeasurements = {
-        heightCm: Math.max(140, Math.min(210, estimatedHeight)),
+        heightCm: null,
         chestCm: safeChest,
-        waistCm: Math.max(60, Math.min(130, estimatedWaist)),
-        hipCm: Math.max(70, Math.min(140, estimatedHip)),
+        waistCm: null,
+        hipCm: null,
         shoulderWidthCm: safeShoulder,
-        armLengthCm: Math.round(estimatedHeight * 0.35),
-        legLengthCm: Math.round(estimatedHeight * 0.45),
+        armLengthCm: null,
+        legLengthCm: null,
         bodyType: 'Portrait (Sitting)'
       };
 
@@ -716,21 +712,21 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 <circle cx="73" cy="102" r="3" fill="#06B6D4" />
                 <circle cx="127" cy="102" r="3" fill="#06B6D4" />
                 <text x="100" y="97" fill="#06B6D4" fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
-                  CH: {computedMeasurements.chestCm || '-'}cm
+                  CH: {computedMeasurements.chestCm ? `${computedMeasurements.chestCm}cm` : 'N/A'}
                 </text>
 
-                <line x1="40" y1="145" x2="160" y2="145" stroke="rgba(16, 185, 129, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
-                <circle cx="74" cy="145" r="3" fill="#10B981" />
-                <circle cx="126" cy="145" r="3" fill="#10B981" />
-                <text x="100" y="140" fill="#10B981" fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
-                  WA: {computedMeasurements.waistCm || '-'}cm
+                <line x1="40" y1="145" x2="160" y2="145" stroke={computedMeasurements.waistCm ? "rgba(16, 185, 129, 0.45)" : "rgba(115, 115, 115, 0.25)"} strokeWidth="1" strokeDasharray="3 3" />
+                <circle cx="74" cy="145" r="3" fill={computedMeasurements.waistCm ? "#10B981" : "#737373"} />
+                <circle cx="126" cy="145" r="3" fill={computedMeasurements.waistCm ? "#10B981" : "#737373"} />
+                <text x="100" y="140" fill={computedMeasurements.waistCm ? "#10B981" : "#888888"} fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
+                  WA: {computedMeasurements.waistCm ? `${computedMeasurements.waistCm}cm` : 'N/A'}
                 </text>
 
-                <line x1="40" y1="185" x2="160" y2="185" stroke="rgba(236, 72, 153, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
-                <circle cx="73" cy="185" r="3" fill="#EC4899" />
-                <circle cx="127" cy="185" r="3" fill="#EC4899" />
-                <text x="100" y="180" fill="#EC4899" fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
-                  HP: {computedMeasurements.hipCm || '-'}cm
+                <line x1="40" y1="185" x2="160" y2="185" stroke={computedMeasurements.hipCm ? "rgba(236, 72, 153, 0.45)" : "rgba(115, 115, 115, 0.25)"} strokeWidth="1" strokeDasharray="3 3" />
+                <circle cx="73" cy="185" r="3" fill={computedMeasurements.hipCm ? "#EC4899" : "#737373"} />
+                <circle cx="127" cy="185" r="3" fill={computedMeasurements.hipCm ? "#EC4899" : "#737373"} />
+                <text x="100" y="180" fill={computedMeasurements.hipCm ? "#EC4899" : "#888888"} fontSize="8" fontWeight="bold" textAnchor="middle" className="font-mono">
+                  HP: {computedMeasurements.hipCm ? `${computedMeasurements.hipCm}cm` : 'N/A'}
                 </text>
 
                 {/* Scan boundary indicator overlay */}
@@ -748,24 +744,24 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Calibrated Height</span>
-                  <p className="text-xl font-bold text-white">{computedMeasurements.heightCm ? `${computedMeasurements.heightCm} cm` : '-'}</p>
+                  <p className="text-xl font-bold text-white">{computedMeasurements.heightCm ? `${computedMeasurements.heightCm} cm` : 'Not Scanned (Sitting)'}</p>
                 </div>
                 <hr className="col-span-2 border-white/10" />
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Chest Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.chestCm ? `${computedMeasurements.chestCm} cm` : '-'}</p>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.chestCm ? `${computedMeasurements.chestCm} cm` : 'Not Scanned (Sitting)'}</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Waist Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.waistCm ? `${computedMeasurements.waistCm} cm` : '-'}</p>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.waistCm ? `${computedMeasurements.waistCm} cm` : 'Not Scanned (Sitting)'}</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Hips Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.hipCm ? `${computedMeasurements.hipCm} cm` : '-'}</p>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.hipCm ? `${computedMeasurements.hipCm} cm` : 'Not Scanned (Sitting)'}</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Shoulders Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.shoulderWidthCm ? `${computedMeasurements.shoulderWidthCm} cm` : '-'}</p>
+                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.shoulderWidthCm ? `${computedMeasurements.shoulderWidthCm} cm` : 'Not Scanned (Sitting)'}</p>
                 </div>
               </div>
 
