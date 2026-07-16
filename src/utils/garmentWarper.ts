@@ -374,7 +374,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const baseWaist = isFemale ? 68 : 82;
 
   const shoulderScale = m.shoulderWidthCm ? (m.shoulderWidthCm / baseShoulder) : 1.0;
-  const waistScale = m.waistCm ? (m.waistCm / baseWaist) : 1.0;
+  const estimatedWaist = m.chestCm ? m.chestCm * 0.81 : (m.shoulderWidthCm ? m.shoulderWidthCm * 1.8 : baseWaist);
+  const waistScale = (m.waistCm ? m.waistCm : estimatedWaist) / baseWaist;
 
   const shScale = Math.max(0.74, Math.min(1.65, shoulderScale));
   const wScale = Math.max(0.74, Math.min(1.65, waistScale));
@@ -869,7 +870,8 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
   // Calculate dynamic fit hips scale
   const isFemale = item.gender === 'woman' || item.gender === 'girl' || item.subcategory.includes('Skirts');
   const baseHip = isFemale ? 94 : 96;
-  const hipScale = m.hipCm ? (m.hipCm / baseHip) : 1.0;
+  const estimatedHip = m.chestCm ? m.chestCm * 1.08 : (m.shoulderWidthCm ? m.shoulderWidthCm * 2.3 : baseHip);
+  const hipScale = (m.hipCm ? m.hipCm : estimatedHip) / baseHip;
   const hScale = Math.max(0.74, Math.min(1.65, hipScale));
 
   const hipWidth = distance(lH, rH);
@@ -999,7 +1001,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const baseHip = isFemale ? 94 : 96;
 
   const shoulderScale = m.shoulderWidthCm ? (m.shoulderWidthCm / baseShoulder) : 1.0;
-  const hipScale = m.hipCm ? (m.hipCm / baseHip) : 1.0;
+  const estimatedHip = m.chestCm ? m.chestCm * 1.08 : (m.shoulderWidthCm ? m.shoulderWidthCm * 2.3 : baseHip);
+  const hipScale = (m.hipCm ? m.hipCm : estimatedHip) / baseHip;
 
   const shScale = Math.max(0.74, Math.min(1.65, shoulderScale));
   const hScale = Math.max(0.74, Math.min(1.65, hipScale));
