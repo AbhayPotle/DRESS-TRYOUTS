@@ -92,7 +92,7 @@ export default function MirrorSidebar({
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-500/50 transition-colors text-white"
               />
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+              <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
                 <button
                   onClick={() => setSelectedCategory('All')}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
