@@ -618,6 +618,44 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
 
   drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 6, scaledRH.x - 16, scaledRH.y + 6, hipMidX, hipMidY + 12);
 
+  // Draw luxury gold buttons down center placket for cardigans/jackets/shirts
+  const isButtoned = subcatLower.includes('jacket') || subcatLower.includes('coat') || nameLower.includes('blazer') || nameLower.includes('cardigan') || nameLower.includes('shirt') || tags.includes('Formal');
+  if (isButtoned) {
+    ctx.save();
+    const numButtons = 3;
+    for (let i = 0; i < numButtons; i++) {
+      const ratio = 0.35 + i * 0.22;
+      const btnX = shoulderMidX;
+      const btnY = raisedMidY + (hipMidY - raisedMidY) * ratio;
+      
+      // Outer drop shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.beginPath();
+      ctx.arc(btnX + 1.2, btnY + 1.5, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Shiny gold button with 3D radial highlights
+      const btnGrad = ctx.createRadialGradient(btnX - 1.5, btnY - 1.5, 0.5, btnX, btnY, 4.5);
+      btnGrad.addColorStop(0, '#FFFFFF'); // Hot spot
+      btnGrad.addColorStop(0.3, '#E5A93B'); // Midtone gold
+      btnGrad.addColorStop(0.9, '#8C5B00'); // Shadow gold
+      btnGrad.addColorStop(1, '#533700'); // Deep rim shadow
+      
+      ctx.fillStyle = btnGrad;
+      ctx.beginPath();
+      ctx.arc(btnX, btnY, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Subtle metallic highlight ring
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.arc(btnX, btnY, 3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   // Secondary details
   if (config.texture === 'stripes') {
     drawStripes(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#FFFFFF');
@@ -1145,6 +1183,45 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     drawStitchingLine(ctx, neckBaseL.x, neckBaseL.y, neckBaseR.x, neckBaseR.y, shoulderMidX, raisedMidY + shWidth * 0.04 + 2);
   }
   drawStitchingLine(ctx, leftFlareX, bottomY - 4, rightFlareX, bottomY - 4, (leftFlareX + rightFlareX) / 2, bottomY + 18);
+
+  // Draw luxury gold buttons down center placket for cardigans/jackets/shirts
+  const isButtoned = subcatLower.includes('jacket') || subcatLower.includes('coat') || nameLower.includes('blazer') || nameLower.includes('cardigan') || nameLower.includes('shirt') || tags.includes('Formal');
+  if (isButtoned) {
+    ctx.save();
+    const hipMidY = (lH.y + rH.y) / 2;
+    const numButtons = 3;
+    for (let i = 0; i < numButtons; i++) {
+      const ratio = 0.35 + i * 0.22;
+      const btnX = shoulderMidX;
+      const btnY = raisedMidY + (hipMidY - raisedMidY) * ratio;
+      
+      // Outer drop shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.beginPath();
+      ctx.arc(btnX + 1.2, btnY + 1.5, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Shiny gold button with 3D radial highlights
+      const btnGrad = ctx.createRadialGradient(btnX - 1.5, btnY - 1.5, 0.5, btnX, btnY, 4.5);
+      btnGrad.addColorStop(0, '#FFFFFF'); // Hot spot
+      btnGrad.addColorStop(0.3, '#E5A93B'); // Midtone gold
+      btnGrad.addColorStop(0.9, '#8C5B00'); // Shadow gold
+      btnGrad.addColorStop(1, '#533700'); // Deep rim shadow
+      
+      ctx.fillStyle = btnGrad;
+      ctx.beginPath();
+      ctx.arc(btnX, btnY, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Subtle metallic highlight ring
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.arc(btnX, btnY, 3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 
   if (isLehenga && config.secondaryColor) {
     ctx.save();
