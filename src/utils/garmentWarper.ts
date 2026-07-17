@@ -1143,6 +1143,107 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const neckBaseL = { x: shoulderMidX - collarWidth / 2, y: raisedMidY - shWidth * 0.01 };
   const neckBaseR = { x: shoulderMidX + collarWidth / 2, y: raisedMidY - shWidth * 0.01 };
 
+  // Calculate dynamic waist parameters for custom fitting
+  const baseWaist = isFemale ? 68 : 84;
+  const waistScale = m.waistCm ? (m.waistCm / baseWaist) : 1.0;
+  const wScale = Math.max(0.74, Math.min(1.65, waistScale));
+
+  const torsoHeight = scaledLH.y - raisedMidY;
+  const waistY = raisedMidY + torsoHeight * 0.52;
+  const waistWidth = shWidth * (isBodycon ? 0.35 : 0.40) * wScale;
+  const leftWaist = { x: shoulderMidX - waistWidth, y: waistY };
+  const rightWaist = { x: shoulderMidX + waistWidth, y: waistY };
+
+  // Check if dress has sleeves
+  const hasSleeves = subcatLower.includes('wrap') || nameLower.includes('wrap') || nameLower.includes('maxi') || tags.includes('Long Sleeve') || tags.includes('Short Sleeve') || subcatLower.includes('lehenga') || subcatLower.includes('saree');
+
+  let leftSleeveOuter = { ...raisedLS };
+  let leftSleeveInner = { ...raisedLS };
+  let rightSleeveOuter = { ...raisedRS };
+  let rightSleeveInner = { ...raisedRS };
+
+  const sleeveLen = tags.includes('Short Sleeve') ? shWidth * 0.14 : shWidth * 0.22;
+  const cuffOffset = shWidth * (tags.includes('Short Sleeve') ? 0.08 : 0.115);
+
+  const fallbackLeftOuter = { 
+    x: raisedLS.x - sleeveLen, 
+    y: raisedLS.y + sleeveLen * 0.45 
+  };
+  const fallbackLeftInner = { 
+    x: fallbackLeftOuter.x + shWidth * 0.02, 
+    y: fallbackLeftOuter.y + cuffOffset 
+  };
+
+  const fallbackRightOuter = { 
+    x: raisedRS.x + sleeveLen, 
+    y: raisedRS.y + sleeveLen * 0.45 
+  };
+  const fallbackRightInner = { 
+    x: fallbackRightOuter.x - shWidth * 0.02, 
+    y: fallbackRightOuter.y + cuffOffset 
+  };
+
+  const lE = p[13];
+  const rE = p[14];
+
+  if (hasSleeves) {
+    if (lE) {
+      const leftElbowConf = Math.max(0, Math.min(1, (lE.vis - 0.25) / 0.3));
+      const activeLeftOuter = interpolate(raisedLS, lE, 0.45);
+      
+      const dx = lE.x - raisedLS.x;
+      const dy = lE.y - raisedLS.y;
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const nx = -dy / dist;
+      const ny = dx / dist;
+      const sign = ny >= 0 ? 1 : -1;
+      const activeLeftInner = {
+        x: activeLeftOuter.x + nx * cuffOffset * sign,
+        y: activeLeftOuter.y + ny * cuffOffset * sign
+      };
+
+      leftSleeveOuter = {
+        x: activeLeftOuter.x * leftElbowConf + fallbackLeftOuter.x * (1 - leftElbowConf),
+        y: activeLeftOuter.y * leftElbowConf + fallbackLeftOuter.y * (1 - leftElbowConf)
+      };
+      leftSleeveInner = {
+        x: activeLeftInner.x * leftElbowConf + fallbackLeftInner.x * (1 - leftElbowConf),
+        y: activeLeftInner.y * leftElbowConf + fallbackLeftInner.y * (1 - leftElbowConf)
+      };
+    } else {
+      leftSleeveOuter = fallbackLeftOuter;
+      leftSleeveInner = fallbackLeftInner;
+    }
+
+    if (rE) {
+      const rightElbowConf = Math.max(0, Math.min(1, (rE.vis - 0.25) / 0.3));
+      const activeRightOuter = interpolate(raisedRS, rE, 0.45);
+      
+      const dx = rE.x - raisedRS.x;
+      const dy = rE.y - raisedRS.y;
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const nx = dy / dist;
+      const ny = -dx / dist;
+      const sign = ny >= 0 ? 1 : -1;
+      const activeRightInner = {
+        x: activeRightOuter.x + nx * cuffOffset * sign,
+        y: activeRightOuter.y + ny * cuffOffset * sign
+      };
+
+      rightSleeveOuter = {
+        x: activeRightOuter.x * rightElbowConf + fallbackRightOuter.x * (1 - rightElbowConf),
+        y: activeRightOuter.y * rightElbowConf + fallbackRightOuter.y * (1 - rightElbowConf)
+      };
+      rightSleeveInner = {
+        x: activeRightInner.x * rightElbowConf + fallbackRightInner.x * (1 - rightElbowConf),
+        y: activeRightInner.y * rightElbowConf + fallbackRightInner.y * (1 - rightElbowConf)
+      };
+    } else {
+      rightSleeveOuter = fallbackRightOuter;
+      rightSleeveInner = fallbackRightInner;
+    }
+  }
+
   // 1. Draw inside back collar underlay (shadow representing interior back)
   ctx.save();
   ctx.beginPath();
@@ -1158,7 +1259,18 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.beginPath();
   ctx.moveTo(neckBaseR.x, neckBaseR.y);
   ctx.lineTo(raisedRS.x, raisedRS.y);
-  ctx.quadraticCurveTo(raisedRS.x + 10, scaledRH.y * 0.7, scaledRH.x + 6, scaledRH.y);
+  
+  if (hasSleeves) {
+    ctx.lineTo(rightSleeveOuter.x, rightSleeveOuter.y);
+    ctx.lineTo(rightSleeveInner.x, rightSleeveInner.y);
+    const rUnder = rightUnderarm(scaledRH, raisedRS);
+    ctx.lineTo(rUnder.x, rUnder.y);
+    ctx.quadraticCurveTo(rUnder.x + 4, (rUnder.y + rightWaist.y) / 2, rightWaist.x, rightWaist.y);
+    ctx.quadraticCurveTo(rightWaist.x + 4, (rightWaist.y + scaledRH.y) / 2, scaledRH.x + 6, scaledRH.y);
+  } else {
+    ctx.quadraticCurveTo(raisedRS.x + 4, (raisedRS.y + rightWaist.y) / 2, rightWaist.x, rightWaist.y);
+    ctx.quadraticCurveTo(rightWaist.x + 4, (rightWaist.y + scaledRH.y) / 2, scaledRH.x + 6, scaledRH.y);
+  }
 
   // Set dress length based on mini vs maxi cuts
   const ankleConfidence = lA ? lA.vis : 0;
@@ -1186,8 +1298,20 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
 
   ctx.quadraticCurveTo(rightFlareX + 12, (scaledRH.y + bottomY) / 2, rightFlareX, bottomY);
   ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, leftFlareX, bottomY);
-  ctx.quadraticCurveTo(leftFlareX - 12, (scaledLH.y + bottomY) / 2, scaledLH.x - 6, scaledLH.y);
-  ctx.quadraticCurveTo(raisedLS.x - 10, scaledLH.y * 0.7, raisedLS.x, raisedLS.y);
+  ctx.quadraticCurveTo(leftFlareX - 12, (scaledLH.y + bottomY) / 2, leftFlareX, bottomY);
+
+  if (hasSleeves) {
+    const leftUnderarm = { x: raisedLS.x + (scaledLH.x - raisedLS.x) * 0.22, y: raisedLS.y + (scaledLH.y - raisedLS.y) * 0.25 };
+    ctx.quadraticCurveTo(scaledLH.x + 4, (leftWaist.y + scaledLH.y) / 2, leftWaist.x, leftWaist.y);
+    ctx.quadraticCurveTo(leftUnderarm.x - 4, (leftUnderarm.y + leftWaist.y) / 2, leftUnderarm.x, leftUnderarm.y);
+    ctx.lineTo(leftSleeveInner.x, leftSleeveInner.y);
+    ctx.lineTo(leftSleeveOuter.x, leftSleeveOuter.y);
+    ctx.lineTo(raisedLS.x, raisedLS.y);
+  } else {
+    ctx.quadraticCurveTo(leftWaist.x - 4, (leftWaist.y + scaledLH.y) / 2, leftWaist.x, leftWaist.y);
+    ctx.quadraticCurveTo(raisedLS.x - 4, (raisedLS.y + leftWaist.y) / 2, raisedLS.x, raisedLS.y);
+  }
+
   ctx.lineTo(neckBaseL.x, neckBaseL.y);
   
   // Curve defining the front dip of the neckband
