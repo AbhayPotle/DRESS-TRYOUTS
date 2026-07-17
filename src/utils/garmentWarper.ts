@@ -876,16 +876,33 @@ function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any
   ctx.arc(rS.x, rS.y + 10, bodyW * 0.35, 0, Math.PI * 2);
   ctx.fill();
 
-  // 3. Ambient occlusion shading along the sides
-  const gradSides = ctx.createLinearGradient(lS.x, lS.y, rS.x, rS.y);
-  gradSides.addColorStop(0, 'rgba(0,0,0,0.22)');
-  gradSides.addColorStop(0.18, 'rgba(0,0,0,0)');
-  gradSides.addColorStop(0.5, 'rgba(255,255,255,0.12)'); // Chest specular bulge highlight
-  gradSides.addColorStop(0.82, 'rgba(0,0,0,0)');
-  gradSides.addColorStop(1, 'rgba(0,0,0,0.22)');
-  ctx.fillStyle = gradSides;
+  // 3. Side ambient occlusion shadowing along left/right torso edges for 3D depth
+  const leftOcclusion = ctx.createLinearGradient(lS.x, shMidY, lS.x + bodyW * 0.18, shMidY);
+  leftOcclusion.addColorStop(0, 'rgba(0,0,0,0.22)');
+  leftOcclusion.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = leftOcclusion;
+  ctx.fillRect(lS.x - 20, shMidY - 30, bodyW * 0.22, (lH.y - shMidY) + 100);
+
+  const rightOcclusion = ctx.createLinearGradient(rS.x, shMidY, rS.x - bodyW * 0.18, shMidY);
+  rightOcclusion.addColorStop(0, 'rgba(0,0,0,0.22)');
+  rightOcclusion.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = rightOcclusion;
+  ctx.fillRect(rS.x + 20, shMidY - 30, -bodyW * 0.22, (lH.y - shMidY) + 100);
+
+  // 4. Dynamic diagonal sheen sweep (shimmers on movement)
+  const timeVal = Date.now() * 0.0012;
+  const sweepX = shMidX + Math.sin(timeVal) * (bodyW * 0.35);
+  const sweepGrad = ctx.createLinearGradient(sweepX - 45, shMidY, sweepX + 45, shMidY);
+  sweepGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+  sweepGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.11)'); // center sheen line
+  sweepGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = sweepGrad;
   
-  ctx.fillRect(lS.x - 100, lS.y - 10, rS.x - lS.x + 200, (lH.y - lS.y) + 150);
+  ctx.save();
+  ctx.translate(shMidX, shMidY);
+  ctx.rotate(0.22); // slight diagonal tilt
+  ctx.fillRect(-bodyW, -bodyW, bodyW * 2, bodyW * 2);
+  ctx.restore();
   
   ctx.restore();
 }
