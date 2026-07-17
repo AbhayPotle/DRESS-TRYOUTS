@@ -92,12 +92,15 @@ export class GestureDetector {
 
         if (!wrist || !thumbTip || !indexTip || !middleTip || !ringTip || !pinkyTip) continue;
 
+        // Calculate dynamic hand size in screen space to make all gestures distance-invariant!
+        const handScale = this.distance(wrist, middleMCP) || 0.08;
+
         // Check if hand is flipped or upright
         const isUpright = wrist.y > middleMCP.y;
 
-        // Distance between thumb tip and index tip for pinch
+        // Distance between thumb tip and index tip for pinch (scaled)
         const pinchDist = this.distance(thumbTip, indexTip);
-        if (pinchDist < 0.045) {
+        if (pinchDist < handScale * 0.48) {
           activeGesture = 'pinch';
           activeConfidence = 0.95;
           break;
@@ -110,17 +113,17 @@ export class GestureDetector {
           ringTip.y > ringMCP.y && 
           pinkyTip.y > pinkyMCP.y;
 
-        if (isUpright && thumbTip.y < thumbMCP.y - 0.025 && otherFingersClosed) {
+        if (isUpright && thumbTip.y < thumbMCP.y - handScale * 0.3 && otherFingersClosed) {
           activeGesture = 'thumbs_up';
           activeConfidence = 0.95;
           break;
         }
 
         // Peace Sign: Index and Middle are extended, Ring and Pinky are closed
-        const isIndexExtended = indexTip.y < indexMCP.y - 0.02;
-        const isMiddleExtended = middleTip.y < middleMCP.y - 0.02;
-        const isRingClosed = ringTip.y > ringMCP.y - 0.01;
-        const isPinkyClosed = pinkyTip.y > pinkyMCP.y - 0.01;
+        const isIndexExtended = indexTip.y < indexMCP.y - handScale * 0.22;
+        const isMiddleExtended = middleTip.y < middleMCP.y - handScale * 0.22;
+        const isRingClosed = ringTip.y > ringMCP.y - handScale * 0.1;
+        const isPinkyClosed = pinkyTip.y > pinkyMCP.y - handScale * 0.1;
 
         if (isUpright && isIndexExtended && isMiddleExtended && isRingClosed && isPinkyClosed) {
           activeGesture = 'peace';
@@ -130,10 +133,10 @@ export class GestureDetector {
 
         // Open Palm: All fingers fully extended and spread out
         const allExtended = 
-          indexTip.y < indexMCP.y - 0.035 && 
-          middleTip.y < middleMCP.y - 0.035 && 
-          ringTip.y < ringMCP.y - 0.035 && 
-          pinkyTip.y < pinkyMCP.y - 0.035;
+          indexTip.y < indexMCP.y - handScale * 0.38 && 
+          middleTip.y < middleMCP.y - handScale * 0.38 && 
+          ringTip.y < ringMCP.y - handScale * 0.38 && 
+          pinkyTip.y < pinkyMCP.y - handScale * 0.38;
 
         if (isUpright && allExtended) {
           activeGesture = 'open_palm';
@@ -151,6 +154,8 @@ export class GestureDetector {
       const rightIndex = poseLandmarks[20];
       const leftThumb = poseLandmarks[21];
       const rightThumb = poseLandmarks[22];
+      const leftElbow = poseLandmarks[13];
+      const rightElbow = poseLandmarks[14];
 
       if (leftWrist && rightWrist && leftIndex && rightIndex && leftThumb && rightThumb) {
         // Push Pose landmarks to history for wave detection
@@ -175,8 +180,12 @@ export class GestureDetector {
           activeConfidence = 0.90;
         }
 
+        // Strict raising constraint: Wrist must be raised above the elbow to prevent false triggers when resting arms down
+        const isRightHandRaised = rightElbow && rightWrist.y < rightElbow.y - 0.05;
+        const isLeftHandRaised = leftElbow && leftWrist.y < leftElbow.y - 0.05;
+
         // Wave Right
-        if (activeGesture === 'none' && isRightWristVisible) {
+        if (activeGesture === 'none' && isRightWristVisible && isRightHandRaised) {
           const isWavingRight = this.checkWaving(this.history.map(h => h.rightWrist[0]));
           if (isWavingRight) {
             activeGesture = 'wave_right';
@@ -185,7 +194,7 @@ export class GestureDetector {
         }
 
         // Wave Left
-        if (activeGesture === 'none' && isLeftWristVisible) {
+        if (activeGesture === 'none' && isLeftWristVisible && isLeftHandRaised) {
           const isWavingLeft = this.checkWaving(this.history.map(h => h.leftWrist[0]));
           if (isWavingLeft) {
             activeGesture = 'wave_left';
