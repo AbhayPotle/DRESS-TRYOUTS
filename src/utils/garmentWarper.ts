@@ -437,30 +437,42 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   let leftSleeveEnd = { ...raisedLS };
   let rightSleeveEnd = { ...raisedRS };
 
-  // Check if elbow landmarks are visible to track sleeve length dynamically (standing poses)
-  const isLeftElbowVisible = lE && lE.vis > 0.45;
-  const isRightElbowVisible = rE && rE.vis > 0.45;
+  const sleeveLen = item.styleTags.includes('Oversized') ? shWidth * 0.28 : shWidth * 0.18;
 
-  if (isLeftElbowVisible && isRightElbowVisible) {
-    leftSleeveEnd = item.styleTags.includes('Oversized') 
+  // Symmetrical fallback coordinates
+  const fallbackLeftEnd = { 
+    x: raisedLS.x - sleeveLen, 
+    y: raisedLS.y + sleeveLen * 0.45 
+  };
+  const fallbackRightEnd = { 
+    x: raisedRS.x + sleeveLen, 
+    y: raisedRS.y + sleeveLen * 0.45 
+  };
+
+  if (lE) {
+    const leftElbowConf = Math.max(0, Math.min(1, (lE.vis - 0.25) / 0.3));
+    const activeLeftEnd = item.styleTags.includes('Oversized') 
       ? interpolate(raisedLS, lE, 0.65) 
       : interpolate(raisedLS, lE, 0.42);
-    rightSleeveEnd = item.styleTags.includes('Oversized') 
+    leftSleeveEnd = {
+      x: activeLeftEnd.x * leftElbowConf + fallbackLeftEnd.x * (1 - leftElbowConf),
+      y: activeLeftEnd.y * leftElbowConf + fallbackLeftEnd.y * (1 - leftElbowConf)
+    };
+  } else {
+    leftSleeveEnd = fallbackLeftEnd;
+  }
+
+  if (rE) {
+    const rightElbowConf = Math.max(0, Math.min(1, (rE.vis - 0.25) / 0.3));
+    const activeRightEnd = item.styleTags.includes('Oversized') 
       ? interpolate(raisedRS, rE, 0.65) 
       : interpolate(raisedRS, rE, 0.42);
+    rightSleeveEnd = {
+      x: activeRightEnd.x * rightElbowConf + fallbackRightEnd.x * (1 - rightElbowConf),
+      y: activeRightEnd.y * rightElbowConf + fallbackRightEnd.y * (1 - rightElbowConf)
+    };
   } else {
-    // Symmetrical fallback for portrait/sitting poses where elbows are out of frame
-    const sleeveLen = item.styleTags.includes('Oversized') ? shWidth * 0.28 : shWidth * 0.18;
-    
-    // Extend outward along the shoulder line, with a slight downward drape
-    leftSleeveEnd = { 
-      x: raisedLS.x - sleeveLen, 
-      y: raisedLS.y + sleeveLen * 0.45 
-    };
-    rightSleeveEnd = { 
-      x: raisedRS.x + sleeveLen, 
-      y: raisedRS.y + sleeveLen * 0.45 
-    };
+    rightSleeveEnd = fallbackRightEnd;
   }
 
   const collarWidth = shWidth * 0.28; // collar width is 28% of shoulder width
