@@ -1558,23 +1558,35 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     drawSequinSparkles(ctx, raisedLS, raisedRS, scaledLH, scaledRH, bottomY, config.baseColor);
   }
 
-  // Draw luxury gold embroidery borders along collar and hem if tagged
-  const isLuxury = tags.includes('Luxury') || tags.includes('Brocade') || tags.includes('Runway') || config.secondaryColor === '#D4AF37';
+  // Draw luxury gold/silver embroidery borders along collar, hem, and cuffs if tagged
+  const isLuxury = tags.includes('Luxury') || tags.includes('Brocade') || tags.includes('Runway') || config.secondaryColor === '#D4AF37' || config.secondaryColor === '#C0C0C0' || nameLower.includes('glitz') || nameLower.includes('haze');
   if (isLuxury) {
     ctx.save();
-    const goldGrad = ctx.createLinearGradient(raisedLS.x, raisedLS.y, raisedRS.x, raisedRS.y);
-    goldGrad.addColorStop(0, '#D4AF37');
-    goldGrad.addColorStop(0.25, '#FFDF00');
-    goldGrad.addColorStop(0.5, '#B8860B');
-    goldGrad.addColorStop(0.75, '#FFDF00');
-    goldGrad.addColorStop(1, '#D4AF37');
     
-    ctx.strokeStyle = goldGrad;
-    ctx.lineWidth = 4;
-    ctx.shadowColor = 'rgba(212, 175, 55, 0.45)';
+    // Choose between gold and silver metallic gradients
+    const isSilver = config.secondaryColor === '#C0C0C0' || nameLower.includes('glitz') || nameLower.includes('haze');
+    let metallicGrad = ctx.createLinearGradient(raisedLS.x, raisedLS.y, raisedRS.x, raisedRS.y);
+    
+    if (isSilver) {
+      metallicGrad.addColorStop(0, '#A6A6A6');
+      metallicGrad.addColorStop(0.25, '#FAFAFA');
+      metallicGrad.addColorStop(0.5, '#7F7F7F');
+      metallicGrad.addColorStop(0.75, '#FAFAFA');
+      metallicGrad.addColorStop(1, '#A6A6A6');
+    } else {
+      metallicGrad.addColorStop(0, '#D4AF37');
+      metallicGrad.addColorStop(0.25, '#FFDF00');
+      metallicGrad.addColorStop(0.5, '#B8860B');
+      metallicGrad.addColorStop(0.75, '#FFDF00');
+      metallicGrad.addColorStop(1, '#D4AF37');
+    }
+    
+    ctx.strokeStyle = metallicGrad;
+    ctx.lineWidth = 3.5;
+    ctx.shadowColor = isSilver ? 'rgba(250, 250, 250, 0.45)' : 'rgba(212, 175, 55, 0.45)';
     ctx.shadowBlur = 8;
     
-    // 1. Gold embroidery along the collar
+    // 1. Gold/Silver embroidery along the collar
     ctx.beginPath();
     ctx.moveTo(neckBaseL.x, neckBaseL.y);
     if (isVNeck) {
@@ -1585,11 +1597,24 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     }
     ctx.stroke();
 
-    // 2. Gold embroidery along the bottom hem line
+    // 2. Gold/Silver embroidery along the bottom hem line
     ctx.beginPath();
     ctx.moveTo(leftFlareX, bottomY);
     ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, rightFlareX, bottomY);
     ctx.stroke();
+
+    // 3. Gold/Silver embroidery along the sleeve cuffs
+    if (hasSleeves) {
+      ctx.beginPath();
+      ctx.moveTo(leftSleeveOuter.x, leftSleeveOuter.y);
+      ctx.lineTo(leftSleeveInner.x, leftSleeveInner.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(rightSleeveOuter.x, rightSleeveOuter.y);
+      ctx.lineTo(rightSleeveInner.x, rightSleeveInner.y);
+      ctx.stroke();
+    }
 
     ctx.restore();
   }
