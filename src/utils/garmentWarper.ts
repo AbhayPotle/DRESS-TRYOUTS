@@ -586,6 +586,36 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.fill();
   ctx.restore();
 
+  // Draw crew neckband collar trim with double-stitching details
+  ctx.save();
+  ctx.lineWidth = 7.5;
+  ctx.strokeStyle = adjustColorBrightness(config.baseColor, -14); // contrast crew neckband
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
+  ctx.stroke();
+  
+  // Double-stitching line
+  ctx.lineWidth = 0.75;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y + 1);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY + 1);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y + 1);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 1, neckBaseR.x, neckBaseR.y + 1);
+  }
+  ctx.stroke();
+  ctx.restore();
+
   // Apply soft edge ambient outlines
   ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
   ctx.lineWidth = 1.5;
@@ -1361,6 +1391,36 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.shadowOffsetY = isGlow ? 0 : 8;
   ctx.fillStyle = getFabricFill(ctx, config.baseColor, config.texture || 'plain', shoulderMidX, raisedLS.y, shWidth);
   ctx.fill();
+  ctx.restore();
+
+  // Draw crew neckband collar trim with double-stitching details
+  ctx.save();
+  ctx.lineWidth = 7.5;
+  ctx.strokeStyle = adjustColorBrightness(config.baseColor, -14); // contrast crew neckband
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
+  ctx.stroke();
+  
+  // Double-stitching line
+  ctx.lineWidth = 0.75;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y + 1);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY + 1);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y + 1);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 1, neckBaseR.x, neckBaseR.y + 1);
+  }
+  ctx.stroke();
   ctx.restore();
 
   // Apply soft edge ambient outlines
