@@ -2131,7 +2131,19 @@ function drawDressCreases(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: a
     const startPt = interpolate(lH, rH, ratio);
     const endX = lH.x - (isLehenga ? 50 : 20) + (rH.x - lH.x + (isLehenga ? 100 : 40)) * ratio;
     
-    draw3DCrease(ctx, startPt.x, startPt.y, startPt.x + (endX - startPt.x) * 0.4, (startPt.y + bottomY) / 2, endX, bottomY, 1.1);
+    // Draw fabric shadow fold (darks)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.085)';
+    ctx.lineWidth = isLehenga ? 2.5 : 1.8;
+    draw3DCrease(ctx, startPt.x - 2, startPt.y, startPt.x + (endX - startPt.x) * 0.4 - 2, (startPt.y + bottomY) / 2, endX - 2, bottomY, 1.25);
+    ctx.restore();
+    
+    // Draw fabric highlight fold (lights)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
+    ctx.lineWidth = isLehenga ? 2.0 : 1.3;
+    draw3DCrease(ctx, startPt.x + 2, startPt.y, startPt.x + (endX - startPt.x) * 0.4 + 2, (startPt.y + bottomY) / 2, endX + 2, bottomY, 1.25);
+    ctx.restore();
   }
 }
 
