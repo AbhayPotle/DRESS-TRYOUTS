@@ -32,6 +32,9 @@ function adjustColorBrightness(hex: string, percent: number): string {
   return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
 }
 
+// Cache generated canvas patterns globally to prevent garbage collection stutters (memory leak mitigation)
+const patternCache: Record<string, CanvasPattern> = {};
+
 // Generates live programmatic high-resolution fabric texture patterns (16px tile for finer weave)
 function getFabricFill(
   ctx: CanvasRenderingContext2D,
@@ -41,7 +44,7 @@ function getFabricFill(
   shY: number,
   shWidth: number
 ): string | CanvasPattern | CanvasGradient {
-  // Silk/Saree gradient sheen
+  // Silk/Saree gradient sheen (dynamic - calculated per frame for light animations)
   if (textureType === 'silk' || color === '#800020' || color === '#D63031') {
     const timeVal = Date.now() * 0.0018;
     const shiftX = Math.sin(timeVal) * (shWidth * 0.15);
@@ -58,6 +61,12 @@ function getFabricFill(
     grad.addColorStop(0.8, adjustColorBrightness(color, -15));
     grad.addColorStop(1, adjustColorBrightness(color, -35));
     return grad;
+  }
+
+  // Retrieve pre-woven texture pattern if cached
+  const cacheKey = `${color}_${textureType}`;
+  if (patternCache[cacheKey]) {
+    return patternCache[cacheKey];
   }
 
   // Create an offscreen canvas to weave the fabric texture pattern (16px instead of 24px for a finer thread count)
@@ -125,7 +134,11 @@ function getFabricFill(
   }
 
   const pattern = ctx.createPattern(patternCanvas, 'repeat');
-  return pattern || color;
+  if (pattern) {
+    patternCache[cacheKey] = pattern;
+    return pattern;
+  }
+  return color;
 }
 
 // Renders a realistic soft-blurred 3D fold crease (shadow stroke + highlight stroke)
