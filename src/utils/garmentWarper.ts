@@ -434,45 +434,93 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const raisedMidY = (raisedLS.y + raisedRS.y) / 2;
   const neckDipY = isVNeck ? (raisedMidY + shWidth * 0.15) : (raisedMidY + shWidth * 0.05);
 
-  let leftSleeveEnd = { ...raisedLS };
-  let rightSleeveEnd = { ...raisedRS };
+  let leftSleeveOuter = { ...raisedLS };
+  let leftSleeveInner = { ...raisedLS };
+  let rightSleeveOuter = { ...raisedRS };
+  let rightSleeveInner = { ...raisedRS };
 
   const sleeveLen = item.styleTags.includes('Oversized') ? shWidth * 0.28 : shWidth * 0.18;
+  const cuffOffset = shWidth * (item.styleTags.includes('Oversized') ? 0.135 : 0.095);
 
   // Symmetrical fallback coordinates
-  const fallbackLeftEnd = { 
+  const fallbackLeftOuter = { 
     x: raisedLS.x - sleeveLen, 
     y: raisedLS.y + sleeveLen * 0.45 
   };
-  const fallbackRightEnd = { 
+  const fallbackLeftInner = { 
+    x: fallbackLeftOuter.x + shWidth * 0.02, 
+    y: fallbackLeftOuter.y + cuffOffset 
+  };
+
+  const fallbackRightOuter = { 
     x: raisedRS.x + sleeveLen, 
     y: raisedRS.y + sleeveLen * 0.45 
+  };
+  const fallbackRightInner = { 
+    x: fallbackRightOuter.x - shWidth * 0.02, 
+    y: fallbackRightOuter.y + cuffOffset 
   };
 
   if (lE) {
     const leftElbowConf = Math.max(0, Math.min(1, (lE.vis - 0.25) / 0.3));
-    const activeLeftEnd = item.styleTags.includes('Oversized') 
+    const activeLeftOuter = item.styleTags.includes('Oversized') 
       ? interpolate(raisedLS, lE, 0.65) 
       : interpolate(raisedLS, lE, 0.42);
-    leftSleeveEnd = {
-      x: activeLeftEnd.x * leftElbowConf + fallbackLeftEnd.x * (1 - leftElbowConf),
-      y: activeLeftEnd.y * leftElbowConf + fallbackLeftEnd.y * (1 - leftElbowConf)
+    
+    // Perpendicular down vector
+    const dx = lE.x - raisedLS.x;
+    const dy = lE.y - raisedLS.y;
+    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    const nx = -dy / dist;
+    const ny = dx / dist;
+    const sign = ny >= 0 ? 1 : -1;
+    const activeLeftInner = {
+      x: activeLeftOuter.x + nx * cuffOffset * sign,
+      y: activeLeftOuter.y + ny * cuffOffset * sign
+    };
+
+    leftSleeveOuter = {
+      x: activeLeftOuter.x * leftElbowConf + fallbackLeftOuter.x * (1 - leftElbowConf),
+      y: activeLeftOuter.y * leftElbowConf + fallbackLeftOuter.y * (1 - leftElbowConf)
+    };
+    leftSleeveInner = {
+      x: activeLeftInner.x * leftElbowConf + fallbackLeftInner.x * (1 - leftElbowConf),
+      y: activeLeftInner.y * leftElbowConf + fallbackLeftInner.y * (1 - leftElbowConf)
     };
   } else {
-    leftSleeveEnd = fallbackLeftEnd;
+    leftSleeveOuter = fallbackLeftOuter;
+    leftSleeveInner = fallbackLeftInner;
   }
 
   if (rE) {
     const rightElbowConf = Math.max(0, Math.min(1, (rE.vis - 0.25) / 0.3));
-    const activeRightEnd = item.styleTags.includes('Oversized') 
+    const activeRightOuter = item.styleTags.includes('Oversized') 
       ? interpolate(raisedRS, rE, 0.65) 
       : interpolate(raisedRS, rE, 0.42);
-    rightSleeveEnd = {
-      x: activeRightEnd.x * rightElbowConf + fallbackRightEnd.x * (1 - rightElbowConf),
-      y: activeRightEnd.y * rightElbowConf + fallbackRightEnd.y * (1 - rightElbowConf)
+    
+    // Perpendicular down vector
+    const dx = rE.x - raisedRS.x;
+    const dy = rE.y - raisedRS.y;
+    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    const nx = dy / dist;
+    const ny = -dx / dist;
+    const sign = ny >= 0 ? 1 : -1;
+    const activeRightInner = {
+      x: activeRightOuter.x + nx * cuffOffset * sign,
+      y: activeRightOuter.y + ny * cuffOffset * sign
+    };
+
+    rightSleeveOuter = {
+      x: activeRightOuter.x * rightElbowConf + fallbackRightOuter.x * (1 - rightElbowConf),
+      y: activeRightOuter.y * rightElbowConf + fallbackRightOuter.y * (1 - rightElbowConf)
+    };
+    rightSleeveInner = {
+      x: activeRightInner.x * rightElbowConf + fallbackRightInner.x * (1 - rightElbowConf),
+      y: activeRightInner.y * rightElbowConf + fallbackRightInner.y * (1 - rightElbowConf)
     };
   } else {
-    rightSleeveEnd = fallbackRightEnd;
+    rightSleeveOuter = fallbackRightOuter;
+    rightSleeveInner = fallbackRightInner;
   }
 
   const collarWidth = shWidth * 0.28; // collar width is 28% of shoulder width
@@ -494,16 +542,16 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.beginPath();
   ctx.moveTo(neckBaseR.x, neckBaseR.y);
   ctx.lineTo(raisedRS.x, raisedRS.y);
-  ctx.lineTo(rightSleeveEnd.x, rightSleeveEnd.y);
+  ctx.lineTo(rightSleeveOuter.x, rightSleeveOuter.y);
+  ctx.lineTo(rightSleeveInner.x, rightSleeveInner.y);
   const rUnder = rightUnderarm(scaledRH, raisedRS);
-  ctx.lineTo(rUnder.x - 12, rUnder.y + 12);
   ctx.lineTo(rUnder.x, rUnder.y);
   ctx.quadraticCurveTo(scaledRH.x - 10, interpolate(raisedRS, scaledRH, 0.6).y, scaledRH.x - 16, scaledRH.y + 6);
   ctx.quadraticCurveTo(hipMidX, hipMidY + 12, scaledLH.x + 16, scaledLH.y + 6);
   const leftUnderarm = { x: raisedLS.x + (scaledLH.x - raisedLS.x) * 0.22, y: raisedLS.y + (scaledLH.y - raisedLS.y) * 0.25 };
-  ctx.quadraticCurveTo(scaledLH.x + 10, interpolate(raisedLS, scaledLH, 0.6).y, leftUnderarm.x + 12, leftUnderarm.y + 12);
-  ctx.lineTo(leftUnderarm.x, leftUnderarm.y);
-  ctx.lineTo(leftSleeveEnd.x, leftSleeveEnd.y);
+  ctx.quadraticCurveTo(scaledLH.x + 10, interpolate(raisedLS, scaledLH, 0.6).y, leftUnderarm.x, leftUnderarm.y);
+  ctx.lineTo(leftSleeveInner.x, leftSleeveInner.y);
+  ctx.lineTo(leftSleeveOuter.x, leftSleeveOuter.y);
   ctx.lineTo(raisedLS.x, raisedLS.y);
   ctx.lineTo(neckBaseL.x, neckBaseL.y);
   // Curve or straight lines defining the front dip of the neckband
@@ -642,24 +690,35 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.lineWidth = Math.max(5, shWidth * 0.024);
   ctx.lineCap = 'butt';
   
-  // Left Sleeve Hem
+  // Left Sleeve Hem (across cuff opening)
   ctx.beginPath();
-  ctx.moveTo(leftSleeveEnd.x, leftSleeveEnd.y);
-  ctx.lineTo(leftUnderarm.x + 12, leftUnderarm.y + 12);
+  ctx.moveTo(leftSleeveOuter.x, leftSleeveOuter.y);
+  ctx.lineTo(leftSleeveInner.x, leftSleeveInner.y);
   ctx.stroke();
 
-  // Right Sleeve Hem
+  // Right Sleeve Hem (across cuff opening)
   ctx.beginPath();
-  ctx.moveTo(rightSleeveEnd.x, rightSleeveEnd.y);
-  ctx.lineTo(rUnder.x - 12, rUnder.y + 12);
+  ctx.moveTo(rightSleeveOuter.x, rightSleeveOuter.y);
+  ctx.lineTo(rightSleeveInner.x, rightSleeveInner.y);
   ctx.stroke();
   ctx.restore();
 
-  // Double stitching line on cuffs
-  drawStitchingLine(ctx, leftSleeveEnd.x - 2, leftSleeveEnd.y - 2, leftUnderarm.x + 10, leftUnderarm.y + 10);
-  drawStitchingLine(ctx, leftSleeveEnd.x + 2, leftSleeveEnd.y + 2, leftUnderarm.x + 14, leftUnderarm.y + 14);
-  drawStitchingLine(ctx, rightSleeveEnd.x - 2, rightSleeveEnd.y - 2, rUnder.x - 14, rUnder.y + 10);
-  drawStitchingLine(ctx, rightSleeveEnd.x + 2, rightSleeveEnd.y + 2, rUnder.x - 10, rUnder.y + 14);
+  // Double stitching line on cuffs (parallel to the hem)
+  const leftStitchOuter1 = interpolate(leftSleeveOuter, raisedLS, 0.05);
+  const leftStitchInner1 = interpolate(leftSleeveInner, leftUnderarm, 0.05);
+  const leftStitchOuter2 = interpolate(leftSleeveOuter, raisedLS, 0.08);
+  const leftStitchInner2 = interpolate(leftSleeveInner, leftUnderarm, 0.08);
+  
+  drawStitchingLine(ctx, leftStitchOuter1.x, leftStitchOuter1.y, leftStitchInner1.x, leftStitchInner1.y);
+  drawStitchingLine(ctx, leftStitchOuter2.x, leftStitchOuter2.y, leftStitchInner2.x, leftStitchInner2.y);
+
+  const rightStitchOuter1 = interpolate(rightSleeveOuter, raisedRS, 0.05);
+  const rightStitchInner1 = interpolate(rightSleeveInner, rUnder, 0.05);
+  const rightStitchOuter2 = interpolate(rightSleeveOuter, raisedRS, 0.08);
+  const rightStitchInner2 = interpolate(rightSleeveInner, rUnder, 0.08);
+
+  drawStitchingLine(ctx, rightStitchOuter1.x, rightStitchOuter1.y, rightStitchInner1.x, rightStitchInner1.y);
+  drawStitchingLine(ctx, rightStitchOuter2.x, rightStitchOuter2.y, rightStitchInner2.x, rightStitchInner2.y);
 
   drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 6, scaledRH.x - 16, scaledRH.y + 6, hipMidX, hipMidY + 12);
 
