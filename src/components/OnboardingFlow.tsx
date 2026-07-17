@@ -418,6 +418,9 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       return;
     }
 
+    const avgEyePx = avg(buffer.eyeDistances) * 1280;
+    const scaleFactor = calculateSittingScaleFactor(avgEyePx);
+
     // Average the buffered coordinate ratios
     const finalShoulderPx = avg(buffer.shoulderWidths) * 1280;
     const finalTorsoPx = avg(buffer.torsoHeights) * 720;
@@ -426,7 +429,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     const finalChestPx = avg(buffer.chestWidths) * 1280;
 
     // Use our sizing formulas to compute real chest, waist, and hip size in cm
-    const baseHeight = gender === 'male' ? 176 : 163;
     const scannedProfile = calculateMeasurements(
       finalShoulderPx,
       finalTorsoPx,
@@ -435,7 +437,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       finalHipPx,
       finalWaistPx,
       finalChestPx,
-      baseHeight
+      scaleFactor
     );
 
     setComputedMeasurements(scannedProfile);
