@@ -154,8 +154,8 @@ export class GestureDetector {
       const rightIndex = poseLandmarks[20];
       const leftThumb = poseLandmarks[21];
       const rightThumb = poseLandmarks[22];
-      const leftElbow = poseLandmarks[13];
-      const rightElbow = poseLandmarks[14];
+      const leftShoulder = poseLandmarks[11];
+      const rightShoulder = poseLandmarks[12];
 
       if (leftWrist && rightWrist && leftIndex && rightIndex && leftThumb && rightThumb) {
         // Push Pose landmarks to history for wave detection
@@ -180,9 +180,9 @@ export class GestureDetector {
           activeConfidence = 0.90;
         }
 
-        // Strict raising constraint: Wrist must be raised above the elbow to prevent false triggers when resting arms down
-        const isRightHandRaised = rightElbow && rightWrist.y < rightElbow.y - 0.05;
-        const isLeftHandRaised = leftElbow && leftWrist.y < leftElbow.y - 0.05;
+        // Stable raising constraint: Wrist must be above shoulder or chest level to prevent idle triggers when hands are down
+        const isRightHandRaised = rightShoulder && rightWrist.y < rightShoulder.y + 0.12;
+        const isLeftHandRaised = leftShoulder && leftWrist.y < leftShoulder.y + 0.12;
 
         // Wave Right
         if (activeGesture === 'none' && isRightWristVisible && isRightHandRaised) {
@@ -205,7 +205,7 @@ export class GestureDetector {
     }
 
     // Handle gesture confidence accumulation
-    const requiredFrames = activeGesture === 'pinch' ? 2 : 6; // pinch is high priority, trigger faster!
+    const requiredFrames = (activeGesture === 'pinch' || activeGesture === 'thumbs_up' || activeGesture === 'peace') ? 3 : 6; // static gestures trigger faster!
     
     for (const key in this.gestureConfidence) {
       const g = key as GestureType;
