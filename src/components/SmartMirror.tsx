@@ -77,7 +77,14 @@ export default function SmartMirror({
   // Recommendations State
   const [measurements, setMeasurements] = useState<ScanMeasurements>(initialMeasurements);
   const [factors, setFactors] = useState<RecommendationFactors>({
-    skinTone: { hex: '#EBEBEB', type: 'Neutral', paletteName: 'Soft Spring Pastels', recommendedColors: ['#93B5C6', '#E6D5B8', '#FFC4DD'] },
+    skinTone: { 
+      hex: '#EBEBEB', 
+      type: 'Neutral', 
+      paletteName: 'Soft Spring Pastels', 
+      recommendedColors: ['#93B5C6', '#E6D5B8', '#FFC4DD'],
+      description: 'Neutral undertones have a balanced warm/cool ratio. You look wonderful in soft spring pastels, charcoal accents, and champagne golds.',
+      colorNames: ['Slate Blue', 'Champagne', 'Blush Rose']
+    },
     measurements: initialMeasurements,
     occasion: 'Casual',
     weather: 'sunny',
@@ -273,8 +280,8 @@ export default function SmartMirror({
       hands.setOptions({
         maxNumHands: 2,
         modelComplexity: 1,
-        minDetectionConfidence: 0.6,
-        minTrackingConfidence: 0.6
+        minDetectionConfidence: 0.45,
+        minTrackingConfidence: 0.45
       });
       hands.onResults((results: any) => {
         handLandmarksRef.current = results.multiHandLandmarks || null;
