@@ -37,22 +37,18 @@ export function calculateMeasurements(
   hipWidthPx: number,
   waistWidthPx: number,
   chestWidthPx: number,
-  cameraHeightCm: number = 175
+  scaleFactor: number
 ): ScanMeasurements {
-  // Compute pixel ratios
-  // Assume average human height ratio relative to the total body pixels
   const totalVerticalPx = shoulderToHipPx + hipToAnklePx + (shoulderToHipPx * 0.4); // Add head/neck estimate
-  const scaleFactor = cameraHeightCm / totalVerticalPx; // cm per pixel
-
-  const heightCm = Math.round(cameraHeightCm);
-  const shoulderWidthCm = Math.round(shoulderToShoulderPx * scaleFactor * 2.2); // scale adjustment
+  const heightCm = Math.max(140, Math.min(210, Math.round(totalVerticalPx * scaleFactor)));
+  const shoulderWidthCm = Math.max(34, Math.min(56, Math.round(shoulderToShoulderPx * scaleFactor * 2.2)));
   const armLengthCm = Math.round(shoulderToWristPx * scaleFactor);
   const legLengthCm = Math.round(hipToAnklePx * scaleFactor);
   
   // Circumferences are approximated using ellipse models (Circumference ≈ π * √((w^2 + d^2)/2))
-  const chestCm = Math.round(chestWidthPx * scaleFactor * Math.PI * 1.15);
-  const waistCm = Math.round(waistWidthPx * scaleFactor * Math.PI * 1.1);
-  const hipCm = Math.round(hipWidthPx * scaleFactor * Math.PI * 1.18);
+  const chestCm = Math.max(70, Math.min(135, Math.round(chestWidthPx * scaleFactor * Math.PI * 1.15)));
+  const waistCm = Math.max(60, Math.min(130, Math.round(waistWidthPx * scaleFactor * Math.PI * 1.1)));
+  const hipCm = Math.max(70, Math.min(145, Math.round(hipWidthPx * scaleFactor * Math.PI * 1.18)));
 
   // Determine body shape classification
   let bodyType: ScanMeasurements['bodyType'] = 'Average';
@@ -218,13 +214,22 @@ export function getAIRecommendations(
       if (factors.styleVibe) {
         const styleTags = outfit.styleTags.map(t => t.toLowerCase());
         const catLower = outfit.category.toLowerCase();
-        
         if (factors.styleVibe === 'elegant') {
-          // Elegant vibe looks for tailored, traditional, formal, blazer, silk, luxury
-          const matches = ['traditional', 'formal', 'wedding', 'silk', 'leather', 'tailored', 'blazer', 'luxury'];
+          // Elegant/Classic vibe looks for tailored, traditional, formal, blazer, silk, luxury, classic, suit, shirt
+          const matches = ['traditional', 'formal', 'wedding', 'silk', 'leather', 'tailored', 'blazer', 'luxury', 'classic', 'suit', 'tuxedo', 'gown', 'saree', 'lehenga', 'shirt'];
           const matchCount = styleTags.filter(t => matches.includes(t)).length;
-          if (matchCount > 0) score += 20 + Math.min(15, matchCount * 5);
-          if (catLower === 'traditional' || catLower === 'formal') score += 10;
+          if (matchCount > 0) score += 25 + Math.min(20, matchCount * 6);
+          if (catLower === 'traditional' || catLower === 'formal' || catLower === 'luxury' || catLower === 'business') score += 15;
+          
+          // Strongly penalize casual hoodies, t-shirts, joggers, and shorts for elegant/classic recommendations
+          const hasCasualItem = outfit.items.some(item => {
+            const sub = item.subcategory.toLowerCase();
+            const name = item.name.toLowerCase();
+            return sub.includes('t-shirt') || sub.includes('hoodie') || sub.includes('jogger') || sub.includes('shorts') || name.includes('tee') || name.includes('hoodie');
+          });
+          if (hasCasualItem) {
+            score -= 45;
+          }
         } else if (factors.styleVibe === 'artistic') {
           // Artistic vibe looks for tie-dye, floral, creative, colorful, streetwear, oversized, boho
           const matches = ['artistic', 'floral', 'tie-dye', 'pattern', 'oversized', 'streetwear', 'colorful', 'boho'];
