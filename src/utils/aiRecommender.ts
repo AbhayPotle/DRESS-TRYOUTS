@@ -17,6 +17,8 @@ export interface RecommendationFactors {
     type: 'Cool Undertone' | 'Warm Undertone' | 'Neutral';
     paletteName: string;
     recommendedColors: string[];
+    description: string;
+    colorNames: string[];
   };
   measurements: ScanMeasurements;
   occasion: string;
@@ -93,7 +95,14 @@ function genderIsCurvy(waistToHipRatio: number): boolean {
  * Samples camera pixels in the center-top facial area to identify skin tone
  * and classify them into Warm/Cool/Neutral palettes.
  */
-export function analyzeSkinTone(r: number, g: number, b: number): RecommendationFactors['skinTone'] {
+export function analyzeSkinTone(r: number, g: number, b: number): {
+  hex: string;
+  type: 'Cool Undertone' | 'Warm Undertone' | 'Neutral';
+  paletteName: string;
+  recommendedColors: string[];
+  description: string;
+  colorNames: string[];
+} {
   const hex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
   
   // Calculate warm/cool bias based on RGB components
@@ -101,9 +110,11 @@ export function analyzeSkinTone(r: number, g: number, b: number): Recommendation
   const redGreenRatio = r / (g || 1);
   const blueGreenRatio = b / (g || 1);
   
-  let type: RecommendationFactors['skinTone']['type'] = 'Neutral';
+  let type: 'Cool Undertone' | 'Warm Undertone' | 'Neutral' = 'Neutral';
   let paletteName = 'Modern Neutral';
   let recommendedColors = ['#000000', '#FFFFFF', '#6C7A89', '#95A5A6', '#D4AC0D'];
+  let colorNames = ['Noir Black', 'Pure White', 'Slate Grey', 'Soft Silver', 'Marigold'];
+  let description = 'Neutral undertones have a balanced warm/cool ratio. You look wonderful in highly contrasting classic monochromes and soft neutral pigments.';
 
   if (redGreenRatio > 1.15) {
     type = 'Warm Undertone';
@@ -116,6 +127,8 @@ export function analyzeSkinTone(r: number, g: number, b: number): Recommendation
       '#E07A5F', // Terracotta
       '#1D4438'  // Deep Forest
     ];
+    colorNames = ['Saddle Brown', 'Desert Tan', 'Olive Green', 'Zari Gold', 'Terracotta', 'Forest Green'];
+    description = 'Warm undertones harmonize beautifully with organic forest hues. We prioritize bronze, gold, terracotta, and olive garments to make your skin look radiant and healthy.';
   } else if (blueGreenRatio > 0.95 || redGreenRatio < 1.05) {
     type = 'Cool Undertone';
     paletteName = 'Winter Jewel Tones';
@@ -127,6 +140,8 @@ export function analyzeSkinTone(r: number, g: number, b: number): Recommendation
       '#FAFAFA', // Pure White
       '#C0C0C0'  // Silver
     ];
+    colorNames = ['Royal Navy', 'Burgundy Wine', 'Plum Velvet', 'Classic Teal', 'Pure Snow', 'Silver Metallic'];
+    description = 'Cool undertones look breathtaking in rich, highly saturated jewel pigments. Royal navy, burgundy, deep plum, and silver metallics highlight your skin tone elegantly.';
   } else {
     type = 'Neutral';
     paletteName = 'Soft Spring Pastels';
@@ -138,13 +153,17 @@ export function analyzeSkinTone(r: number, g: number, b: number): Recommendation
       '#EBEBEB', // Light Grey
       '#4A4A4A'  // Charcoal
     ];
+    colorNames = ['Slate Blue', 'Champagne', 'Blush Rose', 'Sage Leaf', 'Soft Ash', 'Charcoal'];
+    description = 'Neutral undertones have a balanced warm/cool ratio. You look wonderful in soft spring pastels, charcoal accents, and champagne golds.';
   }
 
   return {
     hex,
     type,
     paletteName,
-    recommendedColors
+    recommendedColors,
+    description,
+    colorNames
   };
 }
 
