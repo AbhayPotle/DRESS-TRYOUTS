@@ -175,7 +175,50 @@ export function getAIRecommendations(
   outfits: Outfit[],
   factors: RecommendationFactors
 ): Outfit[] {
-  return outfits
+  let filteredOutfits = outfits;
+  
+  if (factors.styleVibe) {
+    const vibe = factors.styleVibe;
+    filteredOutfits = outfits.filter(outfit => {
+      const catLower = outfit.category.toLowerCase();
+      const styleTags = outfit.styleTags.map(t => t.toLowerCase());
+      
+      if (vibe === 'elegant') {
+        const isCasualGarment = outfit.items.some(item => {
+          const sub = item.subcategory.toLowerCase();
+          const name = item.name.toLowerCase();
+          return sub.includes('t-shirt') || sub.includes('hoodie') || sub.includes('jogger') || sub.includes('shorts') || name.includes('tee') || name.includes('hoodie');
+        });
+        const isElegant = 
+          ['traditional', 'formal', 'luxury', 'business'].includes(catLower) ||
+          styleTags.some(t => ['tailored', 'blazer', 'luxury', 'classic', 'suit', 'tuxedo', 'gown', 'saree', 'lehenga', 'silk', 'brocade', 'festive'].includes(t));
+        return isElegant && !isCasualGarment;
+      }
+      
+      if (vibe === 'artistic') {
+        const isArtistic = 
+          ['streetwear', 'vacation', 'traditional'].includes(catLower) ||
+          styleTags.some(t => ['artistic', 'floral', 'tie-dye', 'pattern', 'oversized', 'streetwear', 'colorful', 'boho', 'neon', 'glitz', 'glitter', 'sequin'].includes(t));
+        return isArtistic;
+      }
+      
+      if (vibe === 'casual') {
+        const isLuxuryEvening = styleTags.some(t => ['wedding', 'tuxedo', 'gown', 'formal suit', 'lehenga', 'saree'].includes(t));
+        const isCasual = 
+          ['casual', 'sporty', 'vacation', 'streetwear'].includes(catLower) ||
+          styleTags.some(t => ['casual', 'denim', 'cotton', 'relaxed', 'staples', 'minimalist', 'utility', 'polo', 'crop', 'heavyweight', 'regular fit'].includes(t));
+        return isCasual && !isLuxuryEvening;
+      }
+      
+      return true;
+    });
+
+    if (filteredOutfits.length < 2) {
+      filteredOutfits = outfits;
+    }
+  }
+
+  return filteredOutfits
     .map(outfit => {
       let score = 0;
 
