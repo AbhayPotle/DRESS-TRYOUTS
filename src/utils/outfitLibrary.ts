@@ -484,6 +484,118 @@ export const BASE_GARMENTS: Garment[] = [
     renderConfig: { baseColor: '#A0522D', texture: 'plain' }
   },
   {
+    id: 'shoes_w_stiletto_heels',
+    name: 'Stiletto Patent Heels',
+    type: 'shoes',
+    category: 'Luxury',
+    subcategory: 'Heels',
+    gender: 'woman',
+    colors: ['#0A0A0A', '#B22222', '#FDFBF7'],
+    price: 165,
+    rating: 4.9,
+    styleTags: ['Patent', 'Luxury', 'Heels', 'Formal'],
+    description: 'Elegant high-gloss patent leather stiletto pumps for formal and luxury wear.',
+    renderConfig: { baseColor: '#0A0A0A', texture: 'plain' }
+  },
+  {
+    id: 'shoes_w_strappy_sandals',
+    name: 'Strappy Leather Sandals',
+    type: 'shoes',
+    category: 'Vacation',
+    subcategory: 'Sandals',
+    gender: 'woman',
+    colors: ['#D2B48C', '#FFFFFF'],
+    price: 95,
+    rating: 4.7,
+    styleTags: ['Strappy', 'Leather', 'Summer', 'Vacation'],
+    description: 'Minimalist strappy leather sandals perfect for resort and vacation walks.',
+    renderConfig: { baseColor: '#D2B48C', texture: 'plain' }
+  },
+  {
+    id: 'shoes_w_ballet_flats',
+    name: 'Classic Ballet Flats',
+    type: 'shoes',
+    category: 'Casual',
+    subcategory: 'Flats',
+    gender: 'woman',
+    colors: ['#FFB6C1', '#0A0A0A', '#E6D5B8'],
+    price: 85,
+    rating: 4.6,
+    styleTags: ['Casual', 'Flats', 'Leather', 'Classic'],
+    description: 'Chic and comfortable leather ballet flats with a subtle bow detail.',
+    renderConfig: { baseColor: '#FFB6C1', texture: 'plain' }
+  },
+  {
+    id: 'shoes_m_leather_loafers',
+    name: 'Classic Leather Loafers',
+    type: 'shoes',
+    category: 'Business',
+    subcategory: 'Loafers',
+    gender: 'man',
+    colors: ['#4A2E1B', '#0A0A0A'],
+    price: 170,
+    rating: 4.8,
+    styleTags: ['Leather', 'Business', 'Classic', 'Sartorial'],
+    description: 'Timeless hand-crafted leather loafers ideal for office and smart-casual fits.',
+    renderConfig: { baseColor: '#4A2E1B', texture: 'plain' }
+  },
+  {
+    id: 'shoes_m_derby_shoes',
+    name: 'Oxford Derby Shoes',
+    type: 'shoes',
+    category: 'Formal',
+    subcategory: 'Derby',
+    gender: 'man',
+    colors: ['#0A0A0A', '#5C4033'],
+    price: 195,
+    rating: 4.9,
+    styleTags: ['Leather', 'Formal', 'Dress Shoes', 'Suit'],
+    description: 'Polished calfskin leather Derby dress shoes for suits and black-tie events.',
+    renderConfig: { baseColor: '#0A0A0A', texture: 'plain' }
+  },
+  {
+    id: 'acc_w_dupatta',
+    name: 'Gold Embroidered Dupatta',
+    type: 'accessory',
+    category: 'Traditional',
+    subcategory: 'Scarves',
+    gender: 'woman',
+    colors: ['#D4AF37', '#B22222', '#0F1E36'],
+    price: 60,
+    rating: 4.9,
+    styleTags: ['Traditional', 'Accessory', 'Gold', 'Silk'],
+    description: 'A heavy organza dupatta bordered with intricate gold zari embroidery.',
+    renderConfig: { baseColor: '#D4AF37', texture: 'silk' }
+  },
+  {
+    id: 'acc_w_clutch_bag',
+    name: 'Satin Envelope Clutch',
+    type: 'accessory',
+    category: 'Luxury',
+    subcategory: 'Bags',
+    gender: 'woman',
+    colors: ['#0A0A0A', '#FAFAFA', '#D4AF37'],
+    price: 120,
+    rating: 4.8,
+    styleTags: ['Luxury', 'Satin', 'Evening', 'Classic'],
+    description: 'A sleek evening envelope clutch in glossy satin with gold metallic hardware.',
+    renderConfig: { baseColor: '#0A0A0A', texture: 'plain' }
+  },
+  {
+    id: 'acc_w_leather_handbag',
+    name: 'Classic Leather Tote Bag',
+    type: 'accessory',
+    category: 'Business',
+    subcategory: 'Bags',
+    gender: 'woman',
+    colors: ['#D2B48C', '#0A0A0A', '#ADC2A9'],
+    price: 210,
+    rating: 4.7,
+    styleTags: ['Leather', 'Tote', 'Business', 'Everyday'],
+    description: 'A spacious premium pebbled leather tote bag with sturdy handles.',
+    renderConfig: { baseColor: '#D2B48C', texture: 'leather' }
+  },
+  {
     id: 'm_top_artistic_paint',
     name: 'Abstract Paint Splatter Tee',
     type: 'top',
@@ -1192,12 +1304,14 @@ export function generateOutfitLibrary(): Outfit[] {
 
   for (const gender of genders) {
     const genderGarments = ALL_GARMENTS.filter(g => g.gender === gender || g.gender === 'unisex');
-    const tops = genderGarments.filter(g => g.type === 'top');
-    const bottoms = genderGarments.filter(g => g.type === 'bottom');
-    const fulls = genderGarments.filter(g => g.type === 'full');
-    const outerwear = genderGarments.filter(g => g.type === 'outerwear');
-    const shoes = genderGarments.filter(g => g.type === 'shoes');
-    const accessories = genderGarments.filter(g => g.type === 'accessory');
+    
+    // Prioritize strictly gender-matching items. Fallback to unisex only if no gender-matching item is in database.
+    const tops = genderGarments.filter(g => g.type === 'top' && (g.gender === gender || !genderGarments.some(x => x.type === 'top' && x.gender === gender)));
+    const bottoms = genderGarments.filter(g => g.type === 'bottom' && (g.gender === gender || !genderGarments.some(x => x.type === 'bottom' && x.gender === gender)));
+    const fulls = genderGarments.filter(g => g.type === 'full' && (g.gender === gender || !genderGarments.some(x => x.type === 'full' && x.gender === gender)));
+    const outerwear = genderGarments.filter(g => g.type === 'outerwear' && (g.gender === gender || !genderGarments.some(x => x.type === 'outerwear' && x.gender === gender)));
+    const shoes = genderGarments.filter(g => g.type === 'shoes' && (g.gender === gender || !genderGarments.some(x => x.type === 'shoes' && x.gender === gender)));
+    const accessories = genderGarments.filter(g => g.type === 'accessory' && (g.gender === gender || !genderGarments.some(x => x.type === 'accessory' && x.gender === gender)));
 
     for (const cat of OUTFIT_CATEGORIES) {
       const matchCat = ['Casual', 'Streetwear', 'Luxury', 'Business', 'Traditional', 'Vacation'].includes(cat) 
