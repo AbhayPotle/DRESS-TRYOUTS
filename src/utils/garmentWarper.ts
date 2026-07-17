@@ -2057,11 +2057,25 @@ function drawSequinSparkles(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH:
       ctx.arc(px, py, 5.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Reflective white metallic glint highlight
-      if (shineVal > 0.45) {
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.95})`;
+      // Reflective white metallic 4-point star lens flare sparkle
+      if (shineVal > 0.52) {
+        const rayLen = 4.5 + shineVal * 3.5;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.95})`;
+        ctx.lineWidth = 1.0;
+        
         ctx.beginPath();
-        ctx.arc(px - 1.5, py - 1.5, 2.0, 0, Math.PI * 2);
+        // Horizontal ray
+        ctx.moveTo(px - rayLen, py);
+        ctx.lineTo(px + rayLen, py);
+        // Vertical ray
+        ctx.moveTo(px, py - rayLen);
+        ctx.lineTo(px, py + rayLen);
+        ctx.stroke();
+
+        // Glowing core center
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
         ctx.fill();
       }
     }
