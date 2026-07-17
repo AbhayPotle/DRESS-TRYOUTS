@@ -194,32 +194,45 @@ export default function MirrorSidebar({
         {tab === 'ai' && (
           <div className="space-y-6 animate-fade-in">
             {/* Skin tone color block */}
-            <div className="bg-white/5 border border-white/10 p-5 rounded-2xl space-y-3">
+            <div className="bg-white/5 border border-white/10 p-5 rounded-2xl space-y-4 backdrop-blur-md">
               <div className="flex justify-between items-center">
                 <span className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">Skin Tone Analyzer</span>
-                <span className="text-xs text-yellow-500 font-bold font-mono">Calibrated</span>
+                <span className="text-xs text-yellow-500 font-bold font-mono flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span>Calibrated</span>
+                </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
                 <div 
-                  className="w-10 h-10 rounded-full border border-white/20 shadow-lg"
+                  className="w-10 h-10 rounded-full border border-white/20 shadow-lg shrink-0"
                   style={{ backgroundColor: factors.skinTone.hex }}
                 />
                 <div>
-                  <h4 className="font-bold text-sm">{factors.skinTone.type}</h4>
-                  <p className="text-xs text-neutral-400">{factors.skinTone.paletteName}</p>
+                  <h4 className="font-bold text-sm text-white">{factors.skinTone.type}</h4>
+                  <p className="text-xs text-yellow-500 font-semibold">{factors.skinTone.paletteName}</p>
                 </div>
               </div>
+
+              <p className="text-xs text-neutral-300 leading-relaxed pt-1">
+                {factors.skinTone.description}
+              </p>
               
-              <div className="space-y-1.5">
-                <span className="text-[10px] text-neutral-500 font-semibold uppercase">Recommended Palette Colors</span>
-                <div className="flex gap-1.5">
-                  {factors.skinTone.recommendedColors.map(c => (
+              <div className="space-y-2.5 pt-2 border-t border-white/5">
+                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Recommended Swatches</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {factors.skinTone.recommendedColors.map((c, idx) => (
                     <div
                       key={c}
-                      className="w-6 h-6 rounded border border-white/10"
-                      style={{ backgroundColor: c }}
-                      title={c}
-                    />
+                      className="flex items-center gap-2 p-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+                    >
+                      <div
+                        className="w-4 h-4 rounded-full shrink-0 border border-white/10"
+                        style={{ backgroundColor: c }}
+                      />
+                      <span className="text-[10px] font-semibold text-neutral-300 truncate">
+                        {factors.skinTone.colorNames?.[idx] || c}
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>
