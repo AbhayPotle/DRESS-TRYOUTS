@@ -32,6 +32,24 @@ function adjustColorBrightness(hex: string, percent: number): string {
   return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
 }
 
+// Global helper function to blend colors for realistic iridescent light interference and sparkle halos
+function mixColor(hex: string, tint: string, amount: number): string {
+  try {
+    const r1 = parseInt(hex.slice(1,3), 16) || 0;
+    const g1 = parseInt(hex.slice(3,5), 16) || 0;
+    const b1 = parseInt(hex.slice(5,7), 16) || 0;
+    const r2 = parseInt(tint.slice(1,3), 16) || 0;
+    const g2 = parseInt(tint.slice(3,5), 16) || 0;
+    const b2 = parseInt(tint.slice(5,7), 16) || 0;
+    const r = Math.min(255, Math.max(0, Math.round(r1 * (1 - amount) + r2 * amount)));
+    const g = Math.min(255, Math.max(0, Math.round(g1 * (1 - amount) + g2 * amount)));
+    const b = Math.min(255, Math.max(0, Math.round(b1 * (1 - amount) + b2 * amount)));
+    return "#" + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+  } catch (e) {
+    return hex;
+  }
+}
+
 // Cache generated canvas patterns globally to prevent garbage collection stutters (memory leak mitigation)
 const patternCache: Record<string, CanvasPattern> = {};
 
@@ -44,23 +62,7 @@ function getFabricFill(
   shY: number,
   shWidth: number
 ): string | CanvasPattern | CanvasGradient {
-  // Helper function to blend colors for realistic iridescent thin-film light interference
-  const mixColor = (hex: string, tint: string, amount: number): string => {
-    try {
-      const r1 = parseInt(hex.slice(1,3), 16) || 0;
-      const g1 = parseInt(hex.slice(3,5), 16) || 0;
-      const b1 = parseInt(hex.slice(5,7), 16) || 0;
-      const r2 = parseInt(tint.slice(1,3), 16) || 0;
-      const g2 = parseInt(tint.slice(3,5), 16) || 0;
-      const b2 = parseInt(tint.slice(5,7), 16) || 0;
-      const r = Math.min(255, Math.max(0, Math.round(r1 * (1 - amount) + r2 * amount)));
-      const g = Math.min(255, Math.max(0, Math.round(g1 * (1 - amount) + g2 * amount)));
-      const b = Math.min(255, Math.max(0, Math.round(b1 * (1 - amount) + b2 * amount)));
-      return "#" + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
-    } catch (e) {
-      return hex;
-    }
-  };
+
 
   // Silk/Saree gradient sheen (dynamic - calculated per frame for iridescent pearl luster)
   if (textureType === 'silk' || color === '#800020' || color === '#D63031') {
@@ -2203,12 +2205,23 @@ function drawSequinSparkles(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH:
       ctx.arc(px, py, 5.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Reflective white metallic 4-point star lens flare sparkle
+      // Reflective white metallic 4-point star lens flare sparkle with color-matched outer glow halo
       if (shineVal > 0.52) {
         const rayLen = 4.5 + shineVal * 3.5;
-        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.95})`;
-        ctx.lineWidth = 1.0;
         
+        // 1. Color-matched outer glow halo rays
+        ctx.strokeStyle = mixColor(baseColor, '#FFFFFF', 0.58);
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.moveTo(px - (rayLen * 0.7), py);
+        ctx.lineTo(px + (rayLen * 0.7), py);
+        ctx.moveTo(px, py - (rayLen * 0.7));
+        ctx.lineTo(px, py + (rayLen * 0.7));
+        ctx.stroke();
+
+        // 2. Bright white core rays
+        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.95})`;
+        ctx.lineWidth = 0.95;
         ctx.beginPath();
         // Horizontal ray
         ctx.moveTo(px - rayLen, py);
