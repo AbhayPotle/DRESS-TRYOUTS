@@ -187,7 +187,25 @@ export function getAIRecommendations(
         const isCasualGarment = outfit.items.some(item => {
           const sub = item.subcategory.toLowerCase();
           const name = item.name.toLowerCase();
-          return sub.includes('t-shirt') || sub.includes('hoodie') || sub.includes('jogger') || sub.includes('shorts') || name.includes('tee') || name.includes('hoodie');
+          const type = item.type;
+          
+          if (type === 'top') {
+            // Must strictly be a formal/classic shirt, suit top, or blazer
+            const isClassicShirt = sub === 'shirts' || sub === 'blazers' || sub === 'suits' || name.includes('oxford') || name.includes('mandarin') || name.includes('linen shirt') || name.includes('silk');
+            return !isClassicShirt;
+          }
+          if (type === 'bottom') {
+            // Must strictly be formal pants, trousers, or chinos
+            const isClassicBottom = sub === 'trousers' || sub === 'chinos' || sub === 'pants' || name.includes('slacks') || name.includes('suit pants');
+            return !isClassicBottom;
+          }
+          if (type === 'full') {
+            // Must strictly be elegant dress, gown, saree, or lehenga
+            const isElegantDress = sub === 'dresses' || sub === 'sarees' || sub === 'lehengas' || sub === 'sherwani';
+            const isCasualDress = name.includes('boho') || name.includes('cyberpunk') || name.includes('tassel') || name.includes('sundress') || name.includes('jersey');
+            return !isElegantDress || isCasualDress;
+          }
+          return false;
         });
         const isElegant = 
           ['traditional', 'formal', 'luxury', 'business'].includes(catLower) ||
