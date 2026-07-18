@@ -763,7 +763,9 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   drawStitchingLine(ctx, rightStitchOuter1.x, rightStitchOuter1.y, rightStitchInner1.x, rightStitchInner1.y);
   drawStitchingLine(ctx, rightStitchOuter2.x, rightStitchOuter2.y, rightStitchInner2.x, rightStitchInner2.y);
 
-  drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 6, scaledRH.x - 16, scaledRH.y + 6, hipMidX, hipMidY + 12);
+  // Double-stitching lines at the bottom hem of the top
+  drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 5, scaledRH.x - 16, scaledRH.y + 5, hipMidX, hipMidY + 11);
+  drawStitchingLine(ctx, scaledLH.x + 16, scaledLH.y + 8, scaledRH.x - 16, scaledRH.y + 8, hipMidX, hipMidY + 14);
 
   // Draw luxury gold buttons down center placket for cardigans/jackets/shirts
   const isButtoned = subcatLower.includes('jacket') || subcatLower.includes('coat') || nameLower.includes('blazer') || nameLower.includes('cardigan') || nameLower.includes('shirt') || tags.includes('Formal');
