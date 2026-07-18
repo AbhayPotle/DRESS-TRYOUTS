@@ -98,9 +98,9 @@ export class GestureDetector {
         // Check if hand is flipped or upright
         const isUpright = wrist.y > middleMCP.y;
 
-        // Distance between thumb tip and index tip for pinch (scaled)
+        // Distance between thumb tip and index tip for pinch (scaled - optimized for sensitivity)
         const pinchDist = this.distance(thumbTip, indexTip);
-        if (pinchDist < handScale * 0.48) {
+        if (pinchDist < handScale * 0.68) {
           activeGesture = 'pinch';
           activeConfidence = 0.95;
           break;
@@ -204,8 +204,8 @@ export class GestureDetector {
       }
     }
 
-    // Handle gesture confidence accumulation
-    const requiredFrames = (activeGesture === 'pinch' || activeGesture === 'thumbs_up' || activeGesture === 'peace') ? 3 : 6; // static gestures trigger faster!
+    // Handle gesture confidence accumulation (pinches trigger in 2 frames for instant reaction)
+    const requiredFrames = (activeGesture === 'pinch') ? 2 : (activeGesture === 'thumbs_up' || activeGesture === 'peace') ? 3 : 5;
     
     for (const key in this.gestureConfidence) {
       const g = key as GestureType;
