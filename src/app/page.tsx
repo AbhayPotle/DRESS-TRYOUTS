@@ -41,8 +41,8 @@ export default function Home() {
       {appState === 'landing' && (
         <div className="relative min-h-screen flex flex-col justify-between overflow-hidden px-6 py-8">
           {/* Background Ambient Glow */}
-          <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-yellow-500/5 blur-[150px] pointer-events-none" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-neutral-500/10 blur-[150px] pointer-events-none" />
+          <div className="absolute top-[-25%] left-[-15%] w-[60vw] h-[60vw] rounded-full bg-yellow-500/8 blur-[180px] animate-pulseGlow1 pointer-events-none" />
+          <div className="absolute bottom-[-15%] right-[-15%] w-[55vw] h-[55vw] rounded-full bg-emerald-500/8 blur-[180px] animate-pulseGlow2 pointer-events-none" />
 
           {/* Header */}
           <header className="max-w-7xl w-full mx-auto flex justify-between items-center z-10">
@@ -56,17 +56,17 @@ export default function Home() {
           </header>
 
           {/* Hero Section */}
-          <section className="max-w-4xl mx-auto text-center space-y-8 py-16 z-10">
+          <section className="max-w-4xl w-full mx-auto text-center space-y-8 py-14 px-6 md:px-12 my-auto z-10 rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl shadow-2xl shadow-black/40">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-yellow-500 text-xs font-semibold uppercase tracking-wider animate-pulse">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Real-Time AI virtual fitting</span>
             </div>
 
-            <h1 className="text-5xl md:text-8xl font-black tracking-tight leading-[0.95] bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-500">
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[0.95] bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-500">
               Stand in the <br />Future of Fashion
             </h1>
 
-            <p className="text-neutral-400 text-md md:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
+            <p className="text-neutral-400 text-sm md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
               Try on shirts, jackets, pants, and luxury traditional wear in real time. We project clothing onto your body shape perfectly while preserving your face, expressions, and hair.
             </p>
 
