@@ -1070,10 +1070,13 @@ function drawBottom(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: S
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Stitch bottom hems of trousers
+  // Stitch bottom hems of trousers (double-stitching detail)
   if (!isShorts) {
-    drawStitchingLine(ctx, scaledLA.x - 10, scaledLA.y - 4, scaledLA.x + 10, scaledLA.y - 4);
-    drawStitchingLine(ctx, scaledRA.x - 10, scaledRA.y - 4, scaledRA.x + 10, scaledRA.y - 4);
+    drawStitchingLine(ctx, scaledLA.x - 10, scaledLA.y - 3, scaledLA.x + 10, scaledLA.y - 3);
+    drawStitchingLine(ctx, scaledLA.x - 10, scaledLA.y - 6, scaledLA.x + 10, scaledLA.y - 6);
+    
+    drawStitchingLine(ctx, scaledRA.x - 10, scaledRA.y - 3, scaledRA.x + 10, scaledRA.y - 3);
+    drawStitchingLine(ctx, scaledRA.x - 10, scaledRA.y - 6, scaledRA.x + 10, scaledRA.y - 6);
   }
 
   // Denim shading/highlights
