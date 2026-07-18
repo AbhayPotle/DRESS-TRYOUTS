@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Sparkles, User, ChevronRight, RefreshCw, Eye, CheckCircle } from 'lucide-react';
+import { Camera, Sparkles, User, ChevronRight, RefreshCw, Eye, CheckCircle, Info } from 'lucide-react';
 import { ScanMeasurements, calculateMeasurements } from '../utils/aiRecommender';
 
 interface OnboardingFlowProps {
@@ -32,6 +32,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [scanStatus, setScanStatus] = useState('Initializing camera stream...');
   const [computedMeasurements, setComputedMeasurements] = useState<ScanMeasurements | null>(null);
   const [trackerActive, setTrackerActive] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -372,15 +373,11 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const calculateScannedFinalProfile = () => {
     const buffer = measurementsBufferRef.current;
     
-    // Fallback: If no landmarks were captured (e.g. camera dark/blocked), use standard profile defaults
+    // Fallback: If no landmarks were captured (e.g. camera dark/blocked), show a clear calibration error warning rather than silently loading defaults
     if (buffer.shoulderWidths.length < 5) {
-      console.warn('Low landmark capture rate. Loading standard size template.');
-      const defaults = {
-        male: { heightCm: 178, chestCm: 102, waistCm: 84, hipCm: 96, shoulderWidthCm: 46, armLengthCm: 62, legLengthCm: 81, bodyType: 'Athletic' as const },
-        female: { heightCm: 165, chestCm: 90, waistCm: 68, hipCm: 94, shoulderWidthCm: 39, armLengthCm: 56, legLengthCm: 74, bodyType: 'Curvy' as const }
-      };
-      setComputedMeasurements(defaults[gender]);
-      setStep('result');
+      console.warn('Low landmark capture rate. Body skeleton detection failed.');
+      stopScanningTracker();
+      setScanError('The camera was unable to detect your body shape landmarks. Please ensure you are standing fully in the camera view with adequate lighting, or choose to skip scanning and use standard templates.');
       return;
     }
 
@@ -627,6 +624,47 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               height={720}
               className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
             />
+
+            {scanError && (
+              <div className="absolute inset-0 bg-neutral-950/95 flex flex-col items-center justify-center p-6 text-center z-30 space-y-4">
+                <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+                  <Info className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Scan Calibration Failed</h3>
+                <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">
+                  {scanError}
+                </p>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      setScanError(null);
+                      setScanProgress(0);
+                      setScanStatus('Starting calibration...');
+                      // Reset buffer refs via direct modification if needed
+                      setStep('camera');
+                      setTimeout(() => setStep('scan'), 50);
+                    }}
+                    className="px-4 py-2 bg-yellow-500 text-black text-xs font-bold rounded-xl hover:bg-yellow-400 transition-all cursor-pointer"
+                  >
+                    Try Scan Again
+                  </button>
+                  <button
+                    onClick={() => {
+                      setScanError(null);
+                      const defaults = {
+                        male: { heightCm: 178, chestCm: 102, waistCm: 84, hipCm: 96, shoulderWidthCm: 46, armLengthCm: 62, legLengthCm: 81, bodyType: 'Athletic' as const },
+                        female: { heightCm: 165, chestCm: 90, waistCm: 68, hipCm: 94, shoulderWidthCm: 39, armLengthCm: 56, legLengthCm: 74, bodyType: 'Curvy' as const }
+                      };
+                      setComputedMeasurements(defaults[gender]);
+                      setStep('result');
+                    }}
+                    className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-xs font-bold rounded-xl border border-white/10 transition-all cursor-pointer"
+                  >
+                    Use Standard Sizes
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Neon scan sweep line */}
             <div
