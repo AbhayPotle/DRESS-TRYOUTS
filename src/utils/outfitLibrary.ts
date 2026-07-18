@@ -1184,7 +1184,7 @@ export const BASE_GARMENTS: Garment[] = [
     renderConfig: { baseColor: '#004F34', secondaryColor: '#D4AF37', texture: 'silk' }
   },
   {
-    id: 'w_full_gold_sherwani',
+    id: 'm_full_gold_sherwani',
     name: 'Royal Gold Brocade Sherwani',
     type: 'full',
     category: 'Traditional',

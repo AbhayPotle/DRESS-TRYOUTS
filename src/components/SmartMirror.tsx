@@ -47,11 +47,16 @@ export default function SmartMirror({
   // Libraries & Data
   const [outfitLibrary] = useState<Outfit[]>(() => generateOutfitLibrary());
   const [genderOutfits] = useState<Outfit[]>(() => {
-    const filtered = outfitLibrary.filter(o => 
-      gender === 'male' 
-        ? (o.gender === 'man' || o.gender === 'boy')
-        : (o.gender === 'woman' || o.gender === 'girl')
-    );
+    // Strictly isolate adult vs children garments based on height metrics (140cm threshold)
+    const isChild = initialMeasurements?.heightCm !== null && initialMeasurements.heightCm < 140;
+    
+    const filtered = outfitLibrary.filter(o => {
+      if (gender === 'male') {
+        return isChild ? o.gender === 'boy' : o.gender === 'man';
+      } else {
+        return isChild ? o.gender === 'girl' : o.gender === 'woman';
+      }
+    });
     // Shuffle using Fisher-Yates algorithm to prevent repeats and show random items
     const arr = [...filtered];
     for (let i = arr.length - 1; i > 0; i--) {
