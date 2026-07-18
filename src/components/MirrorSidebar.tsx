@@ -35,6 +35,8 @@ export default function MirrorSidebar({
   const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(30);
 
+  const [highGraphics, setHighGraphics] = useState(true);
+
   // Reset lazy-loading count whenever filters change
   useEffect(() => {
     setVisibleCount(30);
@@ -49,32 +51,47 @@ export default function MirrorSidebar({
   });
 
   return (
-    <div className="w-96 h-full bg-black/60 border-l border-white/10 backdrop-blur-2xl flex flex-col text-white">
-      {/* Navigation tabs */}
-      <div className="flex border-b border-white/10">
+    <div className={`w-96 h-full border-l border-white/10 flex flex-col text-white transition-all duration-300 ${
+      highGraphics ? 'bg-black/60 backdrop-blur-2xl' : 'bg-neutral-950'
+    }`}>
+      {/* Navigation tabs + Performance toggler */}
+      <div className="flex border-b border-white/10 items-center justify-between pr-3 bg-black/20">
+        <div className="flex flex-1">
+          <button
+            onClick={() => setTab('catalog')}
+            className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 hover:text-white cursor-pointer ${
+              tab === 'catalog' ? 'border-yellow-500 text-white' : 'border-transparent text-neutral-400'
+            }`}
+          >
+            Catalog
+          </button>
+          <button
+            onClick={() => setTab('ai')}
+            className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 hover:text-white cursor-pointer ${
+              tab === 'ai' ? 'border-yellow-500 text-white' : 'border-transparent text-neutral-400'
+            }`}
+          >
+            AI Advisor
+          </button>
+          <button
+            onClick={() => setTab('gestures')}
+            className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 hover:text-white cursor-pointer ${
+              tab === 'gestures' ? 'border-yellow-500 text-white' : 'border-transparent text-neutral-400'
+            }`}
+          >
+            Gestures
+          </button>
+        </div>
         <button
-          onClick={() => setTab('catalog')}
-          className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 hover:text-white cursor-pointer ${
-            tab === 'catalog' ? 'border-yellow-500 text-white' : 'border-transparent text-neutral-400'
+          onClick={() => setHighGraphics(!highGraphics)}
+          title={highGraphics ? "Switch to low-performance backdrop blur mode" : "Enable high-performance glassmorphism blur"}
+          className={`p-1 rounded px-1.5 border transition-all text-[8px] uppercase tracking-widest font-black cursor-pointer ${
+            highGraphics 
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+              : 'bg-white/5 border-white/10 text-neutral-400'
           }`}
         >
-          Catalog
-        </button>
-        <button
-          onClick={() => setTab('ai')}
-          className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 hover:text-white cursor-pointer ${
-            tab === 'ai' ? 'border-yellow-500 text-white' : 'border-transparent text-neutral-400'
-          }`}
-        >
-          AI Advisor
-        </button>
-        <button
-          onClick={() => setTab('gestures')}
-          className={`flex-1 py-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 hover:text-white cursor-pointer ${
-            tab === 'gestures' ? 'border-yellow-500 text-white' : 'border-transparent text-neutral-400'
-          }`}
-        >
-          Gestures
+          {highGraphics ? 'HD UI' : 'SD UI'}
         </button>
       </div>
 
