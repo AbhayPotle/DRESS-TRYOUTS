@@ -2176,12 +2176,36 @@ function drawTopCreases(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any
 
 function drawDenimDetails(ctx: CanvasRenderingContext2D, lH: any, rH: any, lK: any, rK: any, lA: any, rA: any, isShorts: boolean) {
   ctx.save();
-  // Gold stitch lines
-  ctx.strokeStyle = 'rgba(196, 154, 108, 0.35)';
+  // Gold stitch lines (Waistband stitch)
+  ctx.strokeStyle = 'rgba(196, 154, 108, 0.42)';
   ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.moveTo(rH.x + 4, rH.y - 11);
   ctx.lineTo(lH.x - 4, lH.y - 11);
+  ctx.stroke();
+
+  // Scoop pockets detailing (copper orange denim thread)
+  const hipW = Math.abs(rH.x - lH.x);
+  
+  // Left pocket scoop
+  ctx.beginPath();
+  ctx.moveTo(lH.x - 2, lH.y - 10);
+  ctx.quadraticCurveTo(lH.x + hipW * 0.15, lH.y - 12, lH.x + hipW * 0.22, lH.y + 12);
+  ctx.stroke();
+
+  // Right pocket scoop
+  ctx.beginPath();
+  ctx.moveTo(rH.x + 2, rH.y - 10);
+  ctx.quadraticCurveTo(rH.x - hipW * 0.15, rH.y - 12, rH.x - hipW * 0.22, rH.y + 12);
+  ctx.stroke();
+
+  // J-curve fly zipper stitch line
+  ctx.beginPath();
+  const cX = (lH.x + rH.x) / 2;
+  const cY = (lH.y + rH.y) / 2;
+  ctx.moveTo(cX, cY - 10);
+  ctx.lineTo(cX, cY + 22);
+  ctx.quadraticCurveTo(cX - 8, cY + 26, cX - 12, cY + 16);
   ctx.stroke();
 
   // 3D wrinkles around knees (whiskers)
