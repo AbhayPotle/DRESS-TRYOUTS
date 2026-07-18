@@ -106,24 +106,24 @@ export class GestureDetector {
           break;
         }
 
-        // Thumbs Up: Thumb tip is high above wrist/knuckles, other fingers are curled/closed
+        // Thumbs Up: Thumb tip is high above wrist/knuckles, other fingers are curled/closed (with tolerant buffer)
         const otherFingersClosed = 
-          indexTip.y > indexMCP.y && 
-          middleTip.y > middleMCP.y && 
-          ringTip.y > ringMCP.y && 
-          pinkyTip.y > pinkyMCP.y;
+          indexTip.y > indexMCP.y - handScale * 0.08 && 
+          middleTip.y > middleMCP.y - handScale * 0.08 && 
+          ringTip.y > ringMCP.y - handScale * 0.08 && 
+          pinkyTip.y > pinkyMCP.y - handScale * 0.08;
 
-        if (isUpright && thumbTip.y < thumbMCP.y - handScale * 0.3 && otherFingersClosed) {
+        if (isUpright && thumbTip.y < thumbMCP.y - handScale * 0.26 && otherFingersClosed) {
           activeGesture = 'thumbs_up';
           activeConfidence = 0.95;
           break;
         }
 
-        // Peace Sign: Index and Middle are extended, Ring and Pinky are closed
-        const isIndexExtended = indexTip.y < indexMCP.y - handScale * 0.22;
-        const isMiddleExtended = middleTip.y < middleMCP.y - handScale * 0.22;
-        const isRingClosed = ringTip.y > ringMCP.y - handScale * 0.1;
-        const isPinkyClosed = pinkyTip.y > pinkyMCP.y - handScale * 0.1;
+        // Peace Sign: Index and Middle are extended, Ring and Pinky are closed (with tolerant buffer)
+        const isIndexExtended = indexTip.y < indexMCP.y - handScale * 0.16;
+        const isMiddleExtended = middleTip.y < middleMCP.y - handScale * 0.16;
+        const isRingClosed = ringTip.y > ringMCP.y - handScale * 0.06;
+        const isPinkyClosed = pinkyTip.y > pinkyMCP.y - handScale * 0.06;
 
         if (isUpright && isIndexExtended && isMiddleExtended && isRingClosed && isPinkyClosed) {
           activeGesture = 'peace';
@@ -131,12 +131,12 @@ export class GestureDetector {
           break;
         }
 
-        // Open Palm: All fingers fully extended and spread out
+        // Open Palm: All fingers fully extended and spread out (with relaxed threshold)
         const allExtended = 
-          indexTip.y < indexMCP.y - handScale * 0.38 && 
-          middleTip.y < middleMCP.y - handScale * 0.38 && 
-          ringTip.y < ringMCP.y - handScale * 0.38 && 
-          pinkyTip.y < pinkyMCP.y - handScale * 0.38;
+          indexTip.y < indexMCP.y - handScale * 0.28 && 
+          middleTip.y < middleMCP.y - handScale * 0.28 && 
+          ringTip.y < ringMCP.y - handScale * 0.28 && 
+          pinkyTip.y < pinkyMCP.y - handScale * 0.28;
 
         if (isUpright && allExtended) {
           activeGesture = 'open_palm';
@@ -180,9 +180,9 @@ export class GestureDetector {
           activeConfidence = 0.90;
         }
 
-        // Stable raising constraint: Wrist must be above shoulder or chest level to prevent idle triggers when hands are down
-        const isRightHandRaised = rightShoulder && rightWrist.y < rightShoulder.y + 0.12;
-        const isLeftHandRaised = leftShoulder && leftWrist.y < leftShoulder.y + 0.12;
+        // Stable raising constraint: Wrist must be above shoulder or upper chest level (using comfortable 0.18 height buffer)
+        const isRightHandRaised = rightShoulder && rightWrist.y < rightShoulder.y + 0.18;
+        const isLeftHandRaised = leftShoulder && leftWrist.y < leftShoulder.y + 0.18;
 
         // Wave Right
         if (activeGesture === 'none' && isRightWristVisible && isRightHandRaised) {
