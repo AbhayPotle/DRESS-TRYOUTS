@@ -586,6 +586,22 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.fill();
   ctx.restore();
 
+  // 3D Drop-Shadow cast from collar onto chest
+  ctx.save();
+  ctx.lineWidth = 11.0;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y + 1);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY + 1.5);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y + 1);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 1.5, neckBaseR.x, neckBaseR.y + 1);
+  }
+  ctx.stroke();
+  ctx.restore();
+
   // Draw crew neckband collar trim with double-stitching details
   ctx.save();
   ctx.lineWidth = 7.5;
@@ -1398,6 +1414,22 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.fill();
   ctx.restore();
 
+  // 3D Drop-Shadow cast from collar onto chest
+  ctx.save();
+  ctx.lineWidth = 11.0;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(neckBaseL.x, neckBaseL.y + 1);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY + 1.5);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y + 1);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY + 1.5, neckBaseR.x, neckBaseR.y + 1);
+  }
+  ctx.stroke();
+  ctx.restore();
+
   // Draw crew neckband collar trim with double-stitching details
   ctx.save();
   ctx.lineWidth = 7.5;
@@ -1718,6 +1750,27 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   drawTopShading(ctx, raisedLS, raisedRS, scaledLH, scaledRH);
   drawSkirtShading(ctx, scaledLH, scaledRH, bottomY, isLehenga);
   drawDressCreases(ctx, raisedLS, raisedRS, scaledLH, scaledRH, bottomY, isLehenga);
+
+  // Draw embroidered designer signature emblem monogram for luxury garments
+  if (isLuxury) {
+    ctx.save();
+    const isSilver = config.secondaryColor === '#C0C0C0' || nameLower.includes('glitz') || nameLower.includes('haze');
+    ctx.fillStyle = isSilver ? 'rgba(250, 250, 250, 0.48)' : 'rgba(212, 175, 55, 0.58)';
+    ctx.font = 'italic bold 7px Georgia, serif';
+    ctx.textAlign = 'center';
+    
+    // Draw monogram at the lower hem flare corner (left side)
+    const labelX = leftFlareX + (rightFlareX - leftFlareX) * 0.15;
+    const labelY = bottomY - 32;
+    
+    ctx.fillText("AG", labelX, labelY);
+    ctx.strokeStyle = isSilver ? 'rgba(250, 250, 250, 0.32)' : 'rgba(212, 175, 55, 0.38)';
+    ctx.lineWidth = 0.65;
+    ctx.beginPath();
+    ctx.arc(labelX, labelY - 2.2, 5.2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
 function drawSaree(ctx: CanvasRenderingContext2D, p: any[], config: any) {
