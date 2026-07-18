@@ -370,7 +370,7 @@ export default function SmartMirror({
             const indexTip = hand[8];
             if (thumbTip && indexTip) {
               const d = Math.sqrt(Math.pow(thumbTip.x - indexTip.x, 2) + Math.pow(thumbTip.y - indexTip.y, 2));
-              if (d < 0.045) { // sub-pixel pinch threshold
+              if (d < 0.078) { // sub-pixel pinch threshold (optimized for sensitivity)
                 hasPrecisePinch = true;
               }
             }
@@ -411,7 +411,7 @@ export default function SmartMirror({
               const iy = indexTip.y * canvas.height;
 
               const d = Math.sqrt(Math.pow(thumbTip.x - indexTip.x, 2) + Math.pow(thumbTip.y - indexTip.y, 2));
-              const isPinching = d < 0.045;
+              const isPinching = d < 0.078;
 
               ctx.fillStyle = isPinching ? '#F59E0B' : '#10B981';
               ctx.strokeStyle = '#FFFFFF';
