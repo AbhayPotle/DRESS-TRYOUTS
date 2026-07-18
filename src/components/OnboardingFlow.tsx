@@ -746,24 +746,44 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Calibrated Height</span>
-                  <p className="text-xl font-bold text-white">{computedMeasurements.heightCm ? `${computedMeasurements.heightCm} cm` : 'Not Scanned (Sitting)'}</p>
+                  <p className="text-xl font-bold text-white">
+                    {computedMeasurements.heightCm 
+                      ? `${computedMeasurements.heightCm} cm (${Math.floor((computedMeasurements.heightCm / 2.54) / 12)}'${Math.round((computedMeasurements.heightCm / 2.54) % 12)}")` 
+                      : 'Not Scanned (Sitting)'}
+                  </p>
                 </div>
                 <hr className="col-span-2 border-white/10" />
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Chest Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.chestCm ? `${computedMeasurements.chestCm} cm` : 'Not Scanned (Sitting)'}</p>
+                  <p className="text-md font-semibold text-neutral-300">
+                    {computedMeasurements.chestCm 
+                      ? `${computedMeasurements.chestCm} cm (${Math.round(computedMeasurements.chestCm / 2.54)}")` 
+                      : 'Not Scanned (Sitting)'}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Waist Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.waistCm ? `${computedMeasurements.waistCm} cm` : 'Not Scanned (Sitting)'}</p>
+                  <p className="text-md font-semibold text-neutral-300">
+                    {computedMeasurements.waistCm 
+                      ? `${computedMeasurements.waistCm} cm (${Math.round(computedMeasurements.waistCm / 2.54)}")` 
+                      : 'Not Scanned (Sitting)'}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Hips Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.hipCm ? `${computedMeasurements.hipCm} cm` : 'Not Scanned (Sitting)'}</p>
+                  <p className="text-md font-semibold text-neutral-300">
+                    {computedMeasurements.hipCm 
+                      ? `${computedMeasurements.hipCm} cm (${Math.round(computedMeasurements.hipCm / 2.54)}")` 
+                      : 'Not Scanned (Sitting)'}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 text-xs uppercase tracking-wider font-semibold">Shoulders Sizing</span>
-                  <p className="text-md font-semibold text-neutral-300">{computedMeasurements.shoulderWidthCm ? `${computedMeasurements.shoulderWidthCm} cm` : 'Not Scanned (Sitting)'}</p>
+                  <p className="text-md font-semibold text-neutral-300">
+                    {computedMeasurements.shoulderWidthCm 
+                      ? `${computedMeasurements.shoulderWidthCm} cm (${Math.round(computedMeasurements.shoulderWidthCm / 2.54)}")` 
+                      : 'Not Scanned (Sitting)'}
+                  </p>
                 </div>
               </div>
 
