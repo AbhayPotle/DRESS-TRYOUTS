@@ -1031,6 +1031,16 @@ function drawSkirtShading(ctx: CanvasRenderingContext2D, lH: any, rH: any, botto
     const ctrlX = (startX + endX) / 2 + Math.sin(ratio * Math.PI) * 12;
     const ctrlY = (startY + endY) / 2;
     
+    // Light-direction casting shadow (creates deep 3D pleated volume folding)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.09)';
+    ctx.lineWidth = 14.0;
+    ctx.beginPath();
+    ctx.moveTo(startX + 2.5, startY);
+    ctx.quadraticCurveTo(ctrlX + 5, ctrlY, endX + 7, endY);
+    ctx.stroke();
+    ctx.restore();
+
     draw3DCrease(ctx, startX, startY, ctrlX, ctrlY, endX, endY, 0.75);
   }
 
