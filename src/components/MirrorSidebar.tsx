@@ -131,10 +131,10 @@ export default function MirrorSidebar({
                     <div
                       key={outfit.id}
                       onClick={() => onSelectOutfit(outfit)}
-                      className={`group relative p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
+                      className={`group relative p-4 rounded-xl border transition-all duration-300 ease-out hover:scale-[1.015] hover:shadow-[0_12px_36px_rgba(0,0,0,0.3)] cursor-pointer ${
                         isActive
-                          ? 'bg-yellow-500/10 border-yellow-500'
-                          : 'bg-white/5 border-white/10 hover:border-white/20'
+                          ? 'bg-yellow-500/10 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.15)]'
+                          : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
                       }`}
                     >
                       <div className="flex justify-between items-start">
