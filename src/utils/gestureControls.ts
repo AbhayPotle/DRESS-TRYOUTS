@@ -217,8 +217,8 @@ export class GestureDetector {
       }
     }
 
-    // Handle gesture confidence accumulation (pinches trigger in 2 frames for instant reaction)
-    const requiredFrames = (activeGesture === 'pinch' || activeGesture === 'double_pinch') ? 2 : (activeGesture === 'thumbs_up' || activeGesture === 'peace') ? 3 : 5;
+    // Handle gesture confidence accumulation (zero latency - trigger immediately on first frame)
+    const requiredFrames = 1;
     
     for (const key in this.gestureConfidence) {
       const g = key as GestureType;
