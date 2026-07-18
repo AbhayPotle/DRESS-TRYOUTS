@@ -44,7 +44,25 @@ function getFabricFill(
   shY: number,
   shWidth: number
 ): string | CanvasPattern | CanvasGradient {
-  // Silk/Saree gradient sheen (dynamic - calculated per frame for light animations)
+  // Helper function to blend colors for realistic iridescent thin-film light interference
+  const mixColor = (hex: string, tint: string, amount: number): string => {
+    try {
+      const r1 = parseInt(hex.slice(1,3), 16) || 0;
+      const g1 = parseInt(hex.slice(3,5), 16) || 0;
+      const b1 = parseInt(hex.slice(5,7), 16) || 0;
+      const r2 = parseInt(tint.slice(1,3), 16) || 0;
+      const g2 = parseInt(tint.slice(3,5), 16) || 0;
+      const b2 = parseInt(tint.slice(5,7), 16) || 0;
+      const r = Math.min(255, Math.max(0, Math.round(r1 * (1 - amount) + r2 * amount)));
+      const g = Math.min(255, Math.max(0, Math.round(g1 * (1 - amount) + g2 * amount)));
+      const b = Math.min(255, Math.max(0, Math.round(b1 * (1 - amount) + b2 * amount)));
+      return "#" + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+    } catch (e) {
+      return hex;
+    }
+  };
+
+  // Silk/Saree gradient sheen (dynamic - calculated per frame for iridescent pearl luster)
   if (textureType === 'silk' || color === '#800020' || color === '#D63031') {
     const timeVal = Date.now() * 0.0018;
     const shiftX = Math.sin(timeVal) * (shWidth * 0.15);
@@ -54,12 +72,22 @@ function getFabricFill(
       shCenter + shWidth + shiftX, 
       shY + shWidth * 2.5
     );
-    grad.addColorStop(0, adjustColorBrightness(color, -25));
-    grad.addColorStop(0.2, color);
-    grad.addColorStop(0.4, adjustColorBrightness(color, 35)); // glossy silk highlight
-    grad.addColorStop(0.6, color);
-    grad.addColorStop(0.8, adjustColorBrightness(color, -15));
-    grad.addColorStop(1, adjustColorBrightness(color, -35));
+    
+    // Choose a subtle iridescent tint glaze (cyan/magenta highlight for dark fabrics, gold/pink for light fabrics)
+    const isDark = color === '#0A0A0A' || color === '#800020' || color === '#8B0000' || color === '#004F34' || color === '#1D2A44';
+    const tintColor = isDark ? '#00F3FF' : '#FFD700'; 
+    const blendAmt = 0.08; 
+    
+    const baseC = color;
+    const darkC = mixColor(adjustColorBrightness(color, -26), isDark ? '#1C002B' : '#7D3CFF', 0.10);
+    const brightC = mixColor(adjustColorBrightness(color, 45), tintColor, blendAmt * 2.2);
+    
+    grad.addColorStop(0, darkC);
+    grad.addColorStop(0.2, baseC);
+    grad.addColorStop(0.4, brightC); // glossy iridescent highlight
+    grad.addColorStop(0.6, baseC);
+    grad.addColorStop(0.8, mixColor(adjustColorBrightness(color, -16), '#4B0082', 0.04));
+    grad.addColorStop(1, darkC);
     return grad;
   }
 
