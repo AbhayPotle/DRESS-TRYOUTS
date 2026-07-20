@@ -159,13 +159,23 @@ function getFabricFill(
       }
     }
   } else if (textureType === 'leather') {
-    // Tactile pebbled leather grain
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-    pCtx.fillRect(2, 2, 2.5, 2.5);
-    pCtx.fillRect(10, 10, 2.5, 2.5);
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-    pCtx.fillRect(3, 3, 1, 1);
-    pCtx.fillRect(11, 11, 1, 1);
+    // Premium pebbled leather grain with non-uniform cellular grain cells
+    pCtx.fillStyle = 'rgba(0, 0, 0, 0.24)';
+    pCtx.beginPath();
+    pCtx.arc(4, 4, 3, 0, Math.PI * 2);
+    pCtx.arc(12, 4, 2.5, 0, Math.PI * 2);
+    pCtx.arc(5, 12, 2.8, 0, Math.PI * 2);
+    pCtx.arc(12, 12, 3.2, 0, Math.PI * 2);
+    pCtx.fill();
+    
+    // Cell highlights (creates a convex 3D bevel on each pebble grain cell)
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+    pCtx.beginPath();
+    pCtx.arc(3.2, 3.2, 1.2, 0, Math.PI * 2);
+    pCtx.arc(11.2, 3.2, 1.0, 0, Math.PI * 2);
+    pCtx.arc(4.2, 11.2, 1.1, 0, Math.PI * 2);
+    pCtx.arc(11.2, 11.2, 1.3, 0, Math.PI * 2);
+    pCtx.fill();
   } else if (textureType === 'brocade') {
     // Ornate gold brocade zari weave pattern
     pCtx.strokeStyle = 'rgba(212, 175, 55, 0.32)'; // gold zari color
