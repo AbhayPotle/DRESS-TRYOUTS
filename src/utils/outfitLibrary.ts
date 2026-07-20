@@ -14,7 +14,7 @@ export interface Garment {
   renderConfig: {
     baseColor: string;
     secondaryColor?: string;
-    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk' | 'brocade' | 'artistic' | 'sequins';
+    texture?: 'plain' | 'denim' | 'stripes' | 'plaid' | 'leather' | 'knitted' | 'gold' | 'silver' | 'silk' | 'brocade' | 'artistic' | 'sequins' | 'velvet';
     opacity?: number;
     logoText?: string;
     patternScale?: number;
@@ -733,7 +733,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.9,
     styleTags: ['Formal', 'Runway', 'Brocade', 'Velvet', 'Luxury'],
     description: 'A luxurious deep crimson velvet blazer-style dress featuring shiny gold buttons and gold brocade trim.',
-    renderConfig: { baseColor: '#800020', secondaryColor: '#D4AF37', texture: 'plain' }
+    renderConfig: { baseColor: '#800020', secondaryColor: '#D4AF37', texture: 'velvet' }
   },
   {
     id: 'w_full_vintage_summer',
@@ -859,7 +859,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.9,
     styleTags: ['Formal', 'Gown', 'Velvet', 'Luxury', 'Long Sleeve'],
     description: 'A luxurious deep emerald green velvet gown with a formal flared silhouette.',
-    renderConfig: { baseColor: '#0F2E23', secondaryColor: '#D4AF37', texture: 'silk' }
+    renderConfig: { baseColor: '#0F2E23', secondaryColor: '#D4AF37', texture: 'velvet' }
   },
   {
     id: 'w_full_gold_sequin',
@@ -985,7 +985,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.9,
     styleTags: ['Traditional', 'Festive', 'Brocade', 'Gold'],
     description: 'A micro royal navy velvet sherwani with detailed gold embroidery borders.',
-    renderConfig: { baseColor: '#0F172A', secondaryColor: '#D4AF37', texture: 'brocade' }
+    renderConfig: { baseColor: '#0F172A', secondaryColor: '#D4AF37', texture: 'velvet' }
   },
   {
     id: 'w_full_obsidian_gown',
@@ -1055,7 +1055,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.9,
     styleTags: ['Traditional', 'Lehenga', 'Velvet', 'Luxury', 'Silver'],
     description: 'An elegant midnight navy blue velvet lehenga with silver zardozi embroidery borders.',
-    renderConfig: { baseColor: '#0F1E36', secondaryColor: '#C0C0C0', texture: 'silk' }
+    renderConfig: { baseColor: '#0F1E36', secondaryColor: '#C0C0C0', texture: 'velvet' }
   },
   {
     id: 'w_full_sage_saree',
@@ -1153,7 +1153,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.8,
     styleTags: ['Party', 'Cocktail', 'Velvet', 'Luxury', 'Gold'],
     description: 'A plush midnight black velvet mini dress featuring an elegant gold embroidered collar and cuffs.',
-    renderConfig: { baseColor: '#0A0A0A', secondaryColor: '#D4AF37', texture: 'silk' }
+    renderConfig: { baseColor: '#0A0A0A', secondaryColor: '#D4AF37', texture: 'velvet' }
   },
   {
     id: 'w_full_boho_terracotta',
@@ -1279,7 +1279,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.9,
     styleTags: ['Formal', 'Classic', 'Velvet', 'Luxury', 'Blue'],
     description: 'A luxury sapphire blue velvet shawl collar dinner jacket with satin trim lapels.',
-    renderConfig: { baseColor: '#0F2C59', secondaryColor: '#0A0A0A', texture: 'silk' }
+    renderConfig: { baseColor: '#0F2C59', secondaryColor: '#0A0A0A', texture: 'velvet' }
   },
   {
     id: 'm_top_emerald_linen',
@@ -1517,7 +1517,7 @@ export const BASE_GARMENTS: Garment[] = [
     rating: 4.9,
     styleTags: ['Party', 'Cocktail', 'Velvet', 'Luxury', 'Purple'],
     description: 'An elegant plum purple velvet long-sleeve wrap dress shimmering with a dynamic sweep.',
-    renderConfig: { baseColor: '#4E1A3D', secondaryColor: '#D4AF37', texture: 'silk' }
+    renderConfig: { baseColor: '#4E1A3D', secondaryColor: '#D4AF37', texture: 'velvet' }
   },
   {
     id: 'w_full_denim_boiler',

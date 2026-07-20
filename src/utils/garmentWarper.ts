@@ -64,6 +64,26 @@ function getFabricFill(
 ): string | CanvasPattern | CanvasGradient {
 
 
+  // Velvet gradient sheen (rich dark center, glowing high-contrast rim/grazing highlights)
+  if (textureType === 'velvet') {
+    const timeVal = Date.now() * 0.0015;
+    const shiftX = Math.sin(timeVal) * (shWidth * 0.1);
+    const grad = ctx.createLinearGradient(
+      shCenter - shWidth + shiftX, 
+      shY, 
+      shCenter + shWidth + shiftX, 
+      shY + shWidth * 2.5
+    );
+    const coreColor = adjustColorBrightness(color, -32); // deep rich core
+    const edgeColor = adjustColorBrightness(color, 25);  // glowing pile edge highlight
+    grad.addColorStop(0, edgeColor);
+    grad.addColorStop(0.2, coreColor);
+    grad.addColorStop(0.5, color);
+    grad.addColorStop(0.8, coreColor);
+    grad.addColorStop(1, edgeColor);
+    return grad;
+  }
+
   // Silk/Saree gradient sheen (dynamic - calculated per frame for iridescent pearl luster)
   if (textureType === 'silk' || color === '#800020' || color === '#D63031') {
     const timeVal = Date.now() * 0.0018;
