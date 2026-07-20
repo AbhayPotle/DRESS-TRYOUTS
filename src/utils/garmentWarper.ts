@@ -111,19 +111,30 @@ function getFabricFill(
   pCtx.fillRect(0, 0, 16, 16);
 
   if (textureType === 'denim') {
-    // High-contrast twill denim weave
-    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
-    pCtx.lineWidth = 0.75;
+    // High-contrast twill denim weave with micro cross-thread slubs
+    // 1. Fine background horizontal/vertical weave grid
+    pCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    pCtx.fillRect(0, 0, 16, 1);
+    pCtx.fillRect(0, 0, 1, 16);
+    pCtx.fillRect(0, 8, 16, 1);
+    pCtx.fillRect(8, 0, 1, 16);
+    
+    // 2. Main white diagonal twill threads (warp)
+    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+    pCtx.lineWidth = 0.85;
     pCtx.beginPath();
     pCtx.moveTo(0, 0); pCtx.lineTo(16, 16);
     pCtx.moveTo(-8, 0); pCtx.lineTo(8, 16);
     pCtx.moveTo(8, 0); pCtx.lineTo(24, 16);
     pCtx.stroke();
     
-    pCtx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+    // 3. Dark diagonal gap shadow lines (weft)
+    pCtx.strokeStyle = 'rgba(0, 0, 0, 0.32)';
+    pCtx.lineWidth = 0.95;
     pCtx.beginPath();
-    pCtx.moveTo(0, 1.5); pCtx.lineTo(14.5, 16);
-    pCtx.moveTo(-8, 1.5); pCtx.lineTo(6.5, 16);
+    pCtx.moveTo(0, 2); pCtx.lineTo(14, 16);
+    pCtx.moveTo(-8, 2); pCtx.lineTo(6, 16);
+    pCtx.moveTo(8, 2); pCtx.lineTo(22, 16);
     pCtx.stroke();
   } else if (textureType === 'knitted') {
     // Interlocking V-knit wool stitch columns (two 8px columns in 16x16 tile)
