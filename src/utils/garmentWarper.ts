@@ -936,6 +936,71 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
     ctx.restore();
   }
 
+  // Draw folded jacket/blazer lapels
+  const isJacket = subcatLower.includes('jacket') || subcatLower.includes('coat') || nameLower.includes('blazer') || nameLower.includes('trench');
+  if (isJacket) {
+    ctx.save();
+    const lapelCrossY = raisedMidY + (hipMidY - raisedMidY) * 0.25;
+    const leftLapelPoints = [
+      { x: neckBaseL.x, y: neckBaseL.y },
+      { x: shoulderMidX - shWidth * 0.04, y: lapelCrossY },
+      { x: raisedLS.x + shWidth * 0.09, y: raisedLS.y + shWidth * 0.10 },
+      { x: neckBaseL.x + shWidth * 0.05, y: neckBaseL.y + shWidth * 0.05 }
+    ];
+    const rightLapelPoints = [
+      { x: neckBaseR.x, y: neckBaseR.y },
+      { x: shoulderMidX + shWidth * 0.04, y: lapelCrossY },
+      { x: raisedRS.x - shWidth * 0.09, y: raisedRS.y + shWidth * 0.10 },
+      { x: neckBaseR.x - shWidth * 0.05, y: neckBaseR.y + shWidth * 0.05 }
+    ];
+
+    // Left Lapel 3D drop shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.moveTo(leftLapelPoints[0].x, leftLapelPoints[0].y + 1);
+    ctx.lineTo(leftLapelPoints[1].x - 1, leftLapelPoints[1].y + 2);
+    ctx.lineTo(leftLapelPoints[2].x + 1, leftLapelPoints[2].y + 2);
+    ctx.lineTo(leftLapelPoints[3].x, leftLapelPoints[3].y + 1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right Lapel 3D drop shadow
+    ctx.beginPath();
+    ctx.moveTo(rightLapelPoints[0].x, rightLapelPoints[0].y + 1);
+    ctx.lineTo(rightLapelPoints[1].x + 1, rightLapelPoints[1].y + 2);
+    ctx.lineTo(rightLapelPoints[2].x - 1, rightLapelPoints[2].y + 2);
+    ctx.lineTo(rightLapelPoints[3].x, rightLapelPoints[3].y + 1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Fill lapels (slightly lighter to catch specular lighting)
+    ctx.fillStyle = adjustColorBrightness(config.baseColor, 12);
+    
+    // Left lapel
+    ctx.beginPath();
+    ctx.moveTo(leftLapelPoints[0].x, leftLapelPoints[0].y);
+    ctx.lineTo(leftLapelPoints[1].x, leftLapelPoints[1].y);
+    ctx.lineTo(leftLapelPoints[2].x, leftLapelPoints[2].y);
+    ctx.lineTo(leftLapelPoints[3].x, leftLapelPoints[3].y);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.strokeStyle = adjustColorBrightness(config.baseColor, -14);
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // Right lapel
+    ctx.beginPath();
+    ctx.moveTo(rightLapelPoints[0].x, rightLapelPoints[0].y);
+    ctx.lineTo(rightLapelPoints[1].x, rightLapelPoints[1].y);
+    ctx.lineTo(rightLapelPoints[2].x, rightLapelPoints[2].y);
+    ctx.lineTo(rightLapelPoints[3].x, rightLapelPoints[3].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
   // Clip all pattern grids and sparkles strictly inside the front body path!
   ctx.save();
   ctx.beginPath();
@@ -1759,6 +1824,72 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
       ctx.arc(btnX, btnY, 3, 0, Math.PI * 2);
       ctx.stroke();
     }
+    ctx.restore();
+  }
+
+  // Draw folded jacket/blazer lapels
+  const isJacketFull = subcatLower.includes('jacket') || subcatLower.includes('coat') || nameLower.includes('blazer') || nameLower.includes('trench');
+  if (isJacketFull) {
+    ctx.save();
+    const hipMidY = (lH.y + rH.y) / 2;
+    const lapelCrossY = raisedMidY + (hipMidY - raisedMidY) * 0.25;
+    const leftLapelPoints = [
+      { x: neckBaseL.x, y: neckBaseL.y },
+      { x: shoulderMidX - shWidth * 0.04, y: lapelCrossY },
+      { x: raisedLS.x + shWidth * 0.09, y: raisedLS.y + shWidth * 0.10 },
+      { x: neckBaseL.x + shWidth * 0.05, y: neckBaseL.y + shWidth * 0.05 }
+    ];
+    const rightLapelPoints = [
+      { x: neckBaseR.x, y: neckBaseR.y },
+      { x: shoulderMidX + shWidth * 0.04, y: lapelCrossY },
+      { x: raisedRS.x - shWidth * 0.09, y: raisedRS.y + shWidth * 0.10 },
+      { x: neckBaseR.x - shWidth * 0.05, y: neckBaseR.y + shWidth * 0.05 }
+    ];
+
+    // Left Lapel 3D drop shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.moveTo(leftLapelPoints[0].x, leftLapelPoints[0].y + 1);
+    ctx.lineTo(leftLapelPoints[1].x - 1, leftLapelPoints[1].y + 2);
+    ctx.lineTo(leftLapelPoints[2].x + 1, leftLapelPoints[2].y + 2);
+    ctx.lineTo(leftLapelPoints[3].x, leftLapelPoints[3].y + 1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right Lapel 3D drop shadow
+    ctx.beginPath();
+    ctx.moveTo(rightLapelPoints[0].x, rightLapelPoints[0].y + 1);
+    ctx.lineTo(rightLapelPoints[1].x + 1, rightLapelPoints[1].y + 2);
+    ctx.lineTo(rightLapelPoints[2].x - 1, rightLapelPoints[2].y + 2);
+    ctx.lineTo(rightLapelPoints[3].x, rightLapelPoints[3].y + 1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Fill lapels (slightly lighter to catch specular lighting)
+    ctx.fillStyle = adjustColorBrightness(config.baseColor, 12);
+    
+    // Left lapel
+    ctx.beginPath();
+    ctx.moveTo(leftLapelPoints[0].x, leftLapelPoints[0].y);
+    ctx.lineTo(leftLapelPoints[1].x, leftLapelPoints[1].y);
+    ctx.lineTo(leftLapelPoints[2].x, leftLapelPoints[2].y);
+    ctx.lineTo(leftLapelPoints[3].x, leftLapelPoints[3].y);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.strokeStyle = adjustColorBrightness(config.baseColor, -14);
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // Right lapel
+    ctx.beginPath();
+    ctx.moveTo(rightLapelPoints[0].x, rightLapelPoints[0].y);
+    ctx.lineTo(rightLapelPoints[1].x, rightLapelPoints[1].y);
+    ctx.lineTo(rightLapelPoints[2].x, rightLapelPoints[2].y);
+    ctx.lineTo(rightLapelPoints[3].x, rightLapelPoints[3].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
     ctx.restore();
   }
 
