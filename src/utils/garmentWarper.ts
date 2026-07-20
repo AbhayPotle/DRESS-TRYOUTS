@@ -936,6 +936,30 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
     ctx.restore();
   }
 
+  // Clip all pattern grids and sparkles strictly inside the front body path!
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(neckBaseR.x, neckBaseR.y);
+  ctx.lineTo(raisedRS.x, raisedRS.y);
+  ctx.lineTo(rightSleeveOuter.x, rightSleeveOuter.y);
+  ctx.lineTo(rightSleeveInner.x, rightSleeveInner.y);
+  ctx.lineTo(rUnder.x, rUnder.y);
+  ctx.quadraticCurveTo(scaledRH.x - 10, interpolate(raisedRS, scaledRH, 0.6).y, scaledRH.x - 16, scaledRH.y + 6);
+  ctx.quadraticCurveTo(hipMidX, hipMidY + 12, scaledLH.x + 16, scaledLH.y + 6);
+  ctx.quadraticCurveTo(scaledLH.x + 10, interpolate(raisedLS, scaledLH, 0.6).y, leftUnderarm.x, leftUnderarm.y);
+  ctx.lineTo(leftSleeveInner.x, leftSleeveInner.y);
+  ctx.lineTo(leftSleeveOuter.x, leftSleeveOuter.y);
+  ctx.lineTo(raisedLS.x, raisedLS.y);
+  ctx.lineTo(neckBaseL.x, neckBaseL.y);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
+  ctx.closePath();
+  ctx.clip();
+
   // Secondary details
   if (config.texture === 'stripes') {
     drawStripes(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#FFFFFF');
@@ -946,6 +970,7 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   } else if (config.texture === 'sequins') {
     drawSequinSparkles(ctx, raisedLS, raisedRS, scaledLH, scaledRH, scaledLH.y + 6, config.baseColor);
   }
+  ctx.restore();
 
   // Draw luxury gold embroidery borders along collar if tagged
   const isLuxury = tags.includes('Luxury') || tags.includes('Brocade') || tags.includes('Runway') || config.secondaryColor === '#D4AF37';
@@ -1804,11 +1829,52 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
     ctx.restore();
   }
 
+  // Clip all pattern grids and sparkles strictly inside the front body path!
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(neckBaseR.x, neckBaseR.y);
+  ctx.lineTo(raisedRS.x, raisedRS.y);
+  if (hasSleeves) {
+    ctx.lineTo(rightSleeveOuter.x, rightSleeveOuter.y);
+    ctx.lineTo(rightSleeveInner.x, rightSleeveInner.y);
+    const rUnder = rightUnderarm(scaledRH, raisedRS);
+    ctx.lineTo(rUnder.x, rUnder.y);
+    ctx.quadraticCurveTo(rUnder.x + 4, (rUnder.y + rightWaist.y) / 2, rightWaist.x, rightWaist.y);
+    ctx.quadraticCurveTo(rightWaist.x + 4, (rightWaist.y + scaledRH.y) / 2, scaledRH.x + 6, scaledRH.y);
+  } else {
+    ctx.quadraticCurveTo(raisedRS.x + 4, (raisedRS.y + rightWaist.y) / 2, rightWaist.x, rightWaist.y);
+    ctx.quadraticCurveTo(rightWaist.x + 4, (rightWaist.y + scaledRH.y) / 2, scaledRH.x + 6, scaledRH.y);
+  }
+  ctx.quadraticCurveTo(rightFlareX + 12, (scaledRH.y + bottomY) / 2, rightFlareX, bottomY);
+  ctx.quadraticCurveTo((leftFlareX + rightFlareX) / 2, bottomY + 22, leftFlareX, bottomY);
+  ctx.quadraticCurveTo(leftFlareX - 12, (scaledLH.y + bottomY) / 2, leftFlareX, bottomY);
+  if (hasSleeves) {
+    const leftUnderarm = { x: raisedLS.x + (scaledLH.x - raisedLS.x) * 0.22, y: raisedLS.y + (scaledLH.y - raisedLS.y) * 0.25 };
+    ctx.quadraticCurveTo(scaledLH.x + 4, (leftWaist.y + scaledLH.y) / 2, leftWaist.x, leftWaist.y);
+    ctx.quadraticCurveTo(leftUnderarm.x - 4, (leftUnderarm.y + leftWaist.y) / 2, leftUnderarm.x, leftUnderarm.y);
+    ctx.lineTo(leftSleeveInner.x, leftSleeveInner.y);
+    ctx.lineTo(leftSleeveOuter.x, leftSleeveOuter.y);
+    ctx.lineTo(raisedLS.x, raisedLS.y);
+  } else {
+    ctx.quadraticCurveTo(leftWaist.x - 4, (leftWaist.y + scaledLH.y) / 2, leftWaist.x, leftWaist.y);
+    ctx.quadraticCurveTo(raisedLS.x - 4, (raisedLS.y + leftWaist.y) / 2, raisedLS.x, raisedLS.y);
+  }
+  ctx.lineTo(neckBaseL.x, neckBaseL.y);
+  if (isVNeck) {
+    ctx.lineTo(shoulderMidX, neckDipY);
+    ctx.lineTo(neckBaseR.x, neckBaseR.y);
+  } else {
+    ctx.quadraticCurveTo(shoulderMidX, neckDipY, neckBaseR.x, neckBaseR.y);
+  }
+  ctx.closePath();
+  ctx.clip();
+
   if (config.texture === 'artistic') {
     drawArtisticPatterns(ctx, raisedLS, raisedRS, scaledLH, scaledRH, config.secondaryColor || '#EC4899');
   } else if (config.texture === 'sequins') {
     drawSequinSparkles(ctx, raisedLS, raisedRS, scaledLH, scaledRH, bottomY, config.baseColor);
   }
+  ctx.restore();
 
   // Draw luxury gold/silver embroidery borders along collar, hem, and cuffs if tagged
   const isLuxury = tags.includes('Luxury') || tags.includes('Brocade') || tags.includes('Runway') || config.secondaryColor === '#D4AF37' || config.secondaryColor === '#C0C0C0' || nameLower.includes('glitz') || nameLower.includes('haze');
