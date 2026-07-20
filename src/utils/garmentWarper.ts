@@ -2496,17 +2496,51 @@ function drawDenimDetails(ctx: CanvasRenderingContext2D, lH: any, rH: any, lK: a
 
 function drawPantsShading(ctx: CanvasRenderingContext2D, lH: any, rH: any, lK: any, rK: any, lA: any, rA: any, isShorts: boolean) {
   ctx.save();
-  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-  ctx.lineWidth = 2.2;
+  
+  const hipW = Math.abs(rH.x - lH.x);
   
   if (!isShorts) {
-    // Crease lines down middle
+    // 1. Sharp pressed crease line down the center of each leg (dual-pass shadow/highlight)
+    ctx.lineWidth = 1.0;
+    
+    // Left leg pressed crease
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.14)';
     ctx.beginPath();
-    ctx.moveTo(lH.x - 1, lH.y + 12);
-    ctx.lineTo(lA.x, lA.y - 6);
-    ctx.moveTo(rH.x + 1, rH.y + 12);
-    ctx.lineTo(rA.x, rA.y - 6);
+    ctx.moveTo(lH.x - 2, lH.y + 16);
+    ctx.quadraticCurveTo(lK.x - 1, lK.y, lA.x, lA.y - 8);
     ctx.stroke();
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+    ctx.beginPath();
+    ctx.moveTo(lH.x - 1, lH.y + 16);
+    ctx.quadraticCurveTo(lK.x, lK.y, lA.x + 1, lA.y - 8);
+    ctx.stroke();
+    
+    // Right leg pressed crease
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.14)';
+    ctx.beginPath();
+    ctx.moveTo(rH.x + 2, rH.y + 16);
+    ctx.quadraticCurveTo(rK.x + 1, rK.y, rA.x, rA.y - 8);
+    ctx.stroke();
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+    ctx.beginPath();
+    ctx.moveTo(rH.x + 3, rH.y + 16);
+    ctx.quadraticCurveTo(rK.x + 2, rK.y, rA.x + 1, rA.y - 8);
+    ctx.stroke();
+
+    // 2. 3D hip whiskers (extending from fly to side hips)
+    const cX = (lH.x + rH.x) / 2;
+    const cY = (lH.y + rH.y) / 2;
+    draw3DCrease(ctx, cX - 10, cY + 12, cX - hipW * 0.18, cY + 8, lH.x + 8, cY + 16, 0.88);
+    draw3DCrease(ctx, cX + 10, cY + 12, cX + hipW * 0.18, cY + 8, rH.x - 8, cY + 16, 0.88);
+
+    // 3. 3D knee joint crease lines
+    draw3DCrease(ctx, lK.x - 10, lK.y - 8, lK.x, lK.y - 6, lK.x + 10, lK.y - 8, 1.1);
+    draw3DCrease(ctx, lK.x - 8, lK.y + 4, lK.x, lK.y + 6, lK.x + 8, lK.y + 4, 0.8);
+    
+    draw3DCrease(ctx, rK.x - 10, rK.y - 8, rK.x, rK.y - 6, rK.x + 10, rK.y - 8, 1.1);
+    draw3DCrease(ctx, rK.x - 8, rK.y + 4, rK.x, rK.y + 6, rK.x + 8, rK.y + 4, 0.8);
   }
   ctx.restore();
 }
