@@ -625,6 +625,11 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
             />
 
+            {/* Holographic Digital Scan Beam & Grid Overlays */}
+            <div className="absolute top-0 left-0 right-0 h-[8px] bg-cyan-400/40 shadow-[0_0_15px_rgba(6,182,212,0.8)] animate-scan-beam pointer-events-none z-20" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.06),transparent_80%)] pointer-events-none z-20" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-20" />
+
             {scanError && (
               <div className="absolute inset-0 bg-neutral-950/95 flex flex-col items-center justify-center p-6 text-center z-30 space-y-4">
                 <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">

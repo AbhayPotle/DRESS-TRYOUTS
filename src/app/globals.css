@@ -74,3 +74,19 @@ body {
 .animate-pulseGlow2 {
   animation: pulseGlow 14s infinite ease-in-out alternate;
 }
+
+@keyframes scanBeam {
+  0% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(300%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.animate-scan-beam {
+  animation: scanBeam 4.2s infinite ease-in-out;
+}
