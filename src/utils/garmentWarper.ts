@@ -177,17 +177,36 @@ function getFabricFill(
     pCtx.arc(11.2, 11.2, 1.3, 0, Math.PI * 2);
     pCtx.fill();
   } else if (textureType === 'brocade') {
-    // Ornate gold brocade zari weave pattern
-    pCtx.strokeStyle = 'rgba(212, 175, 55, 0.32)'; // gold zari color
-    pCtx.lineWidth = 1.0;
+    // Ornate gold brocade floral damask zari motif weave
+    pCtx.strokeStyle = 'rgba(212, 175, 55, 0.26)';
+    pCtx.lineWidth = 0.75;
+    
+    // Diagonal background grid
     pCtx.beginPath();
     pCtx.moveTo(0, 0); pCtx.lineTo(16, 16);
     pCtx.moveTo(16, 0); pCtx.lineTo(0, 16);
     pCtx.stroke();
     
-    // Add tiny central diamond motifs (4px)
-    pCtx.fillStyle = 'rgba(212, 175, 55, 0.48)';
-    pCtx.fillRect(7, 7, 2, 2);
+    // Elaborate Central Star Medallion (Damask floral)
+    pCtx.fillStyle = 'rgba(212, 175, 55, 0.58)';
+    pCtx.strokeStyle = 'rgba(212, 175, 55, 0.68)';
+    pCtx.lineWidth = 0.85;
+    
+    pCtx.beginPath();
+    pCtx.arc(8, 8, 1.8, 0, Math.PI * 2);
+    pCtx.fill();
+    
+    // Four diamond petal rays spreading out (North, South, East, West)
+    pCtx.beginPath();
+    // North petal
+    pCtx.moveTo(8, 8); pCtx.quadraticCurveTo(6, 4, 8, 1); pCtx.quadraticCurveTo(10, 4, 8, 8);
+    // South petal
+    pCtx.moveTo(8, 8); pCtx.quadraticCurveTo(6, 12, 8, 15); pCtx.quadraticCurveTo(10, 12, 8, 8);
+    // East petal
+    pCtx.moveTo(8, 8); pCtx.quadraticCurveTo(12, 6, 15, 8); pCtx.quadraticCurveTo(12, 10, 8, 8);
+    // West petal
+    pCtx.moveTo(8, 8); pCtx.quadraticCurveTo(4, 6, 1, 8); pCtx.quadraticCurveTo(4, 10, 8, 8);
+    pCtx.stroke();
   } else {
     // Tactile Plain Cotton Weave (micro threads)
     pCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
