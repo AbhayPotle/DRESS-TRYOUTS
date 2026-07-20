@@ -813,6 +813,9 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   ctx.moveTo(rUnder.x - 14, rUnder.y + 10);
   ctx.quadraticCurveTo(shoulderMidX + shWidth * 0.1, (raisedRS.y + scaledRH.y) / 2 + 7, shoulderMidX + shWidth * 0.08, (raisedRS.y + scaledRH.y) / 2 + 32);
   ctx.stroke();
+
+  // Draw 3D elbow joint sleeve fold creases
+  drawSleeveCreases(ctx, raisedLS, raisedRS, leftUnderarm, rUnder, leftSleeveOuter, leftSleeveInner, rightSleeveOuter, rightSleeveInner);
   
   ctx.restore();
 
@@ -1741,6 +1744,13 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   ctx.moveTo(scaledRH.x + 6, (raisedRS.y + scaledRH.y) / 2 + 8);
   ctx.quadraticCurveTo(shoulderMidX + shWidth * 0.1, (raisedRS.y + scaledRH.y) / 2 + 17, shoulderMidX + shWidth * 0.08, (raisedRS.y + scaledRH.y) / 2 + 42);
   ctx.stroke();
+
+  // Draw 3D elbow joint sleeve fold creases if the dress has sleeves
+  if (hasSleeves) {
+    const leftUnderarm = { x: raisedLS.x + (scaledLH.x - raisedLS.x) * 0.22, y: raisedLS.y + (scaledLH.y - raisedLS.y) * 0.25 };
+    const rUnder = rightUnderarm(scaledRH, raisedRS);
+    drawSleeveCreases(ctx, raisedLS, raisedRS, leftUnderarm, rUnder, leftSleeveOuter, leftSleeveInner, rightSleeveOuter, rightSleeveInner);
+  }
   
   ctx.restore();
 
@@ -2558,6 +2568,36 @@ function drawTopCreases(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any
     draw3DCrease(ctx, lH.x + 40, lH.y - 75, (lH.x + rH.x)/2, lH.y - 65, rH.x - 40, lH.y - 75, 0.95);
     draw3DCrease(ctx, lH.x + 25, lH.y - 110, (lH.x + rH.x)/2, lH.y - 100, rH.x - 25, lH.y - 110, 0.7);
   }
+}
+
+// Renders soft, natural 3D joint creases (wrinkles) across mid-elbow points of garment sleeves
+function drawSleeveCreases(
+  ctx: CanvasRenderingContext2D,
+  lS: any,
+  rS: any,
+  leftUnderarm: any,
+  rUnder: any,
+  leftSleeveOuter: any,
+  leftSleeveInner: any,
+  rightSleeveOuter: any,
+  rightSleeveInner: any
+) {
+  // Left sleeve midpoint (elbow joint)
+  const leftMidArmStart = interpolate(lS, leftUnderarm, 0.5);
+  const leftMidArmEnd = interpolate(leftSleeveOuter, leftSleeveInner, 0.5);
+  const leftElbow = interpolate(leftMidArmStart, leftMidArmEnd, 0.5);
+
+  // Right sleeve midpoint (elbow joint)
+  const rightMidArmStart = interpolate(rS, rUnder, 0.5);
+  const rightMidArmEnd = interpolate(rightSleeveOuter, rightSleeveInner, 0.5);
+  const rightElbow = interpolate(rightMidArmStart, rightMidArmEnd, 0.5);
+
+  // Draw diagonal 3D wrinkles across sleeves
+  draw3DCrease(ctx, leftElbow.x - 9, leftElbow.y - 5, leftElbow.x, leftElbow.y - 2, leftElbow.x + 9, leftElbow.y - 5, 0.75);
+  draw3DCrease(ctx, leftElbow.x - 7, leftElbow.y + 4, leftElbow.x, leftElbow.y + 6, leftElbow.x + 7, leftElbow.y + 4, 0.55);
+
+  draw3DCrease(ctx, rightElbow.x - 9, rightElbow.y - 5, rightElbow.x, rightElbow.y - 2, rightElbow.x + 9, rightElbow.y - 5, 0.75);
+  draw3DCrease(ctx, rightElbow.x - 7, rightElbow.y + 4, rightElbow.x, rightElbow.y + 6, rightElbow.x + 7, rightElbow.y + 4, 0.55);
 }
 
 function drawDenimDetails(ctx: CanvasRenderingContext2D, lH: any, rH: any, lK: any, rK: any, lA: any, rA: any, isShorts: boolean) {
