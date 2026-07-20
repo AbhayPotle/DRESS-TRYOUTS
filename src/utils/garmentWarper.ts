@@ -126,13 +126,38 @@ function getFabricFill(
     pCtx.moveTo(-8, 1.5); pCtx.lineTo(6.5, 16);
     pCtx.stroke();
   } else if (textureType === 'knitted') {
-    // Chunky ribbed knit stitch lines (16px tile)
-    pCtx.fillStyle = 'rgba(0, 0, 0, 0.16)';
-    pCtx.fillRect(0, 0, 2, 16);
-    pCtx.fillRect(8, 0, 2, 16);
-    pCtx.fillStyle = 'rgba(255, 255, 255, 0.14)';
-    pCtx.fillRect(4, 0, 2, 16);
-    pCtx.fillRect(12, 0, 2, 16);
+    // Interlocking V-knit wool stitch columns (two 8px columns in 16x16 tile)
+    pCtx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+    pCtx.lineWidth = 1.5;
+    pCtx.lineCap = 'round';
+    for (let c = 0; c < 2; c++) {
+      const dx = c * 8;
+      for (let dy = 0; dy < 16; dy += 8) {
+        // Draw left leg of the V-stitch
+        pCtx.beginPath();
+        pCtx.moveTo(dx + 1, dy + 1);
+        pCtx.lineTo(dx + 4, dy + 6);
+        pCtx.stroke();
+        
+        // Draw right leg of the V-stitch
+        pCtx.beginPath();
+        pCtx.moveTo(dx + 7, dy + 1);
+        pCtx.lineTo(dx + 4, dy + 6);
+        pCtx.stroke();
+      }
+    }
+    // Add soft yarn highlights inside the V stitches to catch ambient highlights
+    pCtx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    pCtx.lineWidth = 1.0;
+    for (let c = 0; c < 2; c++) {
+      const dx = c * 8;
+      for (let dy = 0; dy < 16; dy += 8) {
+        pCtx.beginPath();
+        pCtx.moveTo(dx + 2, dy + 2);
+        pCtx.lineTo(dx + 4, dy + 5);
+        pCtx.stroke();
+      }
+    }
   } else if (textureType === 'leather') {
     // Tactile pebbled leather grain
     pCtx.fillStyle = 'rgba(0, 0, 0, 0.28)';
