@@ -1072,6 +1072,15 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
     ctx.quadraticCurveTo(hipMidX, hipMidY + 12, scaledRH.x - 16, scaledRH.y + 6);
     ctx.stroke();
 
+    // Scalloped gold border detailing for top
+    if (isVNeck) {
+      drawScallopedBorder(ctx, neckBaseL, { x: shoulderMidX, y: neckDipY }, goldGrad);
+      drawScallopedBorder(ctx, { x: shoulderMidX, y: neckDipY }, neckBaseR, goldGrad);
+    } else {
+      drawScallopedBorder(ctx, neckBaseL, neckBaseR, goldGrad, { x: shoulderMidX, y: neckDipY });
+    }
+    drawScallopedBorder(ctx, { x: scaledLH.x + 16, y: scaledLH.y + 6 }, { x: scaledRH.x - 16, y: scaledRH.y + 6 }, goldGrad, { x: hipMidX, y: hipMidY + 12 });
+
     ctx.restore();
   }
 
@@ -2075,6 +2084,19 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
       ctx.stroke();
     }
 
+    // Scalloped border detailing for full body dress
+    if (isVNeck) {
+      drawScallopedBorder(ctx, neckBaseL, { x: shoulderMidX, y: neckDipY }, metallicGrad);
+      drawScallopedBorder(ctx, { x: shoulderMidX, y: neckDipY }, neckBaseR, metallicGrad);
+    } else {
+      drawScallopedBorder(ctx, neckBaseL, neckBaseR, metallicGrad, { x: shoulderMidX, y: neckDipY });
+    }
+    drawScallopedBorder(ctx, { x: leftFlareX, y: bottomY }, { x: rightFlareX, y: bottomY }, metallicGrad, { x: (leftFlareX + rightFlareX) / 2, y: bottomY + 22 });
+    if (hasSleeves) {
+      drawScallopedBorder(ctx, leftSleeveOuter, leftSleeveInner, metallicGrad);
+      drawScallopedBorder(ctx, rightSleeveInner, rightSleeveOuter, metallicGrad);
+    }
+
     ctx.restore();
   }
 
@@ -2869,5 +2891,64 @@ export function drawScanningHUD(
   ctx.fillText(`Calib: ${measurements.heightCm ? '100% OK' : 'Estimate'}`, 10, 38);
   ctx.restore();
 
+  ctx.restore();
+}
+
+
+// Draws a highly detailed scalloped lace/filigree border alongside metallic seams
+function drawScallopedBorder(
+  ctx: CanvasRenderingContext2D,
+  p1: { x: number; y: number },
+  p2: { x: number; y: number },
+  color: any,
+  cp?: { x: number; y: number }
+) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.0;
+  ctx.shadowBlur = 0; // Clear shadows for sharp lace details
+
+  const steps = 14;
+  let prevPt = p1;
+
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps;
+    let currPt;
+    if (cp) {
+      const t1 = (1 - t) * (1 - t);
+      const t2 = 2 * (1 - t) * t;
+      const t3 = t * t;
+      currPt = {
+        x: t1 * p1.x + t2 * cp.x + t3 * p2.x,
+        y: t1 * p1.y + t2 * cp.y + t3 * p2.y
+      };
+    } else {
+      currPt = {
+        x: p1.x + (p2.x - p1.x) * t,
+        y: p1.y + (p2.y - p1.y) * t
+      };
+    }
+
+    const midX = (prevPt.x + currPt.x) / 2;
+    const midY = (prevPt.y + currPt.y) / 2;
+    const dx = currPt.x - prevPt.x;
+    const dy = currPt.y - prevPt.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    
+    if (len > 0.1) {
+      const nx = -dy / len;
+      const ny = dx / len;
+      const h = Math.min(3.5, len * 0.4);
+      const topX = midX + nx * h;
+      const topY = midY + ny * h;
+
+      ctx.beginPath();
+      ctx.moveTo(prevPt.x, prevPt.y);
+      ctx.quadraticCurveTo(topX, topY, currPt.x, currPt.y);
+      ctx.stroke();
+    }
+
+    prevPt = currPt;
+  }
   ctx.restore();
 }
