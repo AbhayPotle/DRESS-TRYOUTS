@@ -42,8 +42,13 @@ export default function MirrorSidebar({
     setVisibleCount(30);
   }, [selectedCategory, searchTerm]);
 
-  // Filter outfits
+  // Filter outfits to show only actual clothing garments (tops, bottoms, full-body dresses)
   const filteredOutfits = outfits.filter(o => {
+    const primaryItem = o.items[0];
+    if (!primaryItem) return false;
+    // Exclude shoes and accessories from the main catalog list to be strictly dress-specific!
+    if (primaryItem.type === 'shoes' || primaryItem.type === 'accessory') return false;
+
     const matchesCat = selectedCategory === 'All' || o.category === selectedCategory;
     const matchesSearch = o.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           o.styleTags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -203,6 +208,34 @@ export default function MirrorSidebar({
                   <span>Load More Garments ({filteredOutfits.length - visibleCount} remaining)</span>
                 </button>
               )}
+
+              {/* Shoes & Accessories Quick-Toggle Drawer */}
+              <div className="space-y-3.5 pt-5 border-t border-white/10">
+                <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold">
+                  Quick-Wear Shoes & Accessories
+                </span>
+                <div className="flex gap-2.5 overflow-x-auto pb-1.5 no-scrollbar">
+                  {outfits.filter(o => {
+                    const item = o.items[0];
+                    return item && (item.type === 'shoes' || item.type === 'accessory');
+                  }).map(o => {
+                    const isActive = activeOutfit?.items.some(worn => worn.id === o.items[0]?.id);
+                    return (
+                      <button
+                        key={o.id}
+                        onClick={() => onSelectOutfit(o)}
+                        className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap border transition-all cursor-pointer shrink-0 ${
+                          isActive
+                            ? 'bg-yellow-500/10 border-yellow-500 text-yellow-500'
+                            : 'bg-white/5 border-white/10 hover:border-white/20 text-neutral-300 hover:bg-white/10'
+                        }`}
+                      >
+                        {o.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}
