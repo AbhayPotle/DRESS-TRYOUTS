@@ -364,6 +364,9 @@ export function drawGarments(
     };
   });
 
+  // Render soft grounding contact shadows under user feet
+  drawFloorShadows(ctx, points, width, height);
+
   // Sort garments order
   const sortedItems = [...items].sort((a, b) => {
     const order = { bottom: 1, full: 2, top: 3, outerwear: 4, shoes: 5, accessory: 6 };
@@ -2950,5 +2953,40 @@ function drawScallopedBorder(
 
     prevPt = currPt;
   }
+  ctx.restore();
+}
+
+// Renders soft, realistic 3D grounding contact shadows beneath user feet
+function drawFloorShadows(ctx: CanvasRenderingContext2D, points: any[], width: number, height: number) {
+  const lA = points[27];
+  const rA = points[28];
+  if (!lA || !rA || lA.vis < 0.25 || rA.vis < 0.25) return;
+
+  ctx.save();
+  const ankleDist = distance(lA, rA);
+  const shadowRadiusX = Math.max(30, Math.min(100, ankleDist * 0.72));
+  const shadowRadiusY = shadowRadiusX * 0.24; // Flattened ellipse
+  const groundY = Math.max(lA.y, rA.y) + 14;
+
+  // Left Foot Contact Shadow
+  ctx.beginPath();
+  const leftGrad = ctx.createRadialGradient(lA.x, groundY, 2, lA.x, groundY, shadowRadiusX);
+  leftGrad.addColorStop(0, 'rgba(0, 0, 0, 0.42)');
+  leftGrad.addColorStop(0.3, 'rgba(0, 0, 0, 0.25)');
+  leftGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = leftGrad;
+  ctx.ellipse(lA.x, groundY, shadowRadiusX, shadowRadiusY, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Right Foot Contact Shadow
+  ctx.beginPath();
+  const rightGrad = ctx.createRadialGradient(rA.x, groundY, 2, rA.x, groundY, shadowRadiusX);
+  rightGrad.addColorStop(0, 'rgba(0, 0, 0, 0.42)');
+  rightGrad.addColorStop(0.3, 'rgba(0, 0, 0, 0.25)');
+  rightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = rightGrad;
+  ctx.ellipse(rA.x, groundY, shadowRadiusX, shadowRadiusY, 0, 0, Math.PI * 2);
+  ctx.fill();
+
   ctx.restore();
 }
