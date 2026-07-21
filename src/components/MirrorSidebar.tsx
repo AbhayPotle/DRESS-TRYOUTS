@@ -138,7 +138,7 @@ export default function MirrorSidebar({
 
             <div className="space-y-3">
               <span className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">
-                Available Outfits ({filteredOutfits.length})
+                Available Garments ({filteredOutfits.length})
               </span>
               <div className="grid grid-cols-1 gap-3">
                 {filteredOutfits.slice(0, visibleCount).map(outfit => {
@@ -200,7 +200,7 @@ export default function MirrorSidebar({
                   className="w-full py-3.5 mt-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-yellow-500/30 text-neutral-300 hover:text-white font-semibold text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <RefreshCw className="w-4 h-4 animate-spin-hover" />
-                  <span>Load More Outfits ({filteredOutfits.length - visibleCount} remaining)</span>
+                  <span>Load More Garments ({filteredOutfits.length - visibleCount} remaining)</span>
                 </button>
               )}
             </div>
@@ -368,13 +368,19 @@ export default function MirrorSidebar({
 
       {/* Active outfit overlay display */}
       {activeOutfit && (
-        <div className="bg-neutral-900 border-t border-white/10 p-5 space-y-2">
+        <div className="bg-neutral-900 border-t border-white/10 p-5 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-neutral-500 font-semibold uppercase">Currently Wearing</span>
+            <span className="text-xs text-neutral-500 font-semibold uppercase">Active Wardrobe</span>
             <span className="text-sm font-bold text-yellow-500">${activeOutfit.totalPrice}</span>
           </div>
-          <h4 className="font-bold text-md leading-tight">{activeOutfit.name}</h4>
-          <p className="text-xs text-neutral-400">{activeOutfit.description}</p>
+          <div className="space-y-1.5 max-h-36 overflow-y-auto no-scrollbar">
+            {activeOutfit.items.map(item => (
+              <div key={item.id} className="flex justify-between items-center bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs hover:border-white/10 transition-colors">
+                <span className="font-semibold text-neutral-300 capitalize">{item.type}: {item.name}</span>
+                <span className="text-neutral-500 font-mono font-semibold">${item.price}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
