@@ -68,7 +68,8 @@ export default function SmartMirror({
   
   // State
   const [activeOutfitIndex, setActiveOutfitIndex] = useState(0);
-  const activeOutfit = genderOutfits[activeOutfitIndex] || null;
+  const [wornOutfit, setWornOutfit] = useState<Outfit | null>(null);
+  const activeOutfit = wornOutfit || genderOutfits[activeOutfitIndex] || null;
   
   const [favorites, setFavorites] = useState<string[]>([]);
   const [capturedSnaps, setCapturedSnaps] = useState<{ id: string; outfit: Outfit; imageSrc: string; timestamp: string }[]>([]);
@@ -790,11 +791,88 @@ export default function SmartMirror({
   };
 
   const handleSelectOutfit = (outfit: Outfit) => {
+    const selectedGarment = outfit.items[0];
+    if (!selectedGarment) return;
+
+    setWornOutfit(prev => {
+      const prevItems = prev ? prev.items : [];
+      let nextItems = [...prevItems];
+
+      if (selectedGarment.type === 'full') {
+        // If it's a full body dress/saree/sherwani, remove other top/bottom/full garments
+        nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'bottom' && g.type !== 'full');
+        nextItems.push(selectedGarment);
+      } else if (selectedGarment.type === 'top') {
+        // Remove existing top and full body garments
+        nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'full');
+        nextItems.push(selectedGarment);
+      } else if (selectedGarment.type === 'bottom') {
+        // Remove existing bottom and full body garments
+        nextItems = nextItems.filter(g => g.type !== 'bottom' && g.type !== 'full');
+        nextItems.push(selectedGarment);
+      } else {
+        // For accessories, shoes, outerwear: replace existing item of same type
+        nextItems = nextItems.filter(g => g.type !== selectedGarment.type);
+        nextItems.push(selectedGarment);
+      }
+
+      const totalPrice = nextItems.reduce((sum, g) => sum + g.price, 0);
+
+      return {
+        id: `worn_outfit_${Date.now()}`,
+        name: selectedGarment.name,
+        gender: outfit.gender,
+        category: selectedGarment.category,
+        styleTags: selectedGarment.styleTags,
+        items: nextItems,
+        description: selectedGarment.description,
+        totalPrice
+      };
+    });
+
     const idx = genderOutfits.findIndex(o => o.id === outfit.id);
-    if (idx !== -1) {
+    if (idx !== -1 && idx !== activeOutfitIndex) {
       setActiveOutfitIndex(idx);
     }
   };
+
+  // Sync index-based gesture cycling and timers to worn selection
+  useEffect(() => {
+    const nextOutfit = genderOutfits[activeOutfitIndex];
+    if (nextOutfit) {
+      const selectedGarment = nextOutfit.items[0];
+      if (selectedGarment) {
+        setWornOutfit(prev => {
+          const prevItems = prev ? prev.items : [];
+          let nextItems = [...prevItems];
+          if (selectedGarment.type === 'full') {
+            nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'bottom' && g.type !== 'full');
+            nextItems.push(selectedGarment);
+          } else if (selectedGarment.type === 'top') {
+            nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'full');
+            nextItems.push(selectedGarment);
+          } else if (selectedGarment.type === 'bottom') {
+            nextItems = nextItems.filter(g => g.type !== 'bottom' && g.type !== 'full');
+            nextItems.push(selectedGarment);
+          } else {
+            nextItems = nextItems.filter(g => g.type !== selectedGarment.type);
+            nextItems.push(selectedGarment);
+          }
+          const totalPrice = nextItems.reduce((sum, g) => sum + g.price, 0);
+          return {
+            id: `worn_outfit_${Date.now()}`,
+            name: selectedGarment.name,
+            gender: nextOutfit.gender,
+            category: selectedGarment.category,
+            styleTags: selectedGarment.styleTags,
+            items: nextItems,
+            description: selectedGarment.description,
+            totalPrice
+          };
+        });
+      }
+    }
+  }, [activeOutfitIndex, genderOutfits]);
 
   return (
     <div className="flex h-screen bg-neutral-950 overflow-hidden font-sans">

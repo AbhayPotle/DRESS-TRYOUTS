@@ -1832,155 +1832,22 @@ export function generateOutfitLibrary(): Outfit[] {
   const library: Outfit[] = [];
   const genders: ('man' | 'woman' | 'boy' | 'girl')[] = ['man', 'woman', 'boy', 'girl'];
   
-  // Occasion styles metadata
-  const stylesMetadata: Record<string, { adjectives: string[], names: string[] }> = {
-    Casual: {
-      adjectives: ['Everyday', 'Relaxed', 'Weekend', 'Nordic', 'Modern', 'Urban', 'Minimalist', 'Cozy'],
-      names: ['Chill', 'Comfort', 'Vibe', 'Essentials', 'Simplicity', 'Lounge', 'Basics', 'Daily']
-    },
-    Streetwear: {
-      adjectives: ['Urban', 'Cyberpunk', 'Hypebeast', 'Neon', 'Grafitti', 'Tokyo', 'Brooklyn', 'Subway'],
-      names: ['Rebel', 'District', 'Shift', 'Cargo', 'Oversize', 'Underground', 'Drift', 'Aero']
-    },
-    Luxury: {
-      adjectives: ['Sartorial', 'Royal', 'Milan', 'Parisian', 'Monaco', 'Silk', 'Bespoke', 'Imperial'],
-      names: ['Heritage', 'Signature', 'Elite', 'Vanguard', 'Silhouette', 'Grandeur', 'Aura', 'Classique']
-    },
-    Business: {
-      adjectives: ['Executive', 'Metropolis', 'Corporate', 'Sharp', 'Synergy', 'Diplomat', 'Capital'],
-      names: ['Ambition', 'Power', 'Meeting', 'Stature', 'Venture', 'Summit', 'Pinnacle', 'Asset']
-    },
-    Traditional: {
-      adjectives: ['Royal', 'Imperial', 'Heritage', 'Ethnic', 'Festive', 'Regal', 'Golden', 'Embroidery'],
-      names: ['Maharani', 'Raja', 'Drape', 'Celebration', 'Culture', 'Glow', 'Utsav', 'Elegance']
-    },
-    Vacation: {
-      adjectives: ['Tropical', 'Riviera', 'Resort', 'Seaside', 'Breeze', 'Sunset', 'Aeolian', 'Linen'],
-      names: ['Gateway', 'Escape', 'Islander', 'Horizon', 'Cruise', 'Cabana', 'Oasis', 'Wanderlust']
-    }
-  };
-
   let outfitCounter = 0;
 
   for (const gender of genders) {
     const genderGarments = ALL_GARMENTS.filter(g => g.gender === gender || g.gender === 'unisex');
-    
-    // Prioritize strictly gender-matching items. Fallback to unisex only if no gender-matching item is in database.
-    const tops = genderGarments.filter(g => g.type === 'top' && (g.gender === gender || !genderGarments.some(x => x.type === 'top' && x.gender === gender)));
-    const bottoms = genderGarments.filter(g => g.type === 'bottom' && (g.gender === gender || !genderGarments.some(x => x.type === 'bottom' && x.gender === gender)));
-    const fulls = genderGarments.filter(g => g.type === 'full' && (g.gender === gender || !genderGarments.some(x => x.type === 'full' && x.gender === gender)));
-    const outerwear = genderGarments.filter(g => g.type === 'outerwear' && (g.gender === gender || !genderGarments.some(x => x.type === 'outerwear' && x.gender === gender)));
-    const shoes = genderGarments.filter(g => g.type === 'shoes' && (g.gender === gender || !genderGarments.some(x => x.type === 'shoes' && x.gender === gender)));
-    const accessories = genderGarments.filter(g => g.type === 'accessory' && (g.gender === gender || !genderGarments.some(x => x.type === 'accessory' && x.gender === gender)));
 
-    // 1. Generate Full Body outfits (Exactly once per full body garment)
-    for (let f = 0; f < fulls.length; f++) {
-      const full = fulls[f];
-      const cat = full.category;
-      const matchCat = ['Casual', 'Streetwear', 'Luxury', 'Business', 'Traditional', 'Vacation'].includes(cat) 
-        ? cat 
-        : 'Casual';
-      const meta = stylesMetadata[matchCat];
-
-      const shoe = shoes[ f % shoes.length ] || shoes[0];
-      const outer = f % 2 === 0 ? (outerwear[ f % outerwear.length ] || null) : null;
-
-      let acc: Garment | null = null;
-      const accessoryCandidate = accessories[ (f + 1) % accessories.length ];
-      if (accessoryCandidate) {
-        if (accessoryCandidate.subcategory === 'Sunglasses') {
-          const isOutdoorOccasion = ['Casual', 'Streetwear', 'Vacation', 'Summer', 'Korean Fashion'].includes(cat);
-          if (isOutdoorOccasion && f % 3 === 0 && full.subcategory.includes('Summer')) {
-            acc = accessoryCandidate;
-          }
-        } else if (accessoryCandidate.subcategory === 'Watches') {
-          const isFormalOccasion = ['Business', 'Office', 'Luxury', 'Casual'].includes(cat);
-          if (isFormalOccasion && f % 2 === 0) {
-            acc = accessoryCandidate;
-          }
-        } else {
-          const isBagOccasion = ['Casual', 'Party', 'Traditional', 'Vacation', 'Luxury'].includes(cat);
-          if (isBagOccasion && f % 2 === 0) {
-            acc = accessoryCandidate;
-          }
-        }
-      }
-
-      const items: Garment[] = [full];
-      if (shoe) items.push(shoe);
-      if (acc) items.push(acc);
-      if (outer) items.push(outer);
-
-      const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
-      
-      const adj = meta.adjectives[outfitCounter % meta.adjectives.length];
-      const outfitName = `${adj} ${full.name}`; // Keep the design name directly
+    for (const g of genderGarments) {
       outfitCounter++;
-
       library.push({
         id: `outfit_${gender}_${outfitCounter}`,
-        name: outfitName,
+        name: g.name, // The card name is the dress name itself!
         gender,
-        category: cat,
-        styleTags: Array.from(new Set([...full.styleTags, cat])),
-        items,
-        description: `An exquisite ${cat.toLowerCase()} collection showcasing the ${full.name} matching luxury accessories.`,
-        totalPrice
-      });
-    }
-
-    // 2. Generate Tops + Bottoms outfits (Exactly once per top garment)
-    const maxTopsBottoms = Math.max(tops.length, bottoms.length);
-    for (let i = 0; i < maxTopsBottoms; i++) {
-      const top = tops[i % tops.length];
-      const bottom = bottoms[i % bottoms.length];
-      if (!top || !bottom) continue;
-
-      const cat = top.category;
-      const matchCat = ['Casual', 'Streetwear', 'Luxury', 'Business', 'Traditional', 'Vacation'].includes(cat) 
-        ? cat 
-        : 'Casual';
-      const meta = stylesMetadata[matchCat];
-      
-      const shoe = shoes[i % shoes.length] || shoes[0];
-      const outer = i % 3 === 0 ? (outerwear[i % outerwear.length] || null) : null;
-
-      let acc: Garment | null = null;
-      const accessoryCandidate = accessories[i % accessories.length];
-      if (accessoryCandidate) {
-        if (accessoryCandidate.subcategory === 'Sunglasses') {
-          const isOutdoorOccasion = ['Casual', 'Streetwear', 'Vacation', 'Summer', 'Korean Fashion'].includes(cat);
-          if (isOutdoorOccasion && i % 2 === 0) acc = accessoryCandidate;
-        } else if (accessoryCandidate.subcategory === 'Watches') {
-          const isFormalOccasion = ['Business', 'Office', 'Luxury', 'Casual'].includes(cat);
-          if (isFormalOccasion && i % 2 === 0) acc = accessoryCandidate;
-        } else {
-          const isBagOccasion = ['Casual', 'Party', 'Traditional', 'Vacation', 'Luxury'].includes(cat);
-          if (isBagOccasion && i % 2 === 0) acc = accessoryCandidate;
-        }
-      }
-
-      const items: Garment[] = [top, bottom];
-      if (shoe) items.push(shoe);
-      if (acc) items.push(acc);
-      if (outer) items.push(outer);
-
-      const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
-      
-      const adj = meta.adjectives[outfitCounter % meta.adjectives.length];
-      const namePart = meta.names[outfitCounter % meta.names.length];
-      const outfitName = `${adj} ${namePart} Set`;
-      outfitCounter++;
-
-      library.push({
-        id: `outfit_${gender}_${outfitCounter}`,
-        name: outfitName,
-        gender,
-        category: cat,
-        styleTags: Array.from(new Set([...top.styleTags, ...bottom.styleTags, cat])),
-        items,
-        description: `A carefully matched ${cat.toLowerCase()} outfit featuring the ${top.name} paired with the ${bottom.name}.`,
-        totalPrice
+        category: g.category,
+        styleTags: g.styleTags,
+        items: [g], // Contains exactly the single dress/garment!
+        description: g.description,
+        totalPrice: g.price // Price is the dress price itself!
       });
     }
   }
