@@ -114,6 +114,38 @@ export default function MirrorSidebar({
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-500/50 transition-colors text-white"
               />
+              {/* Style Vibe Selector Pills */}
+              <div className="flex items-center gap-1.5 bg-black/40 p-1.5 rounded-2xl border border-white/10 overflow-x-auto no-scrollbar mb-1">
+                {[
+                  { id: 'all', label: 'All Styles' },
+                  { id: 'elegant', label: '👔 Classic & Elegant' },
+                  { id: 'artistic', label: '🎨 Streetwear' },
+                  { id: 'casual', label: '👟 Casual' }
+                ].map(vibe => {
+                  const isActive = factors.styleVibe === vibe.id || (!factors.styleVibe && vibe.id === 'all');
+                  return (
+                    <button
+                      key={vibe.id}
+                      onClick={() => {
+                        if (vibe.id === 'all') {
+                          factors.styleVibe = undefined as any;
+                        } else {
+                          factors.styleVibe = vibe.id as any;
+                        }
+                        setSelectedCategory('All');
+                      }}
+                      className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-yellow-500 text-black shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {vibe.label}
+                    </button>
+                  );
+                })}
+              </div>
+
               <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
                 <button
                   onClick={() => setSelectedCategory('All')}
