@@ -1172,6 +1172,21 @@ function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any
   ctx.rotate(0.22); // slight diagonal tilt
   ctx.fillRect(-bodyW, -bodyW, bodyW * 2, bodyW * 2);
   ctx.restore();
+
+  // 5. 8K Subsurface Fabric Scattering & Fresnel Contour Rim Highlight
+  const leftFresnel = ctx.createLinearGradient(lS.x - 15, shMidY, lS.x + bodyW * 0.15, shMidY);
+  leftFresnel.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+  leftFresnel.addColorStop(0.5, 'rgba(255, 255, 255, 0.06)');
+  leftFresnel.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = leftFresnel;
+  ctx.fillRect(lS.x - 20, shMidY - 30, bodyW * 0.18, (lH.y - shMidY) + 120);
+
+  const rightFresnel = ctx.createLinearGradient(rS.x + 15, shMidY, rS.x - bodyW * 0.15, shMidY);
+  rightFresnel.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+  rightFresnel.addColorStop(0.5, 'rgba(255, 255, 255, 0.06)');
+  rightFresnel.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = rightFresnel;
+  ctx.fillRect(rS.x + 20, shMidY - 30, -bodyW * 0.18, (lH.y - shMidY) + 120);
   
   ctx.restore();
 }
