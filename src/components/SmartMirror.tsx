@@ -79,6 +79,7 @@ export default function SmartMirror({
 
   // UI Display state
   const [isUiHidden, setIsUiHidden] = useState(false);
+  const [studioLighting, setStudioLighting] = useState<'runway' | 'sunset' | 'cyberpunk'>('runway');
 
   // Recommendations State
   const [measurements, setMeasurements] = useState<ScanMeasurements>(initialMeasurements);
@@ -917,6 +918,17 @@ export default function SmartMirror({
               playsInline
               muted
               className="absolute w-full h-full object-cover scale-x-[-1] pointer-events-none"
+            />
+
+            {/* 8K Realistic Studio Lighting Raytraced Overlay */}
+            <div 
+              className={`absolute inset-0 pointer-events-none transition-all duration-700 z-10 ${
+                studioLighting === 'runway' 
+                  ? 'bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.18)_0%,rgba(0,0,0,0.35)_100%)] shadow-[inset_0_0_120px_rgba(0,0,0,0.6)]' 
+                  : studioLighting === 'sunset'
+                  ? 'bg-[radial-gradient(ellipse_at_top_right,rgba(251,191,36,0.22)_0%,rgba(217,119,6,0.12)_50%,rgba(0,0,0,0.4)_100%)]'
+                  : 'bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.20)_0%,rgba(236,72,153,0.18)_50%,rgba(0,0,0,0.45)_100%)]'
+              }`}
             />
 
             {/* Warped Clothing Canvas Overlay */}
