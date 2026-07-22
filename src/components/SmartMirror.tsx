@@ -72,50 +72,15 @@ export default function SmartMirror({
       if (primaryItem.type === 'shoes' || primaryItem.type === 'accessory') return false;
 
       const itemGender = primaryItem.gender || o.gender;
-      const matchesGender = (gender === 'male') ? (itemGender === 'man' || itemGender === 'boy') : (itemGender === 'woman' || itemGender === 'girl');
-      if (!matchesGender) return false;
-
-      // Strictly filter catalog by active styleVibe (Classic & Elegant vs Streetwear vs Casual)
-      if (factors.styleVibe) {
-        const catLower = (o.category + ' ' + (primaryItem.subcategory || '')).toLowerCase();
-        const tagsLower = o.styleTags.map(t => t.toLowerCase());
-        const nameLower = o.name.toLowerCase();
-
-        if (factors.styleVibe === 'elegant') {
-          // Strictly Classic & Elegant: Luxury Evening Gowns, Sarees, Lehengas, Sherwanis, Blazers, Tuxedos, Business
-          const isElegant = 
-            catLower.includes('luxury') || catLower.includes('traditional') || catLower.includes('business') ||
-            tagsLower.includes('elegant') || tagsLower.includes('luxury') || tagsLower.includes('gown') || 
-            tagsLower.includes('saree') || tagsLower.includes('lehenga') || tagsLower.includes('sherwani') || 
-            tagsLower.includes('blazer') || tagsLower.includes('brocade') || tagsLower.includes('silk') ||
-            nameLower.includes('gown') || nameLower.includes('saree') || nameLower.includes('sherwani') ||
-            nameLower.includes('anarkali') || nameLower.includes('tuxedo') || nameLower.includes('blazer') ||
-            nameLower.includes('suit') || nameLower.includes('lehenga') || nameLower.includes('anarkali');
-          return isElegant;
-        } else if (factors.styleVibe === 'artistic') {
-          // Strictly Streetwear & Artistic: Techwear, Cyberpunk, Kimonos, Hoodies, Oversized, Printed
-          const isStreetwear = 
-            catLower.includes('streetwear') || tagsLower.includes('streetwear') || tagsLower.includes('artistic') ||
-            tagsLower.includes('cyberpunk') || tagsLower.includes('techwear') || tagsLower.includes('oversized') ||
-            nameLower.includes('hoodie') || nameLower.includes('kimono') || nameLower.includes('graphic') ||
-            nameLower.includes('streetwear') || nameLower.includes('trench') || nameLower.includes('bomber');
-          return isStreetwear;
-        } else if (factors.styleVibe === 'casual') {
-          // Strictly Casual & Everyday: Denims, Boho Maxis, Knitwear, Polos, Summer Staples
-          const isCasual = 
-            catLower.includes('casual') || catLower.includes('vacation') || tagsLower.includes('casual') ||
-            tagsLower.includes('boho') || tagsLower.includes('everyday') || tagsLower.includes('denim') ||
-            nameLower.includes('casual') || nameLower.includes('polo') || nameLower.includes('turtleneck') ||
-            nameLower.includes('slip') || nameLower.includes('maxi') || nameLower.includes('denim');
-          return isCasual;
-        }
+      if (gender === 'male') {
+        return itemGender === 'man' || itemGender === 'boy';
+      } else {
+        return itemGender === 'woman' || itemGender === 'girl';
       }
-
-      return true;
     });
 
     return filtered;
-  }, [gender, initialMeasurements, outfitLibrary, factors.styleVibe]);
+  }, [gender, initialMeasurements, outfitLibrary]);
   
   // State
   const [activeOutfitIndex, setActiveOutfitIndex] = useState(0);
