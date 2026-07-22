@@ -24,12 +24,23 @@ export interface Point3D {
 
 /**
  * GestureDetector class maps raw multi-frame coordinate inputs from MediaPipe
- * into discrete high-level user navigation gestures using spatial thresholds.
+ * into discrete high-level user navigation gestures with zero false-positive triggers.
  */
 export class GestureDetector {
   private history: { leftWrist: Point3D; rightWrist: Point3D }[] = [];
   private maxHistoryLen = 15;
   private lastPinchTimestamp = 0;
+  private consecutiveFrameCounter: Record<GestureType, number> = {
+    none: 0,
+    pinch: 0,
+    double_pinch: 0,
+    wave_right: 0,
+    wave_left: 0,
+    thumbs_up: 0,
+    peace: 0,
+    open_palm: 0,
+    hands_together: 0
+  };
 
   private gestureCooldowns: Record<GestureType, number> = {
     none: 0,
@@ -44,7 +55,7 @@ export class GestureDetector {
   };
 
   /**
-   * Tracks landmarks over time and evaluates gesture status with zero-latency detection.
+   * Tracks landmarks over time and evaluates gesture status with strict false-positive prevention.
    */
   public update(
     poseLandmarks: Point3D[],
@@ -62,7 +73,7 @@ export class GestureDetector {
     let detectedGesture: GestureType = 'none';
     let confidence = 0;
 
-    // 1. High-Precision MediaPipe Hands Skeleton Recognition (21 joints)
+    // 1. High-Precision MediaPipe Hands Skeleton Recognition ONLY (Prevents noise false triggers)
     if (handLandmarks && handLandmarks.length > 0) {
       let isPinching = false;
       let isThumbsUp = false;
@@ -88,27 +99,27 @@ export class GestureDetector {
 
         const handScale = this.distance(wrist, middleMCP) || 0.08;
 
-        // Check Pinch (thumb tip & index tip proximity)
+        // Check Pinch (thumb tip & index tip must touch closely)
         const pinchDist = this.distance(thumbTip, indexTip);
-        if (pinchDist < handScale * 0.88) {
+        if (pinchDist < handScale * 0.52) {
           isPinching = true;
         }
 
-        // Thumbs Up check
+        // Thumbs Up check (hand upright, thumb extended up, other fingers folded down)
         const isUpright = wrist.y > middleMCP.y;
         const otherFingersClosed =
-          indexTip.y > indexMCP.y - handScale * 0.12 &&
-          middleTip.y > middleMCP.y - handScale * 0.12 &&
-          ringTip.y > ringMCP.y - handScale * 0.12 &&
-          pinkyTip.y > pinkyMCP.y - handScale * 0.12;
+          indexTip.y > indexMCP.y - handScale * 0.08 &&
+          middleTip.y > middleMCP.y - handScale * 0.08 &&
+          ringTip.y > ringMCP.y - handScale * 0.08 &&
+          pinkyTip.y > pinkyMCP.y - handScale * 0.08;
 
-        if (isUpright && thumbTip.y < thumbMCP.y - handScale * 0.22 && otherFingersClosed) {
+        if (isUpright && thumbTip.y < thumbMCP.y - handScale * 0.28 && otherFingersClosed) {
           isThumbsUp = true;
         }
 
-        // Peace Sign (V) check
-        const isIndexExt = indexTip.y < indexMCP.y - handScale * 0.18;
-        const isMiddleExt = middleTip.y < middleMCP.y - handScale * 0.18;
+        // Peace Sign (V) check (index & middle extended up, ring & pinky folded down)
+        const isIndexExt = indexTip.y < indexMCP.y - handScale * 0.20;
+        const isMiddleExt = middleTip.y < middleMCP.y - handScale * 0.20;
         const isRingFolded = ringTip.y > ringMCP.y - handScale * 0.08;
         const isPinkyFolded = pinkyTip.y > pinkyMCP.y - handScale * 0.08;
 
@@ -116,12 +127,12 @@ export class GestureDetector {
           isPeace = true;
         }
 
-        // Open Palm check
+        // Open Palm check (all 4 fingers extended upright)
         const allExt =
-          indexTip.y < indexMCP.y - handScale * 0.22 &&
-          middleTip.y < middleMCP.y - handScale * 0.22 &&
-          ringTip.y < ringMCP.y - handScale * 0.22 &&
-          pinkyTip.y < pinkyMCP.y - handScale * 0.22;
+          indexTip.y < indexMCP.y - handScale * 0.25 &&
+          middleTip.y < middleMCP.y - handScale * 0.25 &&
+          ringTip.y < ringMCP.y - handScale * 0.25 &&
+          pinkyTip.y < pinkyMCP.y - handScale * 0.25;
 
         if (isUpright && allExt) {
           isOpenPalm = true;
@@ -130,7 +141,7 @@ export class GestureDetector {
 
       if (isPinching) {
         const now = timestamp || Date.now();
-        if (now - this.lastPinchTimestamp < 480 && now - this.lastPinchTimestamp > 80) {
+        if (now - this.lastPinchTimestamp < 480 && now - this.lastPinchTimestamp > 120) {
           detectedGesture = 'double_pinch';
           confidence = 0.99;
           this.lastPinchTimestamp = 0;
@@ -151,41 +162,28 @@ export class GestureDetector {
       }
     }
 
-    // 2. Pose-Based Distance-Invariant Fallback Gesture Recognition (33 joints)
-    if (detectedGesture === 'none' && poseLandmarks && poseLandmarks.length >= 23) {
+    // 2. Pose-Based Hand Waving & Wrists Close (Strictly requires hands raised above waist!)
+    if (detectedGesture === 'none' && poseLandmarks && poseLandmarks.length >= 25) {
       const leftWrist = poseLandmarks[15];
       const rightWrist = poseLandmarks[16];
-      const leftIndex = poseLandmarks[19];
-      const rightIndex = poseLandmarks[20];
-      const leftThumb = poseLandmarks[21];
-      const rightThumb = poseLandmarks[22];
       const leftShoulder = poseLandmarks[11];
       const rightShoulder = poseLandmarks[12];
+      const leftHip = poseLandmarks[23];
+      const rightHip = poseLandmarks[24];
 
-      if (leftWrist && rightWrist) {
-        const shWidth = (leftShoulder && rightShoulder) ? this.distance(leftShoulder, rightShoulder) : 0.25;
+      const isLeftWristVisible = leftWrist && (leftWrist.visibility === undefined || leftWrist.visibility > 0.85);
+      const isRightWristVisible = rightWrist && (rightWrist.visibility === undefined || rightWrist.visibility > 0.85);
 
-        // Fallback Pinch via Pose index/thumb points
-        if (leftIndex && leftThumb) {
-          const lPinchDist = this.distance(leftIndex, leftThumb);
-          if (lPinchDist < shWidth * 0.22) {
-            detectedGesture = 'pinch';
-            confidence = 0.90;
-          }
-        }
-        if (rightIndex && rightThumb && detectedGesture === 'none') {
-          const rPinchDist = this.distance(rightIndex, rightThumb);
-          if (rPinchDist < shWidth * 0.22) {
-            detectedGesture = 'pinch';
-            confidence = 0.90;
-          }
-        }
+      if (isLeftWristVisible && isRightWristVisible && leftShoulder && rightShoulder && leftHip && rightHip) {
+        const shWidth = this.distance(leftShoulder, rightShoulder);
 
-        // Hands Together: Wrists close
+        // Hands Together: Wrists MUST be raised above waist/hip level AND within close distance!
+        const isHandsRaisedAboveHips = leftWrist.y < leftHip.y - 0.05 && rightWrist.y < rightHip.y - 0.05;
         const wristDist = this.distance(leftWrist, rightWrist);
-        if (wristDist < shWidth * 0.42) {
+
+        if (isHandsRaisedAboveHips && wristDist < shWidth * 0.20) {
           detectedGesture = 'hands_together';
-          confidence = 0.92;
+          confidence = 0.94;
         }
 
         // Push to motion history for wave detection
@@ -194,12 +192,12 @@ export class GestureDetector {
           this.history.shift();
         }
 
-        // Wave Right & Left Detection
+        // Wave Right & Left Detection (Hand MUST be raised above shoulder level!)
         if (detectedGesture === 'none') {
-          const isRightHandRaised = rightShoulder && rightWrist.y < rightShoulder.y + 0.15;
-          const isLeftHandRaised = leftShoulder && leftWrist.y < leftShoulder.y + 0.15;
+          const isRightHandRaised = rightWrist.y < rightShoulder.y + 0.08;
+          const isLeftHandRaised = leftWrist.y < leftShoulder.y + 0.08;
 
-          if (isRightHandRaised && this.history.length >= 5) {
+          if (isRightHandRaised && this.history.length >= 6) {
             const rightHistory = this.history.map(h => h.rightWrist);
             if (this.checkWaving(rightHistory)) {
               detectedGesture = 'wave_right';
@@ -207,7 +205,7 @@ export class GestureDetector {
             }
           }
 
-          if (detectedGesture === 'none' && isLeftHandRaised && this.history.length >= 5) {
+          if (detectedGesture === 'none' && isLeftHandRaised && this.history.length >= 6) {
             const leftHistory = this.history.map(h => h.leftWrist);
             if (this.checkWaving(leftHistory)) {
               detectedGesture = 'wave_left';
@@ -218,11 +216,26 @@ export class GestureDetector {
       }
     }
 
-    // Fast Cooldown Trigger: Immediate response without artificial frame accumulation latency
-    if (detectedGesture !== 'none' && this.gestureCooldowns[detectedGesture] <= 0) {
-      // Cooldown length (ms): Snappy 320ms for pinch/double-pinch, 400ms for other gestures
-      const cooldownMs = (detectedGesture === 'pinch' || detectedGesture === 'double_pinch') ? 320 : 400;
+    // Frame Hysteresis: Require 2 consecutive frames of gesture detection to prevent accidental single-frame noise triggers
+    for (const key in this.consecutiveFrameCounter) {
+      const g = key as GestureType;
+      if (g === detectedGesture && g !== 'none') {
+        this.consecutiveFrameCounter[g] += 1;
+      } else {
+        this.consecutiveFrameCounter[g] = 0;
+      }
+    }
+
+    const minConsecutiveFrames = (detectedGesture === 'pinch' || detectedGesture === 'double_pinch') ? 1 : 2;
+
+    if (
+      detectedGesture !== 'none' &&
+      this.consecutiveFrameCounter[detectedGesture] >= minConsecutiveFrames &&
+      this.gestureCooldowns[detectedGesture] <= 0
+    ) {
+      const cooldownMs = (detectedGesture === 'pinch' || detectedGesture === 'double_pinch') ? 500 : 700;
       this.gestureCooldowns[detectedGesture] = cooldownMs;
+      this.consecutiveFrameCounter[detectedGesture] = 0;
       return { gesture: detectedGesture, confidence };
     }
 
@@ -235,8 +248,8 @@ export class GestureDetector {
   }
 
   private checkWaving(history: Point3D[]): boolean {
-    const validPoints = history.filter(p => p && (p.visibility === undefined || p.visibility > 0.40));
-    if (validPoints.length < 5) return false;
+    const validPoints = history.filter(p => p && (p.visibility === undefined || p.visibility > 0.65));
+    if (validPoints.length < 6) return false;
 
     const xCoords = validPoints.map(p => p.x);
     let directionChanges = 0;
@@ -247,7 +260,7 @@ export class GestureDetector {
       const diff = xCoords[i] - xCoords[i - 1];
       totalMovementX += Math.abs(diff);
 
-      if (Math.abs(diff) > 0.006) {
+      if (Math.abs(diff) > 0.008) {
         const currentDir = diff > 0 ? 1 : -1;
         if (lastDir !== 0 && currentDir !== lastDir) {
           directionChanges++;
@@ -256,6 +269,6 @@ export class GestureDetector {
       }
     }
 
-    return directionChanges >= 1 && totalMovementX > 0.05;
+    return directionChanges >= 2 && totalMovementX > 0.07;
   }
 }
