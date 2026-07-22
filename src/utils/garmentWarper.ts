@@ -475,14 +475,10 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const isFaceCutOff = !p[0] || p[0].vis < 0.4 || !p[2] || p[2].vis < 0.4;
   
   let targetShWidth = detectedShWidth;
-  if (isSitting && isFaceCutOff) {
-    // Extreme close-up: force wide shoulders to cover screen bounds
-    const canvasWidth = ctx.canvas?.width || 1280;
-    targetShWidth = canvasWidth * 0.86;
-  } else if (eyeDist > 0) {
+  if (eyeDist > 0) {
     const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
-    const collapseRatio = Math.max(0, Math.min(1, (expectedShWidth - detectedShWidth) / (expectedShWidth * 0.3)));
-    const blendRatio = 0.4 + 0.6 * collapseRatio; // ranges from 0.4 (low-pass stabilizer) to 1.0 (full correction)
+    const collapseRatio = Math.max(0, Math.min(1, Math.abs(expectedShWidth - detectedShWidth) / (expectedShWidth * 0.3)));
+    const blendRatio = 0.3 * collapseRatio; // gentle stabilizer without distorting style Proportions
     targetShWidth = detectedShWidth * (1 - blendRatio) + expectedShWidth * blendRatio;
   }
 
@@ -560,9 +556,8 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder') || subcatLower.includes('off-shoulder');
 
   // shWidth is already defined above
-  const isSittingMode = isSitting || !p[23] || p[23].vis < 0.3;
-  const isExtremeCloseUp = isSittingMode && isFaceCutOff;
-  const neckYOffset = shWidth * (isExtremeCloseUp ? 0.32 : isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
+  // Style preservation: neckYOffset is kept strictly constant relative to shWidth so dress cut & style remain invariant when sitting or standing at any distance
+  const neckYOffset = shWidth * 0.11;
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
@@ -1361,14 +1356,10 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const isFaceCutOff = !p[0] || p[0].vis < 0.4 || !p[2] || p[2].vis < 0.4;
   
   let targetShWidth = detectedShWidth;
-  if (isSitting && isFaceCutOff) {
-    // Extreme close-up: force wide shoulders to cover screen bounds
-    const canvasWidth = ctx.canvas?.width || 1280;
-    targetShWidth = canvasWidth * 0.86;
-  } else if (eyeDist > 0) {
+  if (eyeDist > 0) {
     const expectedShWidth = eyeDist * 5.9; // average shoulder to pupil width ratio
-    const collapseRatio = Math.max(0, Math.min(1, (expectedShWidth - detectedShWidth) / (expectedShWidth * 0.3)));
-    const blendRatio = 0.4 + 0.6 * collapseRatio; // ranges from 0.4 (low-pass stabilizer) to 1.0 (full correction)
+    const collapseRatio = Math.max(0, Math.min(1, Math.abs(expectedShWidth - detectedShWidth) / (expectedShWidth * 0.3)));
+    const blendRatio = 0.3 * collapseRatio; // gentle stabilizer without distorting style Proportions
     targetShWidth = detectedShWidth * (1 - blendRatio) + expectedShWidth * blendRatio;
   }
 
@@ -1444,9 +1435,8 @@ function drawFullBody(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m:
   const isVNeck = tags.includes('V-Neck') || nameLower.includes('v-neck') || nameLower.includes('wrap') || nameLower.includes('plunging');
   const isOffShoulder = tags.includes('Off-Shoulder') || nameLower.includes('off-shoulder');
 
-  const isSittingMode = isSitting || !p[23] || p[23].vis < 0.3;
-  const isExtremeCloseUp = isSittingMode && isFaceCutOff;
-  const neckYOffset = shWidth * (isExtremeCloseUp ? 0.32 : isSittingMode ? 0.20 : 0.11); // Shift up higher in portrait mode to sit perfectly on collarbone
+  // Style preservation: neckYOffset is kept strictly constant relative to shWidth so dress cut & style remain invariant when sitting or standing at any distance
+  const neckYOffset = shWidth * 0.11;
   
   // Drop shoulder anchor points lower for off-shoulder styles to expose the collarbone
   const offShoulderOffset = isOffShoulder ? shWidth * 0.12 : 0;
