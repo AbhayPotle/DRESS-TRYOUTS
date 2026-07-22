@@ -601,7 +601,7 @@ export const BASE_GARMENTS: Garment[] = [
     type: 'top',
     category: 'Streetwear',
     subcategory: 'T-Shirts',
-    gender: 'unisex',
+    gender: 'man',
     colors: ['#0A0A0A', '#FFFFFF'],
     price: 55,
     rating: 4.9,

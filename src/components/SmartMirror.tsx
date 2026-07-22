@@ -64,6 +64,13 @@ export default function SmartMirror({
   // State
   const [activeOutfitIndex, setActiveOutfitIndex] = useState(0);
   const [wornOutfit, setWornOutfit] = useState<Outfit | null>(null);
+  
+  // Immediately wipe clean any worn wardrobe items when gender mode changes
+  useEffect(() => {
+    setWornOutfit(null);
+    setActiveOutfitIndex(0);
+  }, [gender]);
+
   const activeOutfit = wornOutfit || genderOutfits[activeOutfitIndex] || null;
   
   const [favorites, setFavorites] = useState<string[]>([]);
