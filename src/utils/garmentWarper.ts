@@ -1094,17 +1094,32 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   // Creases & Shadows (Creases add realistic wrinkles)
   drawTopCreases(ctx, raisedLS, raisedRS, scaledLH, scaledRH, leftUnderarm, rUnder);
 
-  if (config.logoText) {
-    ctx.save();
-    // Translate to center of chest, then scale horizontally by -1 to counter-mirror logo letters so they read straight
-    ctx.translate(shoulderMidX, shoulderMidY + (scaledLH.y - scaledLS.y) * 0.3);
-    ctx.scale(-1, 1);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.font = '800 12px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(config.logoText, 0, 0);
-    ctx.restore();
-  }
+  // Draw High-Fashion Left-Chest Designer Badge / Emblem Insignia for every top/jacket
+  ctx.save();
+  ctx.translate(shoulderMidX - shWidth * 0.14, shoulderMidY + (scaledLH.y - scaledLS.y) * 0.22);
+  ctx.scale(-1, 1);
+  
+  const badgeLabel = config.logoText || (item.name ? item.name.split(' ')[0] : '8K');
+  const accentCol = config.secondaryColor || '#FFD700';
+
+  // Badge background circle with metallic border
+  ctx.fillStyle = accentCol;
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  ctx.arc(0, 0, 11, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.fillStyle = '#0A0A0A';
+  ctx.font = '900 7px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(badgeLabel.substring(0, 4).toUpperCase(), 0, 0);
+  ctx.restore();
 }
 
 function drawTopShading(ctx: CanvasRenderingContext2D, lS: any, rS: any, lH: any, rH: any) {
