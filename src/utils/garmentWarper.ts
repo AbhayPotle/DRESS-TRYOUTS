@@ -538,6 +538,12 @@ function drawTop(ctx: CanvasRenderingContext2D, p: any[], item: Garment, m: Scan
   const hipMidX = (lH.x + rH.x) / 2;
   const hipMidY = (lH.y + rH.y) / 2;
 
+  // Calculate 3D Yaw orientation perspective angle & depth foreshortening
+  const zDiff = (lS.z !== undefined && rS.z !== undefined) ? (lS.z - rS.z) : 0;
+  const yawAngle = Math.max(-0.45, Math.min(0.45, zDiff * 0.85)); // Perspective tilt angle
+  const leftForeshorten = 1.0 - Math.max(0, yawAngle * 0.35); // Shrink far side slightly
+  const rightForeshorten = 1.0 - Math.max(0, -yawAngle * 0.35);
+
   const shCenter = (lS.x + rS.x) / 2;
   const hpCenter = (lH.x + rH.x) / 2;
 
