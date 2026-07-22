@@ -136,6 +136,7 @@ export default function SmartMirror({
   const activePoseRef = useRef<any>(null);
   const activeHandsRef = useRef<any>(null);
   const lastShoulderCenterRef = useRef<{ x: number; y: number } | null>(null);
+  const smoothedPoseLandmarksRef = useRef<any[] | null>(null);
 
   // State synchronization Refs to prevent MediaPipe stale closure bugs
   const activeOutfitRef = useRef<Outfit | null>(activeOutfit);
@@ -328,6 +329,27 @@ export default function SmartMirror({
           }
         }
 
+        // Apply Adaptive Exponential Moving Average (EMA) Landmark Filter for anti-jitter tracking stability
+        if (!smoothedPoseLandmarksRef.current || smoothedPoseLandmarksRef.current.length !== results.poseLandmarks.length) {
+          smoothedPoseLandmarksRef.current = results.poseLandmarks.map((lm: any) => ({ ...lm }));
+        } else {
+          smoothedPoseLandmarksRef.current = results.poseLandmarks.map((lm: any, idx: number) => {
+            const prev = smoothedPoseLandmarksRef.current![idx];
+            if (!prev || !lm) return lm;
+            const dist = Math.sqrt(Math.pow(lm.x - prev.x, 2) + Math.pow(lm.y - prev.y, 2));
+            // Dynamic alpha: smooth micro-jitter (alpha = 0.30) when standing still, responsive tracking (alpha = 0.75) on fast movement
+            const alpha = dist > 0.03 ? 0.75 : (dist > 0.01 ? 0.50 : 0.30);
+            return {
+              x: prev.x * (1 - alpha) + lm.x * alpha,
+              y: prev.y * (1 - alpha) + lm.y * alpha,
+              z: prev.z ? (prev.z * (1 - alpha) + (lm.z || 0) * alpha) : (lm.z || 0),
+              visibility: lm.visibility !== undefined ? lm.visibility : prev.visibility
+            };
+          });
+        }
+
+        const effectiveLandmarks = smoothedPoseLandmarksRef.current || results.poseLandmarks;
+
         // Proceed to render on canvas
         ctx.save();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -350,7 +372,7 @@ export default function SmartMirror({
 
         drawGarments(
           ctx, 
-          results.poseLandmarks, 
+          effectiveLandmarks, 
           itemsToDraw, 
           measurementsRef.current, 
           canvas.width, 
@@ -361,7 +383,7 @@ export default function SmartMirror({
         if (showScannerHUDRef.current) {
           drawScanningHUD(
             ctx,
-            results.poseLandmarks,
+            effectiveLandmarks,
             measurementsRef.current,
             canvas.width,
             canvas.height
