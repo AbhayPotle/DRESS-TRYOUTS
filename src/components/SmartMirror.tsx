@@ -48,10 +48,14 @@ export default function SmartMirror({
   const [outfitLibrary] = useState<Outfit[]>(() => generateOutfitLibrary());
   const genderOutfits = useMemo<Outfit[]>(() => {
     const isChild = initialMeasurements?.heightCm !== null && initialMeasurements.heightCm < 140;
-    const targetGender = gender === 'male' ? (isChild ? 'boy' : 'man') : (isChild ? 'girl' : 'woman');
     
     const filtered = outfitLibrary.filter(o => {
-      const itemGender = o.items[0]?.gender || o.gender;
+      const primaryItem = o.items[0];
+      if (!primaryItem) return false;
+      // Exclude accessories and shoes from main gesture cycling list so gestures cycle through real dresses cleanly
+      if (primaryItem.type === 'shoes' || primaryItem.type === 'accessory') return false;
+
+      const itemGender = primaryItem.gender || o.gender;
       if (gender === 'male') {
         return itemGender === 'man' || itemGender === 'boy';
       } else {
