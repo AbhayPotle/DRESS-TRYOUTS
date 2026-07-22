@@ -2115,19 +2115,26 @@ export function generateOutfitLibrary(): Outfit[] {
   let outfitCounter = 0;
 
   for (const gender of genders) {
-    const genderGarments = ALL_GARMENTS.filter(g => g.gender === gender || g.gender === 'unisex');
+    // Strictly match garment gender to target catalog gender. Unisex items are included only if gender-appropriate.
+    const genderGarments = ALL_GARMENTS.filter(g => {
+      if (gender === 'man') return g.gender === 'man' || (g.gender === 'unisex' && g.subcategory !== 'Handbags' && g.subcategory !== 'Bags');
+      if (gender === 'woman') return g.gender === 'woman' || g.gender === 'unisex';
+      if (gender === 'boy') return g.gender === 'boy' || (g.gender === 'unisex' && g.subcategory !== 'Handbags' && g.subcategory !== 'Bags');
+      if (gender === 'girl') return g.gender === 'girl' || g.gender === 'unisex';
+      return false;
+    });
 
     for (const g of genderGarments) {
       outfitCounter++;
       library.push({
-        id: `outfit_${gender}_${outfitCounter}`,
-        name: g.name, // The card name is the dress name itself!
-        gender,
+        id: `outfit_${gender}_${outfitCounter}_${g.id}`,
+        name: g.name,
+        gender: gender,
         category: g.category,
         styleTags: g.styleTags,
-        items: [g], // Contains exactly the single dress/garment!
+        items: [g],
         description: g.description,
-        totalPrice: g.price // Price is the dress price itself!
+        totalPrice: g.price
       });
     }
   }

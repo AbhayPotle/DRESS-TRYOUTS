@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { 
   Camera, Heart, Share2, Scale, Trash, Plus, 
   HelpCircle, Settings, Award, Layers, Sparkles, AlertCircle
@@ -46,25 +46,20 @@ export default function SmartMirror({
 
   // Libraries & Data
   const [outfitLibrary] = useState<Outfit[]>(() => generateOutfitLibrary());
-  const [genderOutfits] = useState<Outfit[]>(() => {
-    // Strictly isolate adult vs children garments based on height metrics (140cm threshold)
+  const genderOutfits = useMemo<Outfit[]>(() => {
     const isChild = initialMeasurements?.heightCm !== null && initialMeasurements.heightCm < 140;
+    const targetGender = gender === 'male' ? (isChild ? 'boy' : 'man') : (isChild ? 'girl' : 'woman');
     
     const filtered = outfitLibrary.filter(o => {
+      const itemGender = o.items[0]?.gender || o.gender;
       if (gender === 'male') {
-        return isChild ? o.gender === 'boy' : o.gender === 'man';
+        return itemGender === 'man' || itemGender === 'boy';
       } else {
-        return isChild ? o.gender === 'girl' : o.gender === 'woman';
+        return itemGender === 'woman' || itemGender === 'girl';
       }
     });
-    // Shuffle using Fisher-Yates algorithm to prevent repeats and show random items
-    const arr = [...filtered];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  });
+    return filtered;
+  }, [gender, initialMeasurements, outfitLibrary]);
   
   // State
   const [activeOutfitIndex, setActiveOutfitIndex] = useState(0);
@@ -607,7 +602,7 @@ export default function SmartMirror({
 
       // Draw the warped clothing garments with Design Studio overrides
       const itemsToDrawSim = activeOutfit
-        ? activeOutfit.items.map(item => {
+        ? activeOutfit.items.map((item: Garment) => {
             if (['top', 'bottom', 'full', 'outerwear'].includes(item.type)) {
               return {
                 ...item,
@@ -821,20 +816,20 @@ export default function SmartMirror({
       const prevItems = prev ? prev.items : [];
       let nextItems = [...prevItems];
 
+      const allowedGenders = gender === 'male' ? ['man', 'boy', 'unisex'] : ['woman', 'girl', 'unisex'];
+      // Purge any cross-gender items from previous state!
+      nextItems = nextItems.filter((g: any) => allowedGenders.includes(g.gender));
+
       if (selectedGarment.type === 'full') {
-        // If it's a full body dress/saree/sherwani, remove other top/bottom/full garments
         nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'bottom' && g.type !== 'full');
         nextItems.push(selectedGarment);
       } else if (selectedGarment.type === 'top') {
-        // Remove existing top and full body garments
         nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'full');
         nextItems.push(selectedGarment);
       } else if (selectedGarment.type === 'bottom') {
-        // Remove existing bottom and full body garments
         nextItems = nextItems.filter(g => g.type !== 'bottom' && g.type !== 'full');
         nextItems.push(selectedGarment);
       } else {
-        // For accessories, shoes, outerwear: replace existing item of same type
         nextItems = nextItems.filter(g => g.type !== selectedGarment.type);
         nextItems.push(selectedGarment);
       }
@@ -853,7 +848,7 @@ export default function SmartMirror({
       };
     });
 
-    const idx = genderOutfits.findIndex(o => o.id === outfit.id);
+    const idx = genderOutfits.findIndex((o: Outfit) => o.id === outfit.id);
     if (idx !== -1 && idx !== activeOutfitIndex) {
       setActiveOutfitIndex(idx);
     }
