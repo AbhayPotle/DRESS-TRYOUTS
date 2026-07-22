@@ -2548,26 +2548,10 @@ export function generateOutfitLibrary(): Outfit[] {
     const bottoms = genderGarments.filter(g => g.type === 'bottom');
     const fulls = genderGarments.filter(g => g.type === 'full');
 
-    // 1. First add all Full Body Dresses/Suits/Sherwanis/Sarees (100% standalone full-body outfits)
-    for (const f of fulls) {
-      outfitCounter++;
-      library.push({
-        id: `outfit_${gender}_${outfitCounter}_${f.id}`,
-        name: f.name,
-        gender: gender,
-        category: f.category,
-        styleTags: f.styleTags,
-        items: [f],
-        description: f.description,
-        totalPrice: f.price
-      });
-    }
-
-    // 2. Next add paired Top + Bottom complete outfits so every gesture tap shows a complete full-body ensemble!
+    // 1. First add paired Top + Bottom complete outfits (Tees + Cargos, Shirts + Jeans, Blazers + Chinos) for instant masculine/feminine clarity!
     for (let i = 0; i < tops.length; i++) {
       outfitCounter++;
       const top = tops[i];
-      // Pick a matching bottom for this top
       const bottom = bottoms.length > 0 ? bottoms[i % bottoms.length] : null;
       const items = bottom ? [top, bottom] : [top];
       const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
@@ -2581,6 +2565,21 @@ export function generateOutfitLibrary(): Outfit[] {
         items: items,
         description: bottom ? `${top.description} Paired with ${bottom.description.toLowerCase()}` : top.description,
         totalPrice: totalPrice
+      });
+    }
+
+    // 2. Next add standalone Full-Body Suits & Traditional Sherwanis/Sarees/Gowns!
+    for (const f of fulls) {
+      outfitCounter++;
+      library.push({
+        id: `outfit_${gender}_${outfitCounter}_${f.id}`,
+        name: f.name,
+        gender: gender,
+        category: f.category,
+        styleTags: f.styleTags,
+        items: [f],
+        description: f.description,
+        totalPrice: f.price
       });
     }
   }
