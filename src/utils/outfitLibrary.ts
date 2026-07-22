@@ -2255,26 +2255,51 @@ export function generateOutfitLibrary(): Outfit[] {
   let outfitCounter = 0;
 
   for (const gender of genders) {
-    // Strictly match garment gender to target catalog gender. Unisex items are included only if gender-appropriate.
     const genderGarments = ALL_GARMENTS.filter(g => {
-      if (gender === 'man') return g.gender === 'man' || (g.gender === 'unisex' && g.subcategory !== 'Handbags' && g.subcategory !== 'Bags');
-      if (gender === 'woman') return g.gender === 'woman' || g.gender === 'unisex';
-      if (gender === 'boy') return g.gender === 'boy' || (g.gender === 'unisex' && g.subcategory !== 'Handbags' && g.subcategory !== 'Bags');
-      if (gender === 'girl') return g.gender === 'girl' || g.gender === 'unisex';
+      if (gender === 'man') return g.gender === 'man' || (g.gender === 'unisex' && g.type !== 'shoes' && g.type !== 'accessory');
+      if (gender === 'woman') return g.gender === 'woman' || (g.gender === 'unisex' && g.type !== 'shoes' && g.type !== 'accessory');
+      if (gender === 'boy') return g.gender === 'boy' || (g.gender === 'unisex' && g.type !== 'shoes' && g.type !== 'accessory');
+      if (gender === 'girl') return g.gender === 'girl' || (g.gender === 'unisex' && g.type !== 'shoes' && g.type !== 'accessory');
       return false;
     });
 
-    for (const g of genderGarments) {
+    const tops = genderGarments.filter(g => g.type === 'top' || g.type === 'outerwear');
+    const bottoms = genderGarments.filter(g => g.type === 'bottom');
+    const fulls = genderGarments.filter(g => g.type === 'full');
+
+    // 1. First add all Full Body Dresses/Suits/Sherwanis/Sarees (100% standalone full-body outfits)
+    for (const f of fulls) {
       outfitCounter++;
       library.push({
-        id: `outfit_${gender}_${outfitCounter}_${g.id}`,
-        name: g.name,
+        id: `outfit_${gender}_${outfitCounter}_${f.id}`,
+        name: f.name,
         gender: gender,
-        category: g.category,
-        styleTags: g.styleTags,
-        items: [g],
-        description: g.description,
-        totalPrice: g.price
+        category: f.category,
+        styleTags: f.styleTags,
+        items: [f],
+        description: f.description,
+        totalPrice: f.price
+      });
+    }
+
+    // 2. Next add paired Top + Bottom complete outfits so every gesture tap shows a complete full-body ensemble!
+    for (let i = 0; i < tops.length; i++) {
+      outfitCounter++;
+      const top = tops[i];
+      // Pick a matching bottom for this top
+      const bottom = bottoms.length > 0 ? bottoms[i % bottoms.length] : null;
+      const items = bottom ? [top, bottom] : [top];
+      const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
+
+      library.push({
+        id: `outfit_${gender}_${outfitCounter}_${top.id}`,
+        name: bottom ? `${top.name} with ${bottom.name}` : top.name,
+        gender: gender,
+        category: top.category,
+        styleTags: [...new Set([...top.styleTags, ...(bottom ? bottom.styleTags : [])])],
+        items: items,
+        description: bottom ? `${top.description} Paired with ${bottom.description.toLowerCase()}` : top.description,
+        totalPrice: totalPrice
       });
     }
   }
