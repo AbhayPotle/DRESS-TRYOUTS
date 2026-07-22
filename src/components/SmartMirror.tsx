@@ -83,7 +83,7 @@ export default function SmartMirror({
   }, [gender, initialMeasurements, outfitLibrary]);
   
   // State
-  const [activeOutfitIndex, setActiveOutfitIndex] = useState(0);
+  const [activeOutfitIndex, setActiveOutfitIndex] = useState(() => Math.floor(Math.random() * 5));
   const [wornOutfit, setWornOutfit] = useState<Outfit | null>(null);
   
   // Immediately wipe clean any worn wardrobe items when gender mode changes
@@ -823,86 +823,18 @@ export default function SmartMirror({
   };
 
   const handleSelectOutfit = (outfit: Outfit) => {
-    const selectedGarment = outfit.items[0];
-    if (!selectedGarment) return;
-
-    setWornOutfit(prev => {
-      const prevItems = prev ? prev.items : [];
-      let nextItems = [...prevItems];
-
-      const allowedGenders = gender === 'male' ? ['man', 'boy', 'unisex'] : ['woman', 'girl', 'unisex'];
-      // Purge any cross-gender items from previous state!
-      nextItems = nextItems.filter((g: any) => allowedGenders.includes(g.gender));
-
-      if (selectedGarment.type === 'full') {
-        nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'bottom' && g.type !== 'full');
-        nextItems.push(selectedGarment);
-      } else if (selectedGarment.type === 'top') {
-        nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'full');
-        nextItems.push(selectedGarment);
-      } else if (selectedGarment.type === 'bottom') {
-        nextItems = nextItems.filter(g => g.type !== 'bottom' && g.type !== 'full');
-        nextItems.push(selectedGarment);
-      } else {
-        nextItems = nextItems.filter(g => g.type !== selectedGarment.type);
-        nextItems.push(selectedGarment);
-      }
-
-      const totalPrice = nextItems.reduce((sum, g) => sum + g.price, 0);
-
-      return {
-        id: `worn_outfit_${Date.now()}`,
-        name: selectedGarment.name,
-        gender: outfit.gender,
-        category: selectedGarment.category,
-        styleTags: selectedGarment.styleTags,
-        items: nextItems,
-        description: selectedGarment.description,
-        totalPrice
-      };
-    });
-
+    setWornOutfit(outfit);
     const idx = genderOutfits.findIndex((o: Outfit) => o.id === outfit.id);
-    if (idx !== -1 && idx !== activeOutfitIndex) {
+    if (idx !== -1) {
       setActiveOutfitIndex(idx);
     }
   };
 
-  // Sync index-based gesture cycling and timers to worn selection
+  // Sync index-based gesture cycling cleanly to worn selection (zero retention of old garments)
   useEffect(() => {
     const nextOutfit = genderOutfits[activeOutfitIndex];
     if (nextOutfit) {
-      const selectedGarment = nextOutfit.items[0];
-      if (selectedGarment) {
-        setWornOutfit(prev => {
-          const prevItems = prev ? prev.items : [];
-          let nextItems = [...prevItems];
-          if (selectedGarment.type === 'full') {
-            nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'bottom' && g.type !== 'full');
-            nextItems.push(selectedGarment);
-          } else if (selectedGarment.type === 'top') {
-            nextItems = nextItems.filter(g => g.type !== 'top' && g.type !== 'full');
-            nextItems.push(selectedGarment);
-          } else if (selectedGarment.type === 'bottom') {
-            nextItems = nextItems.filter(g => g.type !== 'bottom' && g.type !== 'full');
-            nextItems.push(selectedGarment);
-          } else {
-            nextItems = nextItems.filter(g => g.type !== selectedGarment.type);
-            nextItems.push(selectedGarment);
-          }
-          const totalPrice = nextItems.reduce((sum, g) => sum + g.price, 0);
-          return {
-            id: `worn_outfit_${Date.now()}`,
-            name: selectedGarment.name,
-            gender: nextOutfit.gender,
-            category: selectedGarment.category,
-            styleTags: selectedGarment.styleTags,
-            items: nextItems,
-            description: selectedGarment.description,
-            totalPrice
-          };
-        });
-      }
+      setWornOutfit(nextOutfit);
     }
   }, [activeOutfitIndex, genderOutfits]);
 
